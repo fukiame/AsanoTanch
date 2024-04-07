@@ -5,10 +5,9 @@ import time
 from typing import List
 import telegram.ext as tg
 from telegram.ext import Dispatcher, JobQueue, Updater
-from telethon import TelegramClient
-from telethon.sessions import MemorySession
 from configparser import ConfigParser
 from functools import wraps
+from dataclasses import dataclass
 try:
     os.system(os.environ['convert_config'])
     from .config import config_vars
@@ -77,6 +76,7 @@ parser = ConfigParser()
 parser.read("config.ini")
 kigconfig = parser["kigconfig"]
 
+@dataclass
 class KigyoINIT:
     def __init__(self, parser: ConfigParser):
         self.parser = parser
@@ -183,7 +183,6 @@ from tg_bot.modules.sql import SESSION
 
 updater: Updater = tg.Updater(token=TOKEN, base_url=KInit.BOT_API_URL, base_file_url=KInit.BOT_API_FILE_URL, workers=min(32, os.cpu_count() + 4), request_kwargs={"read_timeout": 10, "connect_timeout": 10})
 
-telethn = TelegramClient(MemorySession(), APP_ID, API_HASH)
 dispatcher: Dispatcher = updater.dispatcher
 j: JobQueue = updater.job_queue
 

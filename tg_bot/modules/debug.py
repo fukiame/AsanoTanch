@@ -49,7 +49,6 @@ def asdebug(update: Update, context: CallbackContext):
         message.reply_text("Global announcement is currently off.")
 
 @register(pattern='.*')
-# @telethn.on(events.NewMessage(pattern="[/!>].*"))
 async def i_do_nothing_yes(event):
     global DEBUG_MODE
     if DEBUG_MODE:

@@ -30,7 +30,6 @@ from tg_bot import (
     PORT,
     URL,
     log,
-    telethn,
     SUPPORT_GROUP,
     KigyoINIT
 )
@@ -698,11 +697,9 @@ def main():
                 timeout=15, read_latency=4, allowed_updates=allowed_updates, drop_pending_updates=KInit.DROP_UPDATES)
         print(f"Updater started! Using long polling. | BOT: [@{dispatcher.bot.username}]")
     dispatcher.bot.sendMessage(OWNER_ID, "Master, I'm awake!")
-    telethn.run_until_disconnected()
-    updater.idle()
 
 
 if __name__ == "__main__":
     log.debug(f"[{dispatcher.bot.username}] Successfully loaded modules: " + str(ALL_MODULES))
-    telethn.start(bot_token=TOKEN)
     main()
+    updater.idle()

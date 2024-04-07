@@ -5,14 +5,13 @@ import subprocess
 import sys
 from time import sleep
 from telegram.error import Unauthorized
-from .. import DEV_USERS, OWNER_ID, telethn, SYS_ADMIN
+from .. import DEV_USERS, OWNER_ID, SYS_ADMIN
 from .helper_funcs.chat_status import dev_plus
 from telegram import TelegramError, Update, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 import asyncio
 from statistics import mean
 from time import monotonic as time
-from telethon import events
 from .helper_funcs.decorators import kigcmd, register, kigcallback
 
 @kigcmd(command='leave')
@@ -82,45 +81,6 @@ def restart(update: Update, context: CallbackContext):
     os.system("pm2 restart odin")
 
 
-class Store:
-    def __init__(self, func):
-        self.func = func
-        self.calls = []
-        self.time = time()
-        self.lock = asyncio.Lock()
-
-    def average(self):
-        return round(mean(self.calls), 2) if self.calls else 0
-
-    def __repr__(self):
-        return f"<Store func={self.func.__name__}, average={self.average()}>"
-
-    async def __call__(self, event):
-        async with self.lock:
-            if not self.calls:
-                self.calls = [0]
-            if time() - self.time > 1:
-                self.time = time()
-                self.calls.append(1)
-            else:
-                self.calls[-1] += 1
-        await self.func(event)
-
-
-async def nothing(event):
-    pass
-
-
-messages = Store(nothing)
-inline_queries = Store(nothing)
-callback_queries = Store(nothing)
-
-telethn.add_event_handler(messages, events.NewMessage())
-telethn.add_event_handler(inline_queries, events.InlineQuery())
-telethn.add_event_handler(callback_queries, events.CallbackQuery())
-
-
-# @telethn.on(events.NewMessage(pattern="[/!>]getstats", from_users=[SYS_ADMIN, OWNER_ID]))
 @register(pattern='getstats', from_users=[SYS_ADMIN, OWNER_ID], no_args=True)
 async def getstats(event):
     await event.reply(
