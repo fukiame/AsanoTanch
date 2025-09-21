@@ -341,7 +341,7 @@ def findall(p, s):
         i = s.find(p, i + 1)
 
 
-@kigmsg(((Filters.text | Filters.command | Filters.sticker | Filters.photo) & Filters.chat_type.groups),
+@kigmsg(((Filters.text | Filters.command | Filters.sticker | Filters.photo | Filters.video | Filters.audio | Filters.document | Filters.animation | Filters.voice | Filters.video_note) & Filters.chat_type.groups),
         group=BLACKLIST_GROUP)
 @user_not_admin_check
 def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metrics
