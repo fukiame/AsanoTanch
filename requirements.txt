@@ -26,7 +26,6 @@ telethon
 ujson
 gtts
 wikipedia
-SibylSystem
 pytimeparse
 lxml
 pycryptodome

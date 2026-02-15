@@ -47,9 +47,6 @@ from .helper_funcs.admin_status import (
 )
 import tg_bot.modules.sql.log_channel_sql as logsql
 
-from ..import sibylClient
-from .sql.sibylsystem_sql import does_chat_sibylban
-from SibylSystem import GeneralException
 from .cron_jobs import j
 
 VALID_WELCOME_FORMATTERS = [
@@ -203,18 +200,6 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
         sw_ban = sw.get_ban(new_mem.id)
         if sw_ban:
             return
-
-    data = None
-    if sibylClient and does_chat_sibylban(chat.id):
-        try:
-            data = sibylClient.get_info(user.id)
-        except GeneralException:
-            pass
-        except BaseException as e:
-            log.error(e)
-            pass
-        if data and data.banned:
-            return   # all modes handle it in different ways
 
     if should_welc:
 

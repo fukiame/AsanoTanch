@@ -10,7 +10,6 @@ from telethon import TelegramClient
 from telethon.sessions import MemorySession
 from configparser import ConfigParser
 from functools import wraps
-from SibylSystem import PsychoPass
 try:
     os.system(os.environ['convert_config'])
     from .config import config_vars
@@ -125,8 +124,6 @@ class KigyoINIT:
         self.GROUP_BLACKLIST =  self.parser.get("GROUP_BLACKLIST", [])
         self.GLOBALANNOUNCE =  self.parser.getboolean("GLOBALANNOUNCE", False)
         self.BACKUP_PASS =  self.parser.get("BACKUP_PASS", None)
-        self.SIBYL_KEY =  self.parser.get("SIBYL_KEY", None)
-        self.SIBYL_ENDPOINT = self.parser.get("SIBYL_ENDPOINT", "https://psychopass.kaizoku.cyou")
 
 
     def init_sw(self):
@@ -187,27 +184,12 @@ GROUP_BLACKLIST = KInit.GROUP_BLACKLIST
 bot_username = KInit.bot_username
 GLOBALANNOUNCE = KInit.GLOBALANNOUNCE
 BACKUP_PASS = KInit.BACKUP_PASS
-SIBYL_KEY = KInit.SIBYL_KEY
-SIBYL_ENDPOINT = KInit.SIBYL_ENDPOINT
 BOT_ID = TOKEN.split(":")[0]
 
 
 if IS_DEBUG:
     log.debug("Debug mode is on")
     stream_handler.setLevel(logging.DEBUG)
-
-
-sibylClient: PsychoPass = None
-
-if SIBYL_KEY:
-    try:
-        sibylClient = PsychoPass(SIBYL_KEY, show_license=False, host=SIBYL_ENDPOINT)
-        log.info("Connected to Sibyl System, NONA Tower")
-    except Exception as e:
-        sibylClient = None
-        log.warning(
-            f"Failed to load SibylSystem due to {e.with_traceback(e.__traceback__)}",
-        )
 
 
 try:
