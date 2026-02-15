@@ -562,23 +562,6 @@ github_help: |
 #        • `/delrepo <name>`: deletes a repo shortcut
 
 
-android_help: |
-       *Available commands:*
-       *Magisk:* 
-       • `/magisk`, `/su`, `/root`: fetches latest magisk
-       *OrangeFox Recovery Project:* 
-       • `/orangefox` `<devicecodename>`: fetches lastest OrangeFox Recovery available for a given device codename
-       • `/ofox` `<devicecodename>`: same as orangefox
-       *TWRP:* 
-       • `/twrp <devicecodename>`: fetches lastest TWRP available for a given device codename
-       *MIUI:*
-       • `/miui <devicecodename>`- fetches latest firmware info for a given device codename
-       *Phh:* 
-       • `/phh`: get lastest phh builds from github
-       *Samsung:*
-       • `/checkfw <model> <csc>` - Samsung only - shows the latest firmware info for the given device, taken from samsung servers
-       • `/getfw <model> <csc>` - Samsung only - gets firmware download links from samfrew, sammobile and sfirmwares for the given device
-
 # lockgroup_help: |
 #        *Available commands:*
 #        *Group owner only!*
