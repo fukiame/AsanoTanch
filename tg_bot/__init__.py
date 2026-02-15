@@ -3,7 +3,6 @@ import os
 import sys
 import time
 from typing import List
-import spamwatch
 import telegram.ext as tg
 from telegram.ext import Dispatcher, JobQueue, Updater
 from telethon import TelegramClient
@@ -103,7 +102,6 @@ class KigyoINIT:
         self.BOT_LOGS: int = self.parser.getint('BOT_LOGS', None)
         self.NO_LOAD = self.parser.get("NO_LOAD", "").split()
         self.NO_LOAD: List[str] = list(map(str, self.NO_LOAD))
-        self.spamwatch_api: str = self.parser.get('spamwatch_api', None)
         self.CASH_API_KEY: str = self.parser.get('CASH_API_KEY', None)
         self.TIME_API_KEY: str = self.parser.get('TIME_API_KEY', None)
         self.WALL_API: str = self.parser.get('WALL_API', None)
@@ -124,20 +122,6 @@ class KigyoINIT:
         self.GROUP_BLACKLIST =  self.parser.get("GROUP_BLACKLIST", [])
         self.GLOBALANNOUNCE =  self.parser.getboolean("GLOBALANNOUNCE", False)
         self.BACKUP_PASS =  self.parser.get("BACKUP_PASS", None)
-
-
-    def init_sw(self):
-        if self.spamwatch_api is None:
-            log.warning("SpamWatch API key is missing! Check your config.ini")
-            return None
-        else:
-            try:
-                sw = spamwatch.Client(spamwatch_api)
-                return sw
-            except:
-                sw = None
-                log.warning("Can't connect to SpamWatch!")
-                return sw
 
 
 KInit = KigyoINIT(parser=kigconfig)
@@ -169,7 +153,6 @@ DEV_USERS = [OWNER_ID] + [SYS_ADMIN] + get_user_list("devs")
 SUPPORT_USERS = get_user_list("supports")
 WHITELIST_USERS = get_user_list("whitelists")
 SPAMMERS = get_user_list("spammers")
-spamwatch_api = KInit.spamwatch_api
 CASH_API_KEY = KInit.CASH_API_KEY
 TIME_API_KEY = KInit.TIME_API_KEY
 # WALL_API = KInit.WALL_API
@@ -195,9 +178,6 @@ try:
     IS_DEBUG = IS_DEBUG
 except AttributeError:
     IS_DEBUG = False
-
-# SpamWatch
-sw = KInit.init_sw()
 
 from tg_bot.modules.sql import SESSION
 

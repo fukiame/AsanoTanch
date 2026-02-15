@@ -4,7 +4,7 @@ import os
 from telegram import Update
 from telegram.ext import CallbackContext
 
-from .. import API_HASH, APP_ID, BACKUP_PASS, CASH_API_KEY, CF_API_KEY, DB_URI, LASTFM_API_KEY, TIME_API_KEY, TOKEN, dispatcher, spamwatch_api
+from .. import API_HASH, APP_ID, BACKUP_PASS, CASH_API_KEY, CF_API_KEY, DB_URI, LASTFM_API_KEY, TIME_API_KEY, TOKEN, dispatcher
 from .helper_funcs.chat_status import dev_plus
 from .helper_funcs.decorators import kigcmd, register
 

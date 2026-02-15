@@ -16,7 +16,6 @@ from tg_bot import (
     SUPPORT_USERS,
     WHITELIST_USERS,
     spamcheck,
-    sw,
     dispatcher,
 )
 from .helper_funcs.misc import build_keyboard, revert_buttons
@@ -196,10 +195,6 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
             return
         except:
             pass
-    if sw is not None:
-        sw_ban = sw.get_ban(new_mem.id)
-        if sw_ban:
-            return
 
     if should_welc:
 
@@ -600,12 +595,6 @@ def left_member(update: Update, context: CallbackContext):  # sourcery no-metric
     if should_goodbye:
         left_mem = update.chat_member.new_chat_member.user
         if left_mem:
-
-            # Thingy for spamwatched users
-            if sw:
-                sw_ban = sw.get_ban(left_mem.id)
-                if sw_ban:
-                    return
 
             # Ignore bot being kicked
             if left_mem.id == bot.id:

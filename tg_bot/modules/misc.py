@@ -22,7 +22,6 @@ from tg_bot import (
     WHITELIST_USERS,
     INFOPIC,
     spamcheck,
-    sw,
     StartTime,
     SYS_ADMIN,
 )
@@ -278,28 +277,6 @@ def get_user_info(user, chat, full_info=False):
                 if mod_info:
                     text += mod_info
 
-        if (
-            user.id
-            in [777000, 1087968824, dispatcher.bot.id, OWNER_ID, SYS_ADMIN]
-            + DEV_USERS
-            + SUDO_USERS
-            + SUPPORT_USERS
-            + WHITELIST_USERS
-            + MOD_USERS
-            ):
-                pass #text += ""
-        else:
-            try:
-                spamwtc = sw.get_ban(int(user.id))
-                if sw.get_ban(int(user.id)):
-                    text += "<b>\nSpamWatch:\n</b>"
-                    text += "ㅤ<b>This person is banned in Spamwatch!</b>"
-                    text += f"\nㅤ<b>Reason:</b> <pre>{spamwtc.reason}</pre>"
-                    text += "\nㅤ<b>Appeal:</b>  @SpamWatchSupport"
-            except:
-                pass # don't crash if api is down somehow...
-            else:
-                text += ""
     return text
 
 def get_chat_info(user):
