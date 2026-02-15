@@ -405,8 +405,6 @@ misc_help: |
       • /stickerid: reply to a sticker to get its ID.
       • /getsticker: reply to a sticker to get the raw PNG image.
       • /steal: reply to a sticker or image to add it to your pack.
-      • /spb : get info about a user from @Intellivoid's SpamProtection API
-      • /spbinfo : get info about a user from @Intellivoid's SpamProtection API
       • /afk <reason>: mark yourself as AFK(away from keyboard).
       • brb <reason>: same as the afk command - but not a command.
       When marked as AFK, any mentions will be replied to with a message to say you're not available!
