@@ -30,7 +30,7 @@ from tg_bot import (
     OWNER_ID,
     SUDO_USERS,
     WHITELIST_USERS,
-    GBAN_LOGS,
+    BOT_LOGS,
     DEV_USERS,
     log,
     spamcheck,
@@ -131,14 +131,14 @@ def new_fed(update, context):
         )
         try:
             context.bot.send_message(
-                GBAN_LOGS,
+                BOT_LOGS,
                 "Federation <b>{}</b> has been created with ID: <pre>{}</pre>".format(
                     fed_name, fed_id
                 ),
                 parse_mode=ParseMode.HTML,
             )
         except Exception:
-            log.warning("Cannot send a message to GBAN_LOGS")
+            log.warning("Cannot send a message to BOT_LOGS")
     else:
         update.effective_message.reply_text(
             "Please write down the name of the federation"

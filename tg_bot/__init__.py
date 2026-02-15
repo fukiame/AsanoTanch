@@ -101,7 +101,7 @@ class KigyoINIT:
         self.LOAD = self.parser.get("LOAD", "").split()
         self.LOAD: List[str] = list(map(str, self.LOAD))
         self.MESSAGE_DUMP: int = self.parser.getint('MESSAGE_DUMP', None)
-        self.GBAN_LOGS: int = self.parser.getint('GBAN_LOGS', None)
+        self.BOT_LOGS: int = self.parser.getint('BOT_LOGS', None)
         self.NO_LOAD = self.parser.get("NO_LOAD", "").split()
         self.NO_LOAD: List[str] = list(map(str, self.NO_LOAD))
         self.spamwatch_api: str = self.parser.get('spamwatch_api', None)
@@ -162,7 +162,7 @@ TOKEN = KInit.TOKEN
 DB_URI = KInit.DB_URI
 LOAD = KInit.LOAD
 MESSAGE_DUMP = KInit.MESSAGE_DUMP
-GBAN_LOGS = KInit.GBAN_LOGS
+BOT_LOGS = KInit.BOT_LOGS
 NO_LOAD = KInit.NO_LOAD
 OWNER_USER = [OWNER_ID]
 SYS_ADMIN = KInit.SYS_ADMIN

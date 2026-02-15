@@ -29,7 +29,7 @@ if is_module_loaded(FILENAME):
     from telegram.error import BadRequest, Unauthorized
     from telegram.utils.helpers import escape_markdown
 
-    from tg_bot import GBAN_LOGS, log, dispatcher
+    from tg_bot import BOT_LOGS, log, dispatcher
     from .sql import log_channel_sql as sql
  
 
@@ -81,7 +81,7 @@ if is_module_loaded(FILENAME):
                     else:
                         cid = str(chat.id).replace("-100", '')
                         result += f'\n<b>Link:</b> <a href="https://t.me/c/{cid}/{message.message_id}">click here</a>'
-                log_chat = GBAN_LOGS or OWNER_ID
+                log_chat = BOT_LOGS or OWNER_ID
                 if log_chat:
                     send_log(context, log_chat, chat.id, result)
 
