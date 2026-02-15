@@ -295,38 +295,6 @@ filling_help: |
       - <code>{preview}</code>: show webpage preview for links in notes (defaults to false)
       - <code>{protect}</code>: protect the note contect from being shared (defaults to false)
 
-antispam_help: |
-     *Admins only:*
-      • `/antispam <on/off/yes/no>`*:* Will toggle our antispam tech or return your current settings.
-      • `/gbanstat <on/off/yes/no>`*:* Will toggle our antispam tech or return your current settings.
-      • `/sibylban`*:* Will toggle sibyl system antispam tech.
-
-     Anti-Spam, used by bot devs to ban spammers across all groups. This helps protect
-     you and your groups by removing spam flooders as quickly as possible.
-     *Note:* Users can appeal gbans or report spammers at @TheBotsSupport
-
-     This also integrates @Spamwatch API to remove Spammers as much as possible from your chatroom!
-
-     *What is SpamWatch?*
-     SpamWatch maintains a large constantly updated ban-list of spambots, trolls, bitcoin spammers and unsavoury characters.
-     Constantly help banning spammers off from your group automatically So, you wont have to worry about spammers storming your group.
-     *Note:* Users can appeal spamwatch bans at @SpamwatchSupport
-
-
-    #   • `/nlpstat <on/off/yes/no>`*:* toggle NLP in your chat.
-    #  This also integrates @Spamwatch and @Intellivoid's SpamProtectionBot API to remove Spammers as much as possible from your chatroom!
-
-    #  *What is SpamWatch?*
-    #  SpamWatch maintains a large constantly updated ban-list of spambots, trolls, bitcoin spammers and unsavoury characters.
-    #  Constantly help banning spammers off from your group automatically So, you wont have to worry about spammers storming your group.
-    #  *Note:* Users can appeal spamwatch bans at @SpamwatchSupport
-
-    #  *What is Spam protection? - nlp Chatroom Spam Prediction*
-    #  SpamProtection is the new AI antispam service which makes sure that your chat is free of spambots, scammers, and pedophiles.
-    #  Uses @Intellivoid's Coffeehouse Artificial Engine. Every ban is checked by real trusty people before being finalized.
-    #  This comes under Coffehouse' NLP. Learn more about
-    #  it [here](https://docs.intellivoid.net/coffeehouse/v1/nlp/spam_prediction/chatroom)
-
 gtranslate_help: |
      Use this module to translate stuff... duh!
 

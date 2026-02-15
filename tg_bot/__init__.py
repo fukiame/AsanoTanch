@@ -93,7 +93,6 @@ class KigyoINIT:
         self.PORT: int = self.parser.getint('PORT', None)
         self.INFOPIC: bool = self.parser.getboolean('INFOPIC', False)
         self.DEL_CMDS: bool = self.parser.getboolean("DEL_CMDS", False)
-        self.STRICT_GBAN: bool = self.parser.getboolean("STRICT_GBAN", False)
         self.ALLOW_EXCL: bool = self.parser.getboolean("ALLOW_EXCL", False)
         self.CUSTOM_CMD: List[str] = ['/', '!', ">"]
         self.BAN_STICKER: str = self.parser.get("BAN_STICKER", None)
@@ -102,7 +101,6 @@ class KigyoINIT:
         self.LOAD = self.parser.get("LOAD", "").split()
         self.LOAD: List[str] = list(map(str, self.LOAD))
         self.MESSAGE_DUMP: int = self.parser.getint('MESSAGE_DUMP', None)
-        self.GBAN_LOGS: int = self.parser.getint('GBAN_LOGS', None)
         self.NO_LOAD = self.parser.get("NO_LOAD", "").split()
         self.NO_LOAD: List[str] = list(map(str, self.NO_LOAD))
         self.spamwatch_api: str = self.parser.get('spamwatch_api', None)
@@ -123,7 +121,6 @@ class KigyoINIT:
         self.ALLOW_CHATS =  self.parser.getboolean("ALLOW_CHATS", True)
         self.SUPPORT_GROUP =  self.parser.get("SUPPORT_GROUP", 0)
         self.IS_DEBUG =  self.parser.getboolean("IS_DEBUG", False)
-        self.ANTISPAM_TOGGLE =  self.parser.getboolean("ANTISPAM_TOGGLE", True)
         self.GROUP_BLACKLIST =  self.parser.get("GROUP_BLACKLIST", [])
         self.GLOBALANNOUNCE =  self.parser.getboolean("GLOBALANNOUNCE", False)
         self.BACKUP_PASS =  self.parser.get("BACKUP_PASS", None)
@@ -164,7 +161,6 @@ TOKEN = KInit.TOKEN
 DB_URI = KInit.DB_URI
 LOAD = KInit.LOAD
 MESSAGE_DUMP = KInit.MESSAGE_DUMP
-GBAN_LOGS = KInit.GBAN_LOGS
 NO_LOAD = KInit.NO_LOAD
 OWNER_USER = [OWNER_ID]
 SYS_ADMIN = KInit.SYS_ADMIN
@@ -186,7 +182,6 @@ ALLOW_CHATS = KInit.ALLOW_CHATS
 SUPPORT_GROUP = KInit.SUPPORT_GROUP
 IS_DEBUG = KInit.IS_DEBUG
 GROUP_BLACKLIST = KInit.GROUP_BLACKLIST
-ANTISPAM_TOGGLE = KInit.ANTISPAM_TOGGLE
 bot_username = KInit.bot_username
 GLOBALANNOUNCE = KInit.GLOBALANNOUNCE
 BACKUP_PASS = KInit.BACKUP_PASS
@@ -218,11 +213,6 @@ try:
 except AttributeError:
     IS_DEBUG = False
 
-try:
-    ANTISPAM_TOGGLE = ANTISPAM_TOGGLE
-except AttributeError:
-    ANTISPAM_TOGGLE = True
-
 # SpamWatch
 sw = KInit.init_sw()
 
@@ -252,14 +242,6 @@ if CUSTOM_CMD and len(CUSTOM_CMD) >= 1:
     return True'''
 
 
-try:
-    from tg_bot.antispam import antispam_restrict_user, antispam_cek_user, detect_user
-    log.info("AntiSpam loaded!")
-    antispam_module = True
-except ModuleNotFoundError:
-    antispam_module = False
-
-
 def spamcheck(func):
     @wraps(func)
     def check_user(update, context, *args, **kwargs):
@@ -276,11 +258,6 @@ def spamcheck(func):
             return False
         elif user.id == "777000":
             return False
-        elif antispam_module and ANTISPAM_TOGGLE:
-            parsing_date = time.mktime(message.date.timetuple())
-            if detect_user(user.id, chat.id, message, parsing_date):
-                return False
-            antispam_restrict_user(user.id, parsing_date)
         elif int(user.id) in SPAMMERS:
             return False
         elif str(chat.id) in GROUP_BLACKLIST:

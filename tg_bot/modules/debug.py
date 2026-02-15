@@ -29,25 +29,6 @@ def debug(update: Update, _: CallbackContext):
     else:
         message.reply_text("Debug mode is currently off.")
 
-@kigcmd(command='spamdebug')
-@dev_plus
-def asdebug(update: Update, context: CallbackContext):
-    global IS_DEBUG
-    args = update.effective_message.text.split(None, 1)
-    message = update.effective_message
-    print(IS_DEBUG)
-    if len(args) > 1:
-        if args[1] in ("yes", "on"):
-            IS_DEBUG = True
-            message.reply_text("Antispam Debug mode is now on.")
-        elif args[1] in ("no", "off"):
-            IS_DEBUG = False
-            message.reply_text("Antispam Debug mode is now off.")
-    elif IS_DEBUG:
-        message.reply_text("Antispam Debug mode is currently on.")
-    else:
-        message.reply_text("Antispam Debug mode is currently off.")
-
 @kigcmd(command='gannounce')
 @dev_plus
 def asdebug(update: Update, context: CallbackContext):
@@ -66,25 +47,6 @@ def asdebug(update: Update, context: CallbackContext):
         message.reply_text("Global announcement is currently on.")
     else:
         message.reply_text("Global announcement is currently off.")
-
-@kigcmd(command='spamcheck')
-@dev_plus
-def astoggle(update: Update, context: CallbackContext):
-    global ANTISPAM_TOGGLE
-    args = update.effective_message.text.split(None, 1)
-    message = update.effective_message
-    print(ANTISPAM_TOGGLE)
-    if len(args) > 1:
-        if args[1] in ("yes", "on"):
-            ANTISPAM_TOGGLE = True
-            message.reply_text("Antispam module is now on.")
-        elif args[1] in ("no", "off"):
-            ANTISPAM_TOGGLE = False
-            message.reply_text("Antispam module is now off.")
-    elif ANTISPAM_TOGGLE:
-        message.reply_text("Antispam module is currently on.")
-    else:
-        message.reply_text("Antispam module is currently off.")
 
 @register(pattern='.*')
 # @telethn.on(events.NewMessage(pattern="[/!>].*"))

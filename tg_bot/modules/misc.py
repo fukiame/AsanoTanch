@@ -2,7 +2,6 @@ import html
 from typing import Union
 
 from telegram.user import User
-from tg_bot.antispam import GLOBAL_USER_DATA, Owner
 import time
 import git
 import requests
@@ -127,27 +126,6 @@ def gifid(update: Update, _):
     else:
         update.effective_message.reply_text("Please reply to a gif to get its ID.")
 
-
-@kigcmd(command='print', pass_args=True, filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def printdata(update: Update, context: CallbackContext):  # sourcery no-metrics
-    print(GLOBAL_USER_DATA)
-    gd = str(GLOBAL_USER_DATA)
-    dispatcher.bot.sendMessage(Owner, "`{}`".format(gd), parse_mode="markdown")
-
-
-@kigcmd(command="resetantispam", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def resetglobaldata(update: Update, context: CallbackContext):
-    bot = context.bot
-    from .eval import log_input, send
-    global GLOBAL_USER_DATA
-    log_input(update)
-    gd = str(GLOBAL_USER_DATA)
-    dispatcher.bot.sendMessage(Owner, "`{}`".format(gd), parse_mode="markdown")
-    try:
-        GLOBAL_USER_DATA = {}
-    except Exception as e:
-        dispatcher.bot.sendMessage(Owner, "global error\n`{}`".format(str(e)), parse_mode="markdown")
-    send("done", bot, update)
 
 @kigcmd(command='whois', pass_args=True)
 @spamcheck

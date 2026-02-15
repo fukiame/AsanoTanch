@@ -26,7 +26,6 @@ from .helper_funcs.string_handling import (
     markdown_parser,
 )
 from .log_channel import loggable
-from .sql.antispam_sql import is_user_gbanned
 from telegram import (
     ChatPermissions,
     InlineKeyboardButton,
@@ -622,10 +621,6 @@ def left_member(update: Update, context: CallbackContext):  # sourcery no-metric
                 sw_ban = sw.get_ban(left_mem.id)
                 if sw_ban:
                     return
-
-            # Dont say goodbyes to gbanned users
-            if is_user_gbanned(left_mem.id):
-                return
 
             # Ignore bot being kicked
             if left_mem.id == bot.id:

@@ -22,7 +22,7 @@ from tg_bot import (
     DEV_USERS,
     WHITELIST_USERS,
     SYS_ADMIN,
-    sw, log
+    log
 )
 from .helper_funcs.misc import article
 from .helper_funcs.decorators import kiginline
@@ -152,38 +152,11 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
 
     text += "\n"
     try:
-        from .antispam import __user_info__ as u
-        user_info = u(user.id)
-        text += user_info
-    except:
-        pass
-    try:
         from .blacklistusers import __user_info__ as bl
         user_info = bl(user.id)
         text += user_info
     except:
         pass
-
-
-    if (
-        user.id
-        not in [777000, 1087968824, bot.id, OWNER_ID, SYS_ADMIN]
-        + DEV_USERS
-        + SUDO_USERS
-        + SUPPORT_USERS
-        + WHITELIST_USERS
-        + MOD_USERS
-        ):
-        try:
-            spamwtc = sw.get_ban(int(user.id))
-            if sw.get_ban(int(user.id)):
-                text += "<b>\nSpamWatch:\n</b>"
-                text += "ㅤ<b>This person is banned in Spamwatch!</b>"
-                text += f"\nㅤ<b>Reason:</b> <pre>{spamwtc.reason}</pre>"
-                text += "\nㅤ<b>Appeal:</b>  @SpamWatchSupport"
-        except:
-            pass # don't crash if api is down somehow...
-
 
 
     kb = InlineKeyboardMarkup(
