@@ -30,11 +30,11 @@ from tg_bot import (
     OWNER_ID,
     SUDO_USERS,
     WHITELIST_USERS,
+    GBAN_LOGS,
     DEV_USERS,
     log,
     spamcheck,
 )
-#    GBAN_LOGS,
 from .sql.users_sql import get_user_com_chats
 
 from .helper_funcs.extraction import (
@@ -129,7 +129,6 @@ def new_fed(update, context):
             "\n`/joinfed {}`".format(fed_name, fed_id, fed_id),
             parse_mode=ParseMode.MARKDOWN,
         )
-        '''
         try:
             context.bot.send_message(
                 GBAN_LOGS,
@@ -140,7 +139,6 @@ def new_fed(update, context):
             )
         except Exception:
             log.warning("Cannot send a message to GBAN_LOGS")
-        '''
     else:
         update.effective_message.reply_text(
             "Please write down the name of the federation"
