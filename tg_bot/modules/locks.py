@@ -10,7 +10,7 @@ from .helper_funcs.decorators import kigcmd, kigmsg
 from alphabet_detector import AlphabetDetector
 from .sql.approve_sql import is_approved
 import tg_bot.modules.sql.locks_sql as sql
-from tg_bot import dispatcher, SUDO_USERS, log, spamcheck
+from tg_bot import application, SUDO_USERS, log, spamcheck
 
 from .log_channel import loggable
 
@@ -29,32 +29,32 @@ from .helper_funcs.admin_status import (
 ad = AlphabetDetector()
 
 LOCK_TYPES = {
-    "audio": Filters.audio,
-    "voice": Filters.voice,
-    "document": Filters.document,
-    "video": Filters.video,
-    "contact": Filters.contact,
-    "photo": Filters.photo,
-    "url": Filters.entity(MessageEntity.URL)
-    | Filters.caption_entity(MessageEntity.URL),
-    "bots": Filters.status_update.new_chat_members,
-    "forward": Filters.forwarded & ~ Filters.is_automatic_forward,
-    "game": Filters.game,
-    "location": Filters.location,
-    "egame": Filters.dice,
+    "audio": filters.AUDIO,
+    "voice": filters.VOICE,
+    "document": filters.DOCUMENT,
+    "video": filters.VIDEO,
+    "contact": filters.CONTACT,
+    "photo": filters.PHOTO,
+    "url": filters.Entity(MessageEntity.URL)
+    | filters.Caption_entity(MessageEntity.URL),
+    "bots": filters.StatusUpdate.NEW_CHAT_MEMBERS,
+    "forward": filters.FORWARDED & ~ filters.IS_AUTOMATIC_FORWARD,
+    "game": filters.GAME,
+    "location": filters.LOCATION,
+    "egame": filters.DICE,
     "rtl": "rtl",
     "button": "button",
     "inline": "inline",
-    "apk" : Filters.document.mime_type("application/vnd.android.package-archive"),
-    "doc" : Filters.document.mime_type("application/msword"),
-    "exe" : Filters.document.mime_type("application/x-ms-dos-executable"),
-    "gif" : Filters.document.mime_type("video/mp4"),
-    "jpg" : Filters.document.mime_type("image/jpeg"),
-    "mp3" : Filters.document.mime_type("audio/mpeg"),
-    "pdf" : Filters.document.mime_type("application/pdf"),
-    "txt" : Filters.document.mime_type("text/plain"),
-    "xml" : Filters.document.mime_type("application/xml"),
-    "zip" : Filters.document.mime_type("application/zip"),
+    "apk" : filters.Document.MimeType("application/vnd.android.package-archive"),
+    "doc" : filters.Document.MimeType("application/msword"),
+    "exe" : filters.Document.MimeType("application/x-ms-dos-executable"),
+    "gif" : filters.Document.MimeType("video/mp4"),
+    "jpg" : filters.Document.MimeType("image/jpeg"),
+    "mp3" : filters.Document.MimeType("audio/mpeg"),
+    "pdf" : filters.Document.MimeType("application/pdf"),
+    "txt" : filters.Document.MimeType("text/plain"),
+    "xml" : filters.Document.MimeType("application/xml"),
+    "zip" : filters.Document.MimeType("application/zip"),
 }
 
 LOCK_CHAT_RESTRICTION = {
@@ -111,7 +111,7 @@ def restr_members(
 ):
     for mem in members:
         try:
-            bot.restrict_chat_member(
+            await bot.restrict_chat_member(
                 chat_id,
                 mem.user,
                 can_send_messages=messages,
@@ -129,7 +129,7 @@ def unrestr_members(
 ):
     for mem in members:
         try:
-            bot.restrict_chat_member(
+            await bot.restrict_chat_member(
                 chat_id,
                 mem.user,
                 can_send_messages=messages,
@@ -142,8 +142,8 @@ def unrestr_members(
 
 @kigcmd(command='locktypes')
 @spamcheck
-def locktypes(update, context):
-    update.effective_message.reply_text(
+async def locktypes(update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
         "\n • ".join(
             ["Locks available: "]
             + sorted(list(LOCK_TYPES) + list(LOCK_CHAT_RESTRICTION))
@@ -157,7 +157,7 @@ def locktypes(update, context):
 @bot_admin_check()
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def lock(update, context) -> str:  # sourcery no-metrics
+async def lock(update, context: ContextTypes.DEFAULT_TYPE) -> str:  # sourcery no-metrics
     args = context.args
     chat = update.effective_chat
     user = update.effective_user
@@ -186,8 +186,8 @@ def lock(update, context) -> str:  # sourcery no-metrics
 
             elif ltype in LOCK_CHAT_RESTRICTION:
                 text = "Locked {} for all non-admins!".format(ltype)
-                current_permission = context.bot.getChat(chat.id).permissions
-                context.bot.set_chat_permissions(
+                current_permission = await context.bot.getChat(chat.id).permissions
+                await context.bot.set_chat_permissions(
                     chat_id=chat.id,
                     permissions=get_permission_list(
                         ast.literal_eval(str(current_permission)),
@@ -229,7 +229,7 @@ def lock(update, context) -> str:  # sourcery no-metrics
 @typing_action
 @user_admin_check()
 @loggable
-def unlock(update, context) -> str:  # sourcery no-metrics
+async def unlock(update, context: ContextTypes.DEFAULT_TYPE) -> str:  # sourcery no-metrics
     args = context.args
     chat = update.effective_chat
     user = update.effective_user
@@ -257,8 +257,8 @@ def unlock(update, context) -> str:  # sourcery no-metrics
             elif ltype in UNLOCK_CHAT_RESTRICTION:
                 text = "Unlocked {} for everyone!".format(ltype)
 
-                current_permission = context.bot.getChat(chat.id).permissions
-                context.bot.set_chat_permissions(
+                current_permission = await context.bot.getChat(chat.id).permissions
+                await context.bot.set_chat_permissions(
                     chat_id=chat.id,
                     permissions=get_permission_list(
                         ast.literal_eval(str(current_permission)),
@@ -289,9 +289,9 @@ def unlock(update, context) -> str:  # sourcery no-metrics
 
     return ""
 
-@kigmsg((Filters.all & Filters.chat_type.groups), group=PERM_GROUP)
+@kigmsg((filters.ALL & filters.ChatType.GROUPS), group=PERM_GROUP)
 @user_not_admin_check
-def del_lockables(update, context):  # sourcery no-metrics
+async def del_lockables(update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     chat = update.effective_chat  # type: Optional[Chat]
     message = update.effective_message  # type: Optional[Message]
     user = message.sender_chat or update.effective_user
@@ -305,8 +305,8 @@ def del_lockables(update, context):  # sourcery no-metrics
                     if "ARABIC" in check:
                         try:
                             # replyyy = "This action is restricted to admins only!"
-                            # message.reply_text(replyyy)
-                            message.delete()
+                            # await message.reply_text(replyyy)
+                            await message.delete()
                         except BadRequest as excp:
                             if excp.message != "Message to delete not found":
                                 log.exception("ERROR in lockables")
@@ -316,8 +316,8 @@ def del_lockables(update, context):  # sourcery no-metrics
                     if "ARABIC" in check:
                         try:
                             # replyyy = "This action is restricted to admins only!"
-                            # message.reply_text(replyyy)
-                            message.delete()
+                            # await message.reply_text(replyyy)
+                            await message.delete()
                         except BadRequest as excp:
                             if excp.message != "Message to delete not found":
                                 log.exception("ERROR in lockables")
@@ -332,8 +332,8 @@ def del_lockables(update, context):  # sourcery no-metrics
             ):
                 try:
                     # replyyy = "This action is restricted to admins only!"
-                    # message.reply_text(replyyy)
-                    message.delete()
+                    # await message.reply_text(replyyy)
+                    await message.delete()
                 except BadRequest as excp:
                     if excp.message != "Message to delete not found":
                         log.exception("ERROR in lockables")
@@ -348,8 +348,8 @@ def del_lockables(update, context):  # sourcery no-metrics
             ):
                 try:
                     # replyyy = "This action is restricted to admins only!"
-                    # message.reply_text(replyyy)
-                    message.delete()
+                    # await message.reply_text(replyyy)
+                    await message.delete()
                 except BadRequest as excp:
                     if excp.message != "Message to delete not found":
                         log.exception("ERROR in lockables")
@@ -381,8 +381,8 @@ def del_lockables(update, context):  # sourcery no-metrics
             else:
                 try:
                     # replyyy = "This action is restricted to admins only!"
-                    # message.reply_text(replyyy)
-                    message.delete()
+                    # await message.reply_text(replyyy)
+                    await message.delete()
                 except BadRequest as excp:
                     if excp.message != "Message to delete not found":
                         log.exception("ERROR in lockables")
@@ -423,7 +423,7 @@ def build_lock_message(chat_id):
         locklist.append("txt = `{}`".format(locks.txt))
         locklist.append("xml = `{}`".format(locks.xml))
         locklist.append("zip = `{}`".format(locks.zip))
-    permissions = dispatcher.bot.get_chat(chat_id).permissions
+    permissions = await application.bot.get_chat(chat_id).permissions
     permslist.append("messages = `{}`".format(permissions.can_send_messages))
     permslist.append("media = `{}`".format(permissions.can_send_media_messages))
     permslist.append("poll = `{}`".format(permissions.can_send_polls))
@@ -449,7 +449,7 @@ def build_lock_message(chat_id):
 @connection_status
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods=True)
 @typing_action
-def list_locks(update, _):
+async def list_locks(update, _: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat  # type: Optional[Chat]
 
     res = build_lock_message(chat.id)

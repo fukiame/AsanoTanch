@@ -1,5 +1,5 @@
 from telegram.utils.helpers import escape_markdown
-from tg_bot import dispatcher
+from tg_bot import application
 from .helper_funcs.decorators import kigcallback
 from telegram import (
     ParseMode,
@@ -10,15 +10,15 @@ from telegram import (
 from telegram.ext import CallbackContext
 from .language import gs
 
-def fmt_md_help(update: Update, context: CallbackContext):
-    update.effective_message.reply_text(
+async def fmt_md_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
         gs(update.effective_chat.id, "md_help"),
         parse_mode=ParseMode.HTML,
     )
 
 
-def fmt_filling_help(update: Update, context: CallbackContext):
-    update.effective_message.reply_text(
+async def fmt_filling_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
         gs(update.effective_chat.id, "filling_help"),
         parse_mode=ParseMode.HTML,
     )
@@ -26,15 +26,15 @@ def fmt_filling_help(update: Update, context: CallbackContext):
 
 
 @kigcallback(pattern=r"fmt_help_")
-def fmt_help(update: Update, context: CallbackContext):
+async def fmt_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     bot = context.bot
-    help_info = query.data.split("fmt_help_")[1]
+    help_info = await query.data.split("fmt_help_")[1]
     if help_info == "md":
         help_text = gs(update.effective_chat.id, "md_help")
     elif help_info == "filling":
         help_text = gs(update.effective_chat.id, "filling_help") 
-    query.message.edit_text(
+    await query.message.edit_text(
         text=help_text,
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(
@@ -42,12 +42,12 @@ def fmt_help(update: Update, context: CallbackContext):
             InlineKeyboardButton(text='Support', url='https://t.me/TheBotsSupport')]]
         ),
     )
-    bot.answer_callback_query(query.id)
+    await bot.answer_callback_query(query.id)
 
 __mod_name__ = 'Formatting'
 
 def get_help(chat):
-    return [gs(chat, "formt_help_bse".format(escape_markdown(dispatcher.bot.username))),
+    return [gs(chat, "formt_help_bse".format(escape_markdown(application.bot.username))),
     [
         InlineKeyboardButton(text="Markdown", callback_data="fmt_help_md"),
         InlineKeyboardButton(text="Filling", callback_data="fmt_help_filling")

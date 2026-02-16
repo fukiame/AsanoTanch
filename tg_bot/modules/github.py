@@ -6,7 +6,7 @@ import tg_bot.modules.helper_funcs.git_api as api
 import tg_bot.modules.sql.github_sql as sql
 
 from .sql.clear_cmd_sql import get_clearcmd
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 from .helper_funcs.misc import delete
 from .disable import DisableAbleCommandHandler
 
@@ -83,7 +83,7 @@ def getRepo(bot, update, reponame):
     return None, None
 
 @spamcheck
-def getRelease(update: Update, context: CallbackContext):
+async def getRelease(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot, args = context.bot, context.args
     msg = update.effective_message
     if len(args) == 0:
@@ -105,11 +105,11 @@ def getRelease(update: Update, context: CallbackContext):
     return
 
 # @spamcheck
-# def hashFetch(update: Update, context: CallbackContext):  # kanged from notes
+# async def hashFetch(update: Update, context: ContextTypes.DEFAULT_TYPE):  # kanged from notes
 #     bot, args = context.bot, context.args
 #     message = update.effective_message.text
 #     msg = update.effective_message
-#     fst_word = message.split()[0]
+#     fst_word = await message.split()[0]
 #     no_hash = fst_word[1:]
 #     url, index = getRepo(bot, update, no_hash)
 #     if url is None and index is None:
@@ -124,7 +124,7 @@ def getRelease(update: Update, context: CallbackContext):
 #     return
 
 @spamcheck
-def cmdFetch(update: Update, context: CallbackContext):
+async def cmdFetch(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot, args = context.bot, context.args
     msg = update.effective_message
     if len(args) != 1:
@@ -143,7 +143,7 @@ def cmdFetch(update: Update, context: CallbackContext):
     return
 
 @spamcheck
-def changelog(update: Update, context: CallbackContext):
+async def changelog(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot, args = context.bot, context.args
     msg = update.effective_message
     if len(args) != 1:
@@ -161,7 +161,7 @@ def changelog(update: Update, context: CallbackContext):
 
 # @spamcheck
 # @user_admin
-# def saveRepo(update: Update, context: CallbackContext):
+# async def saveRepo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     bot, args = context.bot, context.args
 #     chat_id = update.effective_chat.id
 #     msg = update.effective_message
@@ -181,7 +181,7 @@ def changelog(update: Update, context: CallbackContext):
 
 # @spamcheck
 # @user_admin
-# def delRepo(update: Update, context: CallbackContext):
+# async def delRepo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     bot, args = context.bot, context.args
 #     chat_id = update.effective_chat.id
 #     msg = update.effective_message
@@ -193,7 +193,7 @@ def changelog(update: Update, context: CallbackContext):
 #     return
 
 # @spamcheck
-# def listRepo(update: Update, context: CallbackContext):
+# async def listRepo(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     chat_id = update.effective_chat.id
 #     chat = update.effective_chat
 #     chat_name = chat.title or chat.first_name or chat.username
@@ -203,18 +203,18 @@ def changelog(update: Update, context: CallbackContext):
 #     for repo in repo_list:
 #         repo_name = " • `{}`\n".format(repo.name)
 #         if len(msg) + len(repo_name) > MAX_MESSAGE_LENGTH:
-#             deletion(update, context, update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN))
+#             deletion(update, context, await update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN))
 #             msg = ""
 #         msg += repo_name
 #     if msg == "*List of repo shotcuts in {}:*\n":
-#         deletion(update, context, update.effective_message.reply_text("No repo shortcuts in this chat!"))
+#         deletion(update, context, await update.effective_message.reply_text("No repo shortcuts in this chat!"))
 #     elif len(msg) != 0:
-#         deletion(update, context, update.effective_message.reply_text(
+#         deletion(update, context, await update.effective_message.reply_text(
 #             msg.format(chat_name) + des, parse_mode=ParseMode.MARKDOWN
 #         ))
 
 @spamcheck
-def getVer(update: Update, context: CallbackContext):
+async def getVer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     ver = api.vercheck()
     deletion(update, context, msg.reply_text("GitHub API version: " + ver))
@@ -226,37 +226,37 @@ def deletion(update: Update, context: CallbackContext, delmsg):
     cleartime = get_clearcmd(chat.id, "github")
 
     if cleartime:
-        context.dispatcher.run_async(delete, delmsg, cleartime.time)
+        context.application.run_async(delete, delmsg, cleartime.time)
 
 
 
 
 
 RELEASE_HANDLER = DisableAbleCommandHandler(
-    "git", getRelease, admin_ok=True, run_async=True
+    "git", getRelease, admin_ok=True, block=False
 )
 FETCH_HANDLER = DisableAbleCommandHandler(
-    "fetch", cmdFetch, admin_ok=True, run_async=True
+    "fetch", cmdFetch, admin_ok=True, block=False
 )
-# SAVEREPO_HANDLER = CommandHandler("saverepo", saveRepo, run_async=True)
-# DELREPO_HANDLER = CommandHandler("delrepo", delRepo, run_async=True)
-# LISTREPO_HANDLER = DisableAbleCommandHandler("listrepo", listRepo, admin_ok=True, run_async=True)
-VERCHECKER_HANDLER = DisableAbleCommandHandler("gitver", getVer, admin_ok=True, run_async=True)
+# SAVEREPO_HANDLER = CommandHandler("saverepo", saveRepo, block=False)
+# DELREPO_HANDLER = CommandHandler("delrepo", delRepo, block=False)
+# LISTREPO_HANDLER = DisableAbleCommandHandler("listrepo", listRepo, admin_ok=True, block=False)
+VERCHECKER_HANDLER = DisableAbleCommandHandler("gitver", getVer, admin_ok=True, block=False)
 CHANGELOG_HANDLER = DisableAbleCommandHandler(
-    "changelog", changelog, admin_ok=True, run_async=True
+    "changelog", changelog, admin_ok=True, block=False
 )
 
-# HASHFETCH_HANDLER = MessageHandler(Filters.regex(r"^&[^\s]+"), hashFetch)
+# HASHFETCH_HANDLER = MessageHandler(filters.Regex(r"^&[^\s]+"), hashFetch)
 
 
-dispatcher.add_handler(RELEASE_HANDLER)
-dispatcher.add_handler(FETCH_HANDLER)
-# dispatcher.add_handler(SAVEREPO_HANDLER)
-# dispatcher.add_handler(DELREPO_HANDLER)
-# dispatcher.add_handler(LISTREPO_HANDLER)
-# dispatcher.add_handler(HASHFETCH_HANDLER)
-dispatcher.add_handler(VERCHECKER_HANDLER)
-dispatcher.add_handler(CHANGELOG_HANDLER)
+application.add_handler(RELEASE_HANDLER)
+application.add_handler(FETCH_HANDLER)
+# application.add_handler(SAVEREPO_HANDLER)
+# application.add_handler(DELREPO_HANDLER)
+# application.add_handler(LISTREPO_HANDLER)
+# application.add_handler(HASHFETCH_HANDLER)
+application.add_handler(VERCHECKER_HANDLER)
+application.add_handler(CHANGELOG_HANDLER)
 
 
 from .language import gs

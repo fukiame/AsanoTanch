@@ -10,7 +10,7 @@ import tg_bot.modules.sql.blacklist_sql as blacklistsql
 import tg_bot.modules.sql.locks_sql as locksql
 import tg_bot.modules.sql.notes_sql as sql
 import tg_bot.modules.sql.rules_sql as rulessql
-from .. import OWNER_ID, dispatcher, log as LOGGER, spamcheck
+from .. import OWNER_ID, application, log as LOGGER, spamcheck
 from ..__main__ import DATA_IMPORT
 from .connection import connected
 from .helper_funcs.alternate import typing_action
@@ -26,7 +26,7 @@ from .helper_funcs.admin_status import (
 @spamcheck
 @typing_action
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def import_data(update, context):
+async def import_data(update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     chat = update.effective_chat
     user = update.effective_user
@@ -35,11 +35,11 @@ def import_data(update, context):
 
     conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
-        chat = dispatcher.bot.getChat(conn)
-        chat_name = dispatcher.bot.getChat(conn).title
+        chat = await application.bot.getChat(conn)
+        chat_name = await application.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text("This is a group only command!")
+            await update.effective_message.reply_text("This is a group only command!")
             return ""
 
         chat = update.effective_chat
@@ -47,7 +47,7 @@ def import_data(update, context):
 
     if msg.reply_to_message and msg.reply_to_message.document:
         try:
-            file_info = context.bot.get_file(msg.reply_to_message.document.file_id)
+            file_info = await context.bot.get_file(msg.reply_to_message.document.file_id)
         except BadRequest:
             msg.reply_text(
                 "Try downloading and uploading the file yourself again, This one seem broken to me!",
@@ -119,7 +119,7 @@ def import_data(update, context):
 @kigcmd(command='export')
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def export_data(update, context):  # sourcery no-metrics
+async def export_data(update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     chat_data = context.chat_data
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
@@ -129,12 +129,12 @@ def export_data(update, context):  # sourcery no-metrics
     current_chat_id = update.effective_chat.id
     conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
-        chat = dispatcher.bot.getChat(conn)
+        chat = await application.bot.getChat(conn)
         chat_id = conn
-        # chat_name = dispatcher.bot.getChat(conn).title
+        # chat_name = await application.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text("This is a group only command!")
+            await update.effective_message.reply_text("This is a group only command!")
             return ""
         chat = update.effective_chat
         chat_id = update.effective_chat.id
@@ -148,7 +148,7 @@ def export_data(update, context):  # sourcery no-metrics
             timeformatt = time.strftime(
                 "%H:%M:%S %d/%m/%Y", time.localtime(checkchat.get("value")),
             )
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 "You can only backup once a day!\nYou can backup again in about `{}`".format(
                     timeformatt,
                 ),
@@ -324,22 +324,22 @@ def export_data(update, context):  # sourcery no-metrics
         },
     }
     baccinfo = json.dumps(backup, indent=4)
-    with open("{}{}.json".format(dispatcher.bot.username, chat_id), "w") as f:
+    with open("{}{}.json".format(application.bot.username, chat_id), "w") as f:
         f.write(str(baccinfo))
-    context.bot.sendChatAction(current_chat_id, "upload_document")
+    await context.bot.sendChatAction(current_chat_id, "upload_document")
     tgl = time.strftime("%H:%M:%S - %d/%m/%Y", time.localtime(time.time()))
-    context.bot.sendDocument(
+    await context.bot.sendDocument(
         current_chat_id,
-        document=open("{}{}.json".format(dispatcher.bot.username, chat_id), "rb"),
+        document=open("{}{}.json".format(application.bot.username, chat_id), "rb"),
         caption=("*Successfully Exported backup:*\nChat: `{}`\nChat ID: `{}`\nOn: `{}`\n"
                 "\nNote: This `{}-Backup` was specially made for notes.").format(
-            chat.title, chat_id, tgl, dispatcher.bot.username
+            chat.title, chat_id, tgl, application.bot.username
         ),
         timeout=360,
         reply_to_message_id=msg.message_id,
         parse_mode=ParseMode.MARKDOWN,
     )
-    os.remove("{}{}.json".format(dispatcher.bot.username, chat_id))  # Cleaning file
+    os.remove("{}{}.json".format(application.bot.username, chat_id))  # Cleaning file
 
 
 # Temporary data

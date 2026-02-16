@@ -111,11 +111,11 @@ def send_to_list(
     for user_id in set(send_to):
         try:
             if markdown:
-                bot.send_message(user_id, message, parse_mode=ParseMode.MARKDOWN)
+                await bot.send_message(user_id, message, parse_mode=ParseMode.MARKDOWN)
             elif html:
-                bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
+                await bot.send_message(user_id, message, parse_mode=ParseMode.HTML)
             else:
-                bot.send_message(user_id, message)
+                await bot.send_message(user_id, message)
         except TelegramError:
             pass  # ignore users who fail
 

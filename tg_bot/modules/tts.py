@@ -6,14 +6,14 @@ from gtts import gTTS
 from telegram import Update, ChatAction, ParseMode
 
 from .sql.clear_cmd_sql import get_clearcmd
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 from telegram.ext import CallbackContext
 from .helper_funcs.misc import delete
 from .helper_funcs.decorators import kigcmd
 
 @kigcmd(command='tts')
 @spamcheck
-def tts(update: Update, context: CallbackContext):
+async def tts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     message = update.effective_message
     chat = update.effective_chat
@@ -27,7 +27,7 @@ def tts(update: Update, context: CallbackContext):
 
         current_time = datetime.strftime(datetime.now(), "%d.%m.%Y %H:%M:%S")
         filename = datetime.now().strftime("%d%m%y-%H%M%S%f")
-        update.message.chat.send_action(ChatAction.RECORD_AUDIO)
+        await update.message.chat.send_action(ChatAction.RECORD_AUDIO)
         lang = "ml"
         tts = gTTS(delmsg, lang)
         tts.save("k.mp3")
@@ -35,17 +35,17 @@ def tts(update: Update, context: CallbackContext):
             linelist = list(f)
             linecount = len(linelist)
         if linecount == 1:
-            update.message.chat.send_action(ChatAction.RECORD_AUDIO)
+            await update.message.chat.send_action(ChatAction.RECORD_AUDIO)
             lang = "en"
             tts = gTTS(delmsg, lang)
             tts.save("k.mp3")
         with open("k.mp3", "rb") as speech:
-            delmsg = update.message.reply_voice(speech, quote=False)
+            delmsg = await update.message.reply_voice(speech, quote=False)
 
         os.remove("k.mp3")
 
     else:
-        delmsg = message.reply_text(
+        delmsg = await message.reply_text(
         "Reply a message or give something like:\n`/tts <message>`",
         parse_mode = ParseMode.MARKDOWN
         )
@@ -53,6 +53,6 @@ def tts(update: Update, context: CallbackContext):
     cleartime = get_clearcmd(chat.id, "tts")
 
     if cleartime:
-        context.dispatcher.run_async(delete, delmsg, cleartime.time)
+        context.application.run_async(delete, delmsg, cleartime.time)
 
 

@@ -11,7 +11,7 @@ from telegram.ext import (
 )
 from telegram.utils.helpers import  escape_markdown, mention_html
 
-from tg_bot import dispatcher, log, SUDO_USERS, spamcheck
+from tg_bot import application, log, SUDO_USERS, spamcheck
 
 from .helper_funcs.extraction import extract_text
 from .helper_funcs.filters import CustomFilters
@@ -40,29 +40,29 @@ from .helper_funcs.admin_status import (
 HANDLER_GROUP = 10
 
 ENUM_FUNC_MAP = {
-    sql.Types.TEXT.value: dispatcher.bot.send_message,
-    sql.Types.BUTTON_TEXT.value: dispatcher.bot.send_message,
-    sql.Types.STICKER.value: dispatcher.bot.send_sticker,
-    sql.Types.DOCUMENT.value: dispatcher.bot.send_document,
-    sql.Types.PHOTO.value: dispatcher.bot.send_photo,
-    sql.Types.AUDIO.value: dispatcher.bot.send_audio,
-    sql.Types.VOICE.value: dispatcher.bot.send_voice,
-    sql.Types.VIDEO.value: dispatcher.bot.send_video,
-    # sql.Types.VIDEO_NOTE.value: dispatcher.bot.send_video_note
+    sql.Types.TEXT.value: application.bot.send_message,
+    sql.Types.BUTTON_TEXT.value: application.bot.send_message,
+    sql.Types.STICKER.value: application.bot.send_sticker,
+    sql.Types.DOCUMENT.value: application.bot.send_document,
+    sql.Types.PHOTO.value: application.bot.send_photo,
+    sql.Types.AUDIO.value: application.bot.send_audio,
+    sql.Types.VOICE.value: application.bot.send_voice,
+    sql.Types.VIDEO.value: application.bot.send_video,
+    # sql.Types.VIDEO_NOTE.value: application.bot.send_video_note
 }
 CUSTFILTERS_GROUP = 50
 
 @kigcmd(command='filters', admin_ok=True)
 @spamcheck
 @typing_action
-def list_handlers(update, context):
+async def list_handlers(update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
 
     conn = connected(context.bot, update, chat, user.id, need_admin=False)
     if conn is not False:
         chat_id = conn
-        chat_name = dispatcher.bot.getChat(conn).title
+        chat_name = await application.bot.getChat(conn).title
         filter_list = "*Filter in {}:*\n"
     else:
         chat_id = update.effective_chat.id
@@ -101,12 +101,12 @@ def list_handlers(update, context):
 
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
-@kigcmd(command='filter', run_async=False, group=55)
+@kigcmd(command='filter', block=True, group=55)
 @spamcheck
 @typing_action
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @loggable
-def filters(update, context) -> None:  # sourcery no-metrics
+async def filters(update, context: ContextTypes.DEFAULT_TYPE) -> None:  # sourcery no-metrics
     chat = update.effective_chat
     user = update.effective_user
     msg = update.effective_message
@@ -119,7 +119,7 @@ def filters(update, context) -> None:  # sourcery no-metrics
     conn = connected(context.bot, update, chat, user.id)
     if conn is not False:
         chat_id = conn
-        chat_name = dispatcher.bot.getChat(conn).title
+        chat_name = await application.bot.getChat(conn).title
     else:
         chat_id = update.effective_chat.id
         chat_name = "local filters" if chat.type == "private" else chat.title
@@ -148,9 +148,9 @@ def filters(update, context) -> None:  # sourcery no-metrics
 
     # Add the filter
     # Note: perhaps handlers can be removed somehow using sql.get_chat_filters
-    for handler in dispatcher.handlers.get(HANDLER_GROUP, []):
+    for handler in application.handlers.get(HANDLER_GROUP, []):
         if handler.filters == (keyword, chat_id):
-            dispatcher.remove_handler(handler, HANDLER_GROUP)
+            application.remove_handler(handler, HANDLER_GROUP)
 
     text, file_type, file_id = get_filter_type(msg)
     if not msg.reply_to_message and len(extracted) >= 2:
@@ -236,21 +236,21 @@ def filters(update, context) -> None:  # sourcery no-metrics
 
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
-@kigcmd(command='stop', run_async=False)
+@kigcmd(command='stop', block=True)
 @spamcheck
 @typing_action
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @loggable
-def stop_filter(update, context) -> str:
+async def stop_filter(update, context: ContextTypes.DEFAULT_TYPE) -> str:
     chat = update.effective_chat
     user = update.effective_user
-    args = update.effective_message.text.split(None, 1)
+    args = await update.effective_message.text.split(None, 1)
     message = update.effective_message
 
     conn = connected(context.bot, update, chat, user.id)
     if conn is not False:
         chat_id = conn
-        chat_name = dispatcher.bot.getChat(conn).title
+        chat_name = await application.bot.getChat(conn).title
     else:
         chat_id = update.effective_chat.id
         chat_name = "Local filters" if chat.type == "private" else chat.title
@@ -288,9 +288,9 @@ def stop_filter(update, context) -> str:
         "That's not a filter - Click: /filters to get currently active filters.",
     )
 
-@kigmsg((CustomFilters.has_text & ~Filters.update.edited_message), group=CUSTFILTERS_GROUP)
+@kigmsg((Customfilters.HAS_TEXT & ~filters.Update.EDITED_MESSAGE), group=CUSTFILTERS_GROUP)
 @spamcheck
-def reply_filter(update, context):  # sourcery no-metrics
+async def reply_filter(update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     chat = update.effective_chat  # type: Optional[Chat]
     message = update.effective_message  # type: Optional[Message]
     user = update.effective_user
@@ -339,7 +339,7 @@ def reply_filter(update, context):  # sourcery no-metrics
                     if (text.startswith("~!") or text.startswith(" ~!")) and (text.endswith("!~") or text.endswith("!~ ")):
                         sticker_id = text.replace("~!", "").replace("!~", "").replace(" ", "") # replace space (' ') bcz, got error: Wrong remote file....
                         try:
-                            context.bot.send_sticker(
+                            await context.bot.send_sticker(
                                 chat.id,
                                 sticker_id,
                                 reply_to_message_id=message.message_id,
@@ -350,7 +350,7 @@ def reply_filter(update, context):  # sourcery no-metrics
                                 excp.message
                                 == "Wrong remote file identifier specified: wrong padding in the string"
                             ):
-                                context.bot.send_message(
+                                await context.bot.send_message(
                                     chat.id,
                                     "Message couldn't be sent, Is the sticker id valid?",
                                 )
@@ -417,7 +417,7 @@ def reply_filter(update, context):  # sourcery no-metrics
 
                 if filt.file_type in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
                     try:
-                        context.bot.send_message(
+                        await context.bot.send_message(
                             chat.id,
                             filtext,
                             reply_to_message_id=message.message_id,
@@ -430,7 +430,7 @@ def reply_filter(update, context):  # sourcery no-metrics
                         error_catch = get_exception(excp, filt, chat)
                         if error_catch == "noreply":
                             try:
-                                context.bot.send_message(
+                                await context.bot.send_message(
                                     chat.id,
                                     filtext,
                                     parse_mode=ParseMode.HTML,
@@ -454,7 +454,7 @@ def reply_filter(update, context):  # sourcery no-metrics
                                 log.exception(
                                     "Failed to send message: " + excp.message
                                 )
-                elif ENUM_FUNC_MAP[filt.file_type] == dispatcher.bot.send_sticker:
+                elif ENUM_FUNC_MAP[filt.file_type] == application.bot.send_sticker:
                     ENUM_FUNC_MAP[filt.file_type](
                         chat.id,
                         filt.file_id,
@@ -473,17 +473,17 @@ def reply_filter(update, context):  # sourcery no-metrics
                         allow_sending_without_reply=True
                     )
             elif filt.is_sticker:
-                message.reply_sticker(filt.reply)
+                await message.reply_sticker(filt.reply)
             elif filt.is_document:
-                message.reply_document(filt.reply)
+                await message.reply_document(filt.reply)
             elif filt.is_image:
-                message.reply_photo(filt.reply)
+                await message.reply_photo(filt.reply)
             elif filt.is_audio:
-                message.reply_audio(filt.reply)
+                await message.reply_audio(filt.reply)
             elif filt.is_voice:
-                message.reply_voice(filt.reply)
+                await message.reply_voice(filt.reply)
             elif filt.is_video:
-                message.reply_video(filt.reply)
+                await message.reply_video(filt.reply)
             elif filt.has_markdown:
 
                 keyb = []
@@ -519,7 +519,7 @@ def reply_filter(update, context):  # sourcery no-metrics
                             log.exception("Error in filters: " + excp.message)
                     elif excp.message == "Reply message not found":
                         try:
-                            context.bot.send_message(
+                            await context.bot.send_message(
                                 chat.id,
                                 filt.reply,
                                 parse_mode=parse_mode,
@@ -554,14 +554,14 @@ def reply_filter(update, context):  # sourcery no-metrics
             break
 
 
-@kigcmd(command=["removeallfilters", "stopall"], filters=Filters.chat_type.groups)
+@kigcmd(command=["removeallfilters", "stopall"], filters=filters.ChatType.GROUPS)
 @spamcheck
-def rmall_filters(update, context):
+async def rmall_filters(update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
     member = chat.get_member(user.id)
     if member.status != "creator" and user.id not in SUDO_USERS:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Only the chat owner can clear all filters at once."
         )
     else:
@@ -575,7 +575,7 @@ def rmall_filters(update, context):
                 [InlineKeyboardButton(text="Cancel", callback_data="filters_cancel")],
             ]
         )
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Are you sure you would like to stop ALL filters in {chat.title}? This action cannot be undone.",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
@@ -584,7 +584,7 @@ def rmall_filters(update, context):
 
 @kigcallback(pattern=r"filters_.*")
 @loggable
-def rmall_callback(update, context) -> str:
+async def rmall_callback(update, context: ContextTypes.DEFAULT_TYPE) -> str:
     query = update.callback_query
     chat = update.effective_chat
     msg = update.effective_message
@@ -616,7 +616,7 @@ def rmall_callback(update, context) -> str:
             return log_message
 
         else:
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
 
     elif query.data == "filters_cancel":
@@ -624,7 +624,7 @@ def rmall_callback(update, context) -> str:
             msg.edit_text("Clearing of all filters has been cancelled.")
             return ""
         else:
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
 
 

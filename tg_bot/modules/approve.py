@@ -22,11 +22,11 @@ def build_mention(user) -> str:
         else f'<a href="t.me/{user.username}">{html.escape(user.title)}</a>'
 
 
-@kigcmd(command='approve', filters=Filters.chat_type.groups)
+@kigcmd(command='approve', filters=filters.ChatType.GROUPS)
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @loggable
-def approve(update: Update, context: CallbackContext) -> str:
+async def approve(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     message = update.effective_message
     chat_title = message.chat.title
     chat = update.effective_chat
@@ -36,7 +36,7 @@ def approve(update: Update, context: CallbackContext) -> str:
 
     user_id = extract_user(message, args)
     if not user_id:
-        message.reply_text(
+        await message.reply_text(
             "I don't know who you're talking about, you're going to need to specify a user!"
         )
         return ""
@@ -46,26 +46,26 @@ def approve(update: Update, context: CallbackContext) -> str:
         member = chat.get_member(user_id)
     except BadRequest:
         try:
-            chan = bot.get_chat(user_id)
+            chan = await bot.get_chat(user_id)
         except BadRequest as excp:
             if excp.message != "Chat not found":
                 raise
-            message.reply_text("Can't seem to find this person.")
+            await message.reply_text("Can't seem to find this person.")
             return ""
     if member and (member.status == "administrator" or member.status == "creator"):
-        message.reply_text(
+        await message.reply_text(
             "User is already admin - locks, blocklists, and antiflood already don't apply to them."
         )
         return ""
     user_mention = build_mention(member or chan)
     if sql.is_approved(message.chat_id, user_id):
-        message.reply_text(
+        await message.reply_text(
             f"{user_mention} is already approved in {html.escape(chat_title)}",
             parse_mode=ParseMode.HTML,
         )
         return ""
     sql.approve(message.chat_id, user_id)
-    message.reply_text(
+    await message.reply_text(
         f"{user_mention} has been approved in {html.escape(chat_title)}! They "
         f"will now be ignored by automated admin actions like locks, blocklists, and antiflood.",
         parse_mode=ParseMode.HTML,
@@ -79,11 +79,11 @@ def approve(update: Update, context: CallbackContext) -> str:
     return log_message
 
 
-@kigcmd(command='unapprove', filters=Filters.chat_type.groups)
+@kigcmd(command='unapprove', filters=filters.ChatType.GROUPS)
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @loggable
-def disapprove(update: Update, context: CallbackContext):
+async def disapprove(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat_title = message.chat.title
     chat = update.effective_chat
@@ -98,23 +98,23 @@ def disapprove(update: Update, context: CallbackContext):
         member = chat.get_member(user_id)
     except BadRequest:
         try:
-            chan = bot.get_chat(user_id)
+            chan = await bot.get_chat(user_id)
         except BadRequest as excp:
             if excp.message != "Chat not found":
                 raise
-            message.reply_text("Can't seem to find this person.")
+            await message.reply_text("Can't seem to find this person.")
             return ""
     if member and (member.status == "administrator" or member.status == "creator"):
-        message.reply_text(
+        await message.reply_text(
             "User is already admin - locks, blocklists, and antiflood already don't apply to them."
         )
         return ""
     user_mention = build_mention(member or chan)
     if not sql.is_approved(message.chat_id, user_id):
-        message.reply_text(f"{user_mention} isn't approved yet!", parse_mode = ParseMode.HTML)
+        await message.reply_text(f"{user_mention} isn't approved yet!", parse_mode = ParseMode.HTML)
         return ""
     sql.disapprove(message.chat_id, user_id)
-    message.reply_text(
+    await message.reply_text(
         f"{user_mention} is no longer approved in {chat_title}.", parse_mode = ParseMode.HTML)
     log_message = (
         f"<b>{html.escape(chat.title)}:</b>\n"
@@ -125,10 +125,10 @@ def disapprove(update: Update, context: CallbackContext):
     return log_message
 
 
-@kigcmd(command='approved', filters=Filters.chat_type.groups)
+@kigcmd(command='approved', filters=filters.ChatType.GROUPS)
 @spamcheck
 @user_admin_check()
-def approved(update: Update, context: CallbackContext):
+async def approved(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat_title = message.chat.title
     chat = update.effective_chat
@@ -139,26 +139,26 @@ def approved(update: Update, context: CallbackContext):
         try:
             member = chat.get_member(int(i.user_id))
         except:
-            member = bot.get_chat(int(i.user_id))
+            member = await bot.get_chat(int(i.user_id))
         msg += f"- `{i.user_id}`: {member.user['first_name'] or member.title}\n"
     if msg.endswith("approved.\n"):
-        message.reply_text(f"No users are approved in {chat_title}.")
+        await message.reply_text(f"No users are approved in {chat_title}.")
         return ""
     else:
-        message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+        await message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 
-@kigcmd(command='approval', filters=Filters.chat_type.groups)
+@kigcmd(command='approval', filters=filters.ChatType.GROUPS)
 @spamcheck
 @user_admin_check()
-def approval(update: Update, context: CallbackContext):
+async def approval(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat
     args = context.args
     bot = context.bot
     user_id = extract_user(message, args)
     if not user_id:
-        message.reply_text(
+        await message.reply_text(
             "I don't know who you're talking about, you're going to need to specify a user!"
         )
         return ""
@@ -169,40 +169,40 @@ def approval(update: Update, context: CallbackContext):
         member = chat.get_member(user_id)
     except BadRequest:
         try:
-            chan = bot.get_chat(user_id)
+            chan = await bot.get_chat(user_id)
         except BadRequest as excp:
             if excp.message != "Chat not found":
                 raise
-            message.reply_text("Can't seem to find this person.")
+            await message.reply_text("Can't seem to find this person.")
             return ""
 
     if member and member.status in ["administrator", "creator"]:
-        message.reply_text(
+        await message.reply_text(
             "User is already admin - locks, blocklists, and antiflood already don't apply to them."
         )
         return ""
     user_mention = build_mention(member or chan)
 
     if sql.is_approved(message.chat_id, user_id):
-        message.reply_text(
+        await message.reply_text(
             f"{user_mention} is an approved user. Locks, antiflood, and blocklists won't apply to them.",
                 parse_mode = ParseMode.HTML
         )
     else:
-        message.reply_text(
+        await message.reply_text(
             f"{user_mention} is not an approved user. They are affected by normal commands.",
                 parse_mode = ParseMode.HTML
         )
 
 
-@kigcmd(command='unapproveall', filters=Filters.chat_type.groups)
+@kigcmd(command='unapproveall', filters=filters.ChatType.GROUPS)
 @spamcheck
-def unapproveall(update: Update, _: CallbackContext):
+async def unapproveall(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
     member = chat.get_member(user.id)
     if member.status != "creator" and user.id not in SUDO_USERS:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Only the chat owner can unapprove all users at once.")
     else:
         buttons = InlineKeyboardMarkup([
@@ -216,7 +216,7 @@ def unapproveall(update: Update, _: CallbackContext):
                     text="Cancel", callback_data="unapproveall_cancel")
             ],
         ])
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Are you sure you would like to unapprove ALL users in {chat.title}? This action cannot be undone.",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
@@ -224,7 +224,7 @@ def unapproveall(update: Update, _: CallbackContext):
 
 
 @kigcallback(pattern=r"unapproveall_.*")
-def unapproveall_btn(update: Update, _: CallbackContext):
+async def unapproveall_btn(update: Update, _: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     chat = update.effective_chat
     message = update.effective_message
@@ -237,15 +237,15 @@ def unapproveall_btn(update: Update, _: CallbackContext):
                 sql.disapprove(chat.id, user_id)
 
         else:
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
 
     elif query.data == "unapproveall_cancel":
         if member.status == "creator" or query.from_user.id in SUDO_USERS:
-            message.edit_text(
+            await message.edit_text(
                 "Removing of all approved users has been cancelled.")
             return ""
         else:
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
 
 
 from .language import gs

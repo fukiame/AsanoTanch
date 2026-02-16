@@ -2,7 +2,7 @@ import datetime
 from typing import List
 
 import requests
-from tg_bot import TIME_API_KEY, dispatcher, spamcheck
+from tg_bot import TIME_API_KEY, application, spamcheck
 from telegram import ParseMode, Update
 from telegram.ext import CallbackContext
 from .helper_funcs.decorators import kigcmd
@@ -55,19 +55,19 @@ def generate_time(to_find: str, findtype: List[str]) -> str:
 
 @kigcmd(command='time')
 @spamcheck
-def gettime(update: Update, context: CallbackContext):
+async def gettime(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
 
     try:
-        query = message.text.strip().split(" ", 1)[1]
+        query = await message.text.strip().split(" ", 1)[1]
     except:
-        message.reply_text("Provide a country name/abbreviation/timezone to find.")
+        await message.reply_text("Provide a country name/abbreviation/timezone to find.")
         return
-    send_message = message.reply_text(
+    send_message = await message.reply_text(
         f"Finding timezone info for <b>{query}</b>", parse_mode=ParseMode.HTML
     )
 
-    query_timezone = query.lower()
+    query_timezone = await query.lower()
     if len(query_timezone) == 2:
         result = generate_time(query_timezone, ["countryCode"])
     else:

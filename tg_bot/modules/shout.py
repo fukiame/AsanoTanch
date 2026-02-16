@@ -1,15 +1,15 @@
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 from telegram import Update
 from telegram.ext import CallbackContext
 from .helper_funcs.decorators import kigcmd
 
 @kigcmd(command='shout')
 @spamcheck
-def shout(update: Update, context: CallbackContext):
+async def shout(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         args = context.args
     except IndexError:
-        return update.effective_message.reply_text("What do you want me to shout?", parse_mode="MARKDOWN")
+        return await update.effective_message.reply_text("What do you want me to shout?", parse_mode="MARKDOWN")
     text = " ".join(args)
     result = [" ".join(list(text))]
     for pos, symbol in enumerate(text[1:]):
@@ -18,4 +18,4 @@ def shout(update: Update, context: CallbackContext):
     result[0] = text[0]
     result = "".join(result)
     msg = "```\n" + result + "```"
-    return update.effective_message.reply_text(msg, parse_mode="MARKDOWN")
+    return await update.effective_message.reply_text(msg, parse_mode="MARKDOWN")

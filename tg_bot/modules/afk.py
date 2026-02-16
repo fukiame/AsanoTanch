@@ -9,10 +9,10 @@ from .users import get_user_id
 from .helper_funcs.decorators import kigcmd, kigmsg
 
 
-@kigmsg(Filters.regex("(?i)^brb"), friendly="afk", group=3)
+@kigmsg(filters.Regex("(?i)^brb"), friendly="afk", group=3)
 @kigcmd(command="afk", group=3)
-def afk(update: Update, _: CallbackContext):
-    args = update.effective_message.text.split(None, 1)
+async def afk(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    args = await update.effective_message.text.split(None, 1)
     user = update.effective_user
 
     if not user or user.id in (777000, 1087968824, 136817688):  # ignore channels
@@ -30,13 +30,13 @@ def afk(update: Update, _: CallbackContext):
     sql.set_afk(update.effective_user.id, reason)
     fname = update.effective_user.first_name
     try:
-        update.effective_message.reply_text("{} is now away!{}".format(fname, notice))
+        await update.effective_message.reply_text("{} is now away!{}".format(fname, notice))
     except BadRequest:
         pass
 
 
-@kigmsg((Filters.all & Filters.chat_type.groups), friendly='afk', group=1)
-def no_longer_afk(update: Update, _: CallbackContext):
+@kigmsg((filters.ALL & filters.ChatType.GROUPS), friendly='afk', group=1)
+async def no_longer_afk(update: Update, _: ContextTypes.DEFAULT_TYPE):
     user = update.effective_user
     message = update.effective_message
 
@@ -59,7 +59,7 @@ def no_longer_afk(update: Update, _: CallbackContext):
                 "Where is {}?\nIn the chat!",
             ]
             chosen_option = random.choice(options)
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 chosen_option.format(firstname), parse_mode=None
             )
         except:
@@ -67,19 +67,19 @@ def no_longer_afk(update: Update, _: CallbackContext):
 
 
 @kigmsg(
-        (Filters.entity(MessageEntity.MENTION) | Filters.entity(MessageEntity.TEXT_MENTION) & Filters.chat_type.groups),
+        (filters.Entity(MessageEntity.MENTION) | filters.Entity(MessageEntity.TEXT_MENTION) & filters.ChatType.GROUPS),
         friendly='afk', group=8)
-def reply_afk(update: Update, context: CallbackContext):
+async def reply_afk(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     message = update.effective_message
     userc = update.effective_user
     if not userc:
         return
     userc_id = userc.id
-    if message.entities and message.parse_entities(
+    if message.entities and await message.parse_entities(
         [MessageEntity.TEXT_MENTION, MessageEntity.MENTION]
     ):
-        entities = message.parse_entities(
+        entities = await message.parse_entities(
             [MessageEntity.TEXT_MENTION, MessageEntity.MENTION]
         )
 
@@ -107,7 +107,7 @@ def reply_afk(update: Update, context: CallbackContext):
             chk_users.append(user_id)
 
             try:
-                chat = bot.get_chat(user_id)
+                chat = await bot.get_chat(user_id)
             except BadRequest:
                 print(
                     "Error: Could not fetch userid {} for AFK module".format(
@@ -132,12 +132,12 @@ def check_afk(update, user_id, fst_name, userc_id):
     if is_afk:
         if not reason:
             res = "{} is afk".format(fst_name)
-            update.effective_message.reply_text(res, parse_mode=None)
+            await update.effective_message.reply_text(res, parse_mode=None)
         else:
             res = "{} is afk.\nReason: <code>{}</code>".format(
                 html.escape(fst_name), html.escape(reason)
             )
-            update.effective_message.reply_text(res, parse_mode="html")
+            await update.effective_message.reply_text(res, parse_mode="html")
 
 
 def __gdpr__(user_id):

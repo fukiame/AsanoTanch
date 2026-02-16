@@ -8,7 +8,7 @@ from telegram.ext.filters import Filters
 from telegram.update import Update
 
 import datetime
-from .. import DB_URI, OWNER_ID, SYS_ADMIN, dispatcher, log, BACKUP_PASS
+from .. import DB_URI, OWNER_ID, SYS_ADMIN, application, log, BACKUP_PASS
 
 from .helper_funcs.decorators import kigcmd
 import shutil
@@ -17,32 +17,32 @@ from time import sleep
 
 
 
-@kigcmd(command="backupdb", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def backup_now(update: Update, context: CallbackContext):
-    cronjob.run(dispatcher=dispatcher)
+@kigcmd(command="backupdb", filters=filters.User(SYS_ADMIN) | filters.User(OWNER_ID))
+async def backup_now(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    cronjob.run(application=application)
 
-@kigcmd(command="jobs", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def get_jobs(update: Update, context: CallbackContext):
+@kigcmd(command="jobs", filters=filters.User(SYS_ADMIN) | filters.User(OWNER_ID))
+async def get_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     a = cronjob.job_queue.jobs().count(j)
     print(a)
-    update.effective_message.reply_text(a)
+    await update.effective_message.reply_text(a)
 
-@kigcmd(command="stopjobs", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def stop_jobs(update: Update, context: CallbackContext):
+@kigcmd(command="stopjobs", filters=filters.User(SYS_ADMIN) | filters.User(OWNER_ID))
+async def stop_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(j.stop())
-    update.effective_message.reply_text("Scheduler has been shut down")
+    await update.effective_message.reply_text("Scheduler has been shut down")
 
-@kigcmd(command="startjobs", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def start_jobs(update: Update, context: CallbackContext):
+@kigcmd(command="startjobs", filters=filters.User(SYS_ADMIN) | filters.User(OWNER_ID))
+async def start_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(j.start())
-    update.effective_message.reply_text("Scheduler started")
+    await update.effective_message.reply_text("Scheduler started")
 
 zip_pass = BACKUP_PASS
 
 def backup_db(ctx: CallbackContext):
-    bot = dispatcher.bot
+    bot = application.bot
     tmpmsg = "Performing backup, Please wait..."
-    tmp = bot.send_message(OWNER_ID, tmpmsg)
+    tmp = await bot.send_message(OWNER_ID, tmpmsg)
     datenow = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     dbbkpname = "db_{}_{}.tar".format(bot.username, datenow)
     bkplocation = "backups/{}".format(datenow)
@@ -54,7 +54,7 @@ def backup_db(ctx: CallbackContext):
     loginfo = "db backup"
     term(bkpcmd, loginfo)
     if not os.path.exists('{}/{}'.format(bkplocation, dbbkpname)):
-        bot.send_message(OWNER_ID, "An error occurred during the db backup")
+        await bot.send_message(OWNER_ID, "An error occurred during the db backup")
         tmp.edit_text("Backup Failed!")
         sleep(8)
         tmp.delete()
@@ -79,7 +79,7 @@ def backup_db(ctx: CallbackContext):
         sleep(1)
         with open('backups/{}'.format(f'{datenow}.zip'), 'rb') as bkp:
             nm = "{} backup \n".format(bot.username) + datenow
-            bot.send_document(OWNER_ID,
+            await bot.send_document(OWNER_ID,
                               document=bkp,
                               caption=nm,
                               timeout=20
@@ -92,10 +92,10 @@ def backup_db(ctx: CallbackContext):
         tmp.delete()
 
 
-@kigcmd(command="purgebackups", filters=Filters.user(SYS_ADMIN) | Filters.user(OWNER_ID))
-def stop_jobs(update: Update, context: CallbackContext):
+@kigcmd(command="purgebackups", filters=filters.User(SYS_ADMIN) | filters.User(OWNER_ID))
+async def stop_jobs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     shutil.rmtree("backups")
-    update.effective_message.reply_text("'backups' directory has been purged!")
+    await update.effective_message.reply_text("'backups' directory has been purged!")
 
 def term(cmd, info):
     process = subprocess.Popen(

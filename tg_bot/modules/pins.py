@@ -7,7 +7,7 @@ from telegram.ext import CallbackContext
 from telegram.ext.filters import Filters
 from telegram.utils.helpers import mention_html
 
-from tg_bot import SUDO_USERS, spamcheck, dispatcher
+from tg_bot import SUDO_USERS, spamcheck, application
 
 from .helper_funcs.chat_status import connection_status
 from .helper_funcs.string_handling import escape_invalid_curly_brackets
@@ -31,7 +31,7 @@ from .helper_funcs.admin_status import (
 @kigcmd(command="pinned", can_disable=False)
 @spamcheck
 @bot_admin_check(AdminPerms.CAN_PIN_MESSAGES)
-def pinned(update: Update, context: CallbackContext):
+async def pinned(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     msg = update.effective_message
     msg_id = (
@@ -40,7 +40,7 @@ def pinned(update: Update, context: CallbackContext):
         else update.effective_message.message_id
     )
 
-    chat = bot.getChat(chat_id=msg.chat.id)
+    chat = await bot.getChat(chat_id=msg.chat.id)
     if chat.pinned_message:
         pinned_id = chat.pinned_message.message_id
         message_link = f"https://t.me/c/{str(chat.id)[4:]}/{pinned_id}"
@@ -74,7 +74,7 @@ def pinned(update: Update, context: CallbackContext):
 @bot_admin_check(AdminPerms.CAN_PIN_MESSAGES)
 @user_admin_check(AdminPerms.CAN_PIN_MESSAGES, allow_mods = True)
 @loggable
-def pin(update: Update, context: CallbackContext) -> Optional[str]:
+async def pin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Optional[str]:
     bot, args = context.bot, context.args
     user = update.effective_user
     chat = update.effective_chat
@@ -100,7 +100,7 @@ def pin(update: Update, context: CallbackContext) -> Optional[str]:
 
     if prev_message and is_group:
         try:
-            bot.pinChatMessage(
+            await bot.pinChatMessage(
                 chat.id, prev_message.message_id, disable_notification=is_silent
             )
             msg.reply_text(
@@ -136,7 +136,7 @@ def pin(update: Update, context: CallbackContext) -> Optional[str]:
 @bot_admin_check(AdminPerms.CAN_PIN_MESSAGES)
 @user_admin_check(AdminPerms.CAN_PIN_MESSAGES, allow_mods = True)
 @loggable
-def unpin(update: Update, context: CallbackContext) -> str:
+async def unpin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     chat = update.effective_chat
     user = update.effective_user
@@ -145,11 +145,11 @@ def unpin(update: Update, context: CallbackContext) -> str:
     reply_msg = message.reply_to_message
     if not reply_msg:
         try:
-            bot.unpinChatMessage(chat.id)
-            dispatcher.bot.sendMessage(chat.id, "Unpinned the last pinned message successfully!", parse_mode=ParseMode.MARKDOWN)
+            await bot.unpinChatMessage(chat.id)
+            await application.bot.sendMessage(chat.id, "Unpinned the last pinned message successfully!", parse_mode=ParseMode.MARKDOWN)
         except BadRequest as excp:
             if excp.message == "Chat_not_modified":
-                dispatcher.bot.sendMessage(chat.id, f"I couldn't unpin the message from some reason.")
+                await application.bot.sendMessage(chat.id, f"I couldn't unpin the message from some reason.")
                 pass
             else:
                 raise
@@ -164,11 +164,11 @@ def unpin(update: Update, context: CallbackContext) -> str:
     else:
         unpinthis = reply_msg.message_id
         try:
-            bot.unpinChatMessage(chat.id, unpinthis)
+            await bot.unpinChatMessage(chat.id, unpinthis)
 
             pinmsg = "https://t.me/c/{}/{}".format(str(chat.id)[4:], unpinthis)
 
-            message.reply_text(
+            await message.reply_text(
                 "I have unpinned this message in <b>{}</b>!".format(html.escape(chat.title)),
                 reply_markup=InlineKeyboardMarkup(
                     [
@@ -182,7 +182,7 @@ def unpin(update: Update, context: CallbackContext) -> str:
             )
         except BadRequest as excp:
             if excp.message == "Chat_not_modified":
-                dispatcher.bot.sendMessage(chat.id, f"I couldn't unpin the message from some reason.")
+                await application.bot.sendMessage(chat.id, f"I couldn't unpin the message from some reason.")
                 pass
             else:
                 raise
@@ -195,17 +195,17 @@ def unpin(update: Update, context: CallbackContext) -> str:
         return log_message
 
 
-@kigcmd(command="unpinall", filters=Filters.chat_type.groups)
+@kigcmd(command="unpinall", filters=filters.ChatType.GROUPS)
 @spamcheck
 @bot_admin_check(AdminPerms.CAN_PIN_MESSAGES)
 @user_admin_check(AdminPerms.CAN_PIN_MESSAGES, allow_mods = True)
 @spamcheck
-def rmall_filters(update, context):
+async def rmall_filters(update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
     member = chat.get_member(user.id)
     if member.status != "creator" and user.id not in SUDO_USERS:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Only the chat owner can unpin all messages at once."
         )
     else:
@@ -219,7 +219,7 @@ def rmall_filters(update, context):
                 [InlineKeyboardButton(text="Cancel", callback_data="pinned_cancel")],
             ]
         )
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Are you sure you would like unpin all pinned messages in {chat.title}? This action cannot be undone.",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
@@ -228,7 +228,7 @@ def rmall_filters(update, context):
 
 @kigcallback(pattern=r"pinned_.*")
 @loggable
-def unpin_callback(update, context: CallbackContext) -> str:
+async def unpin_callback(update, context: ContextTypes.DEFAULT_TYPE) -> str:
     query = update.callback_query
     chat = update.effective_chat
     msg = update.effective_message
@@ -239,7 +239,7 @@ def unpin_callback(update, context: CallbackContext) -> str:
         if member.status == "creator" or query.from_user.id in SUDO_USERS:
 
             try:
-                bot.unpinAllChatMessages(chat.id)
+                await bot.unpinAllChatMessages(chat.id)
             except BadRequest as excp:
                 if excp.message == "Chat_not_modified":
                     pass
@@ -255,7 +255,7 @@ def unpin_callback(update, context: CallbackContext) -> str:
             return log_message
 
         else:
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
 
     elif query.data == "pinned_cancel":
@@ -263,7 +263,7 @@ def unpin_callback(update, context: CallbackContext) -> str:
             msg.edit_text("Unpinning all pinned messages has been cancelled.")
             return ""
         else:
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
 
 
@@ -342,7 +342,7 @@ def permapin(update: Update, ctx: CallbackContext) -> Optional[str]:
 
     try:
         if data_type in (Types.BUTTON_TEXT, Types.TEXT):
-            pin_this = bot.send_message(
+            pin_this = await bot.send_message(
                 chat.id,
                 text,
                 parse_mode=ParseMode.HTML,
@@ -350,7 +350,7 @@ def permapin(update: Update, ctx: CallbackContext) -> Optional[str]:
                 disable_web_page_preview=bool(preview),
                 protect_content=bool(protect)
             )
-        elif ENUM_FUNC_MAP[data_type] == dispatcher.bot.send_sticker:
+        elif ENUM_FUNC_MAP[data_type] == application.bot.send_sticker:
             pin_this = ENUM_FUNC_MAP[data_type](
                 chat.id,
                 content,
@@ -366,7 +366,7 @@ def permapin(update: Update, ctx: CallbackContext) -> Optional[str]:
                 protect_content=bool(protect)
             )
 
-        bot.pinChatMessage(chat.id, pin_this.message_id, disable_notification=False)
+        await bot.pinChatMessage(chat.id, pin_this.message_id, disable_notification=False)
 
         enable_linked(chat.id)  # enable cleanlinked for this chat
         log_message = (

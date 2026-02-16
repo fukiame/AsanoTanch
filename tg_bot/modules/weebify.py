@@ -62,19 +62,19 @@ weebyfont = [
 
 @kigcmd(command='weebify')
 @spamcheck
-def weebify(update: Update, context: CallbackContext):
+async def weebify(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     message = update.effective_message
     string = ""
 
     if message.reply_to_message:
-        string = message.reply_to_message.text.lower().replace(" ", "  ")
+        string = await message.reply_to_message.text.lower().replace(" ", "  ")
 
     if args:
         string = "  ".join(args).lower()
 
     if not string:
-        message.reply_text("Usage is `/weebify <text>`", parse_mode=ParseMode.MARKDOWN)
+        await message.reply_text("Usage is `/weebify <text>`", parse_mode=ParseMode.MARKDOWN)
         return
 
     for normiecharacter in string:
@@ -83,6 +83,6 @@ def weebify(update: Update, context: CallbackContext):
             string = string.replace(normiecharacter, weebycharacter)
 
     if message.reply_to_message:
-        message.reply_to_message.reply_text(string)
+        await message.reply_to_message.reply_text(string)
     else:
-        message.reply_text(string)
+        await message.reply_text(string)

@@ -14,7 +14,7 @@ from .helper_funcs.decorators import kigcmd
 
 
 def get_sticker_count(bot: Bot, packname: str) -> int:
-    resp = bot._request.post(
+    resp = await bot._request.post(
         f"{bot.base_url}/getStickerSet",
         {
             "name": packname,
@@ -25,17 +25,17 @@ def get_sticker_count(bot: Bot, packname: str) -> int:
 
 @kigcmd(command='stickerid')
 @spamcheck
-def stickerid(update: Update, context: CallbackContext):
+async def stickerid(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     if msg.reply_to_message and msg.reply_to_message.sticker:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "The sticker id you are replying is :\n <code>"
             + escape(msg.reply_to_message.sticker.file_id)
             + "</code>",
             parse_mode=ParseMode.HTML,
         )
     else:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Please reply to sticker message to get id sticker",
             parse_mode=ParseMode.HTML,
         )
@@ -43,7 +43,7 @@ def stickerid(update: Update, context: CallbackContext):
 
 @kigcmd(command='getsticker')
 @spamcheck
-def getsticker(update: Update, context: CallbackContext):
+async def getsticker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     if msg.reply_to_message and msg.reply_to_message.sticker:
         file_id = msg.reply_to_message.sticker.file_id
@@ -51,27 +51,27 @@ def getsticker(update: Update, context: CallbackContext):
         is_animated = msg.reply_to_message.sticker.is_animated
         bot = context.bot
         # Get the file and put it into a memory buffer
-        new_file = bot.get_file(file_id)
+        new_file = await bot.get_file(file_id)
         sticker_data = new_file.download(out=BytesIO())
         # go back to the start of the buffer
         sticker_data.seek(0)
         filename = "animated_sticker.tgs.rename_me" if is_animated else "sticker.png"
         chat_id = update.effective_chat.id
         # Send the document
-        bot.send_document(chat_id,
+        await bot.send_document(chat_id,
             document=sticker_data,
             filename=filename,
             disable_content_type_detection=True
         )
     else:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Please reply to a sticker for me to upload its PNG."
         )
 
 
 @kigcmd(command=["steal", "kang"])
 @spamcheck
-def kang(update: Update, context: CallbackContext):  # sourcery no-metrics
+async def kang(update: Update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     ppref = ""
     msg = update.effective_message
     user = update.effective_user
@@ -178,7 +178,7 @@ def kang(update: Update, context: CallbackContext):  # sourcery no-metrics
             sticker_emoji = args[0]
 
         # Download the data
-        kang_file = context.bot.get_file(file_id)
+        kang_file = await context.bot.get_file(file_id)
         sticker_data = kang_file.download(out=BytesIO())
         # move to the front of the buffer.
         sticker_data.seek(0)
@@ -290,7 +290,7 @@ def kang(update: Update, context: CallbackContext):  # sourcery no-metrics
             # Since Stickerset_invalid will also try to create a pack we might as
             # well just reuse that code and avoid typing it all again.
             raise TelegramError("Stickerset_invalid")
-        context.bot.add_sticker_to_set(
+        await context.bot.add_sticker_to_set(
             user_id=user.id,
             name=packname,
                 tgs_sticker = sticker_data if is_animated else None,
@@ -356,7 +356,7 @@ def makepack_internal(
         extra_version = ""
         if packnum > 0:
             extra_version = f" {packnum}"
-        success = context.bot.create_new_sticker_set(
+        success = await context.bot.create_new_sticker_set(
             user.id,
             packname,
             f"{name}s {'animated ' if tgs_sticker else 'video ' if webm_sticker else ''}kang pack{extra_version}",

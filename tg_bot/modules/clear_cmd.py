@@ -16,7 +16,7 @@ from .helper_funcs.admin_status import (
 @spamcheck
 @connection_status
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def clearcmd(update: Update, context: CallbackContext):
+async def clearcmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     message = update.effective_message
     args = context.args
@@ -102,7 +102,7 @@ def clearcmd(update: Update, context: CallbackContext):
     else:
         msg = "I don't understand what are you trying to do. Check module help for more details"
 
-    message.reply_text(
+    await message.reply_text(
         text = msg,
         parse_mode = ParseMode.MARKDOWN
     )

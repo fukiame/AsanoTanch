@@ -1,6 +1,6 @@
 # from AstrakoBot
 import wikipedia, os, glob
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 from .helper_funcs.misc import delete
 from .sql.clear_cmd_sql import get_clearcmd
 from telegram import ParseMode, Update
@@ -10,7 +10,7 @@ from .helper_funcs.decorators import kigcmd
 
 @kigcmd(command='wiki', can_disable=True)
 @spamcheck
-def wiki(update: Update, context: CallbackContext):
+async def wiki(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     msg = (
         update.effective_message.reply_to_message
@@ -18,7 +18,7 @@ def wiki(update: Update, context: CallbackContext):
         else update.effective_message
     )
     if not msg:
-        update.message.reply_text("Give something to search.")
+        await update.message.reply_text("Give something to search.")
     res = ""
     if msg == update.effective_message:
         search = msg.text.split(" ", maxsplit=1)[1]
@@ -27,14 +27,14 @@ def wiki(update: Update, context: CallbackContext):
     try:
         res = wikipedia.summary(search)
     except DisambiguationError as e:
-        delmsg = update.message.reply_text(
+        delmsg = await update.message.reply_text(
             "Disambiguated pages found! Adjust your query accordingly.\n<i>{}</i>".format(
                 e
             ),
             parse_mode=ParseMode.HTML,
         )
     except PageError as e:
-        delmsg = update.message.reply_text(
+        delmsg = await update.message.reply_text(
             "<code>{}</code>".format(e), parse_mode=ParseMode.HTML
         )
     if res:
@@ -45,7 +45,7 @@ def wiki(update: Update, context: CallbackContext):
             with open("result.txt", "w") as f:
                 f.write(f"{result}\n\nUwU OwO OmO UmU")
             with open("result.txt", "rb") as f:
-                delmsg = context.bot.send_document(
+                delmsg = await context.bot.send_document(
                     document=f,
                     filename=f.name,
                     reply_to_message_id=update.message.message_id,
@@ -60,13 +60,13 @@ def wiki(update: Update, context: CallbackContext):
                     pass
 
         else:
-            delmsg = update.message.reply_text(
+            delmsg = await update.message.reply_text(
                 result, parse_mode=ParseMode.HTML, disable_web_page_preview=True
             )
 
     cleartime = get_clearcmd(chat.id, "wiki")
 
     if cleartime:
-        context.dispatcher.run_async(delete, delmsg, cleartime.time)
+        context.application.run_async(delete, delmsg, cleartime.time)
 
 

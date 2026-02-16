@@ -24,7 +24,7 @@ from .helper_funcs.admin_status import (
 @bot_admin_check(AdminPerms.CAN_PROMOTE_MEMBERS)
 @user_admin_check(AdminPerms.CAN_PROMOTE_MEMBERS)
 @loggable
-def promoteanon(update: Update, context: CallbackContext) -> Optional[str]:
+async def promoteanon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Optional[str]:
     bot = context.bot
     args = context.args
 
@@ -33,7 +33,7 @@ def promoteanon(update: Update, context: CallbackContext) -> Optional[str]:
     user = update.effective_user
 
     if chat.type == "private":
-        message.reply_text("This command is meant to be used in groups not PM!")
+        await message.reply_text("This command is meant to be used in groups not PM!")
 
     user_id, title = extract_user_and_text(message, args)
 
@@ -44,19 +44,19 @@ def promoteanon(update: Update, context: CallbackContext) -> Optional[str]:
     try:
         user_member = chat.get_member(user_id)
     except Exception as e:
-        message.reply_text("Error:\n`{}`".format(e))
+        await message.reply_text("Error:\n`{}`".format(e))
         return
 
     if user_member.status == "creator":
-        message.reply_text("This user is the chat creator, he can manage his own stuff!")
+        await message.reply_text("This user is the chat creator, he can manage his own stuff!")
         return
 
     if getattr(user_member, "is_anonymous") is True:
-        message.reply_text("This user is already anonymous!")
+        await message.reply_text("This user is already anonymous!")
         return
 
     if user_id == bot.id:
-        message.reply_text("Yeah, I wish I could promote myself...")
+        await message.reply_text("Yeah, I wish I could promote myself...")
         return
 
     # set same perms as bot - bot can't assign higher perms than itself!
@@ -67,8 +67,8 @@ def promoteanon(update: Update, context: CallbackContext) -> Optional[str]:
 
     try:
         if title:
-            bot.setChatAdministratorCustomTitle(chat.id, user_id, title)
-        bot.promoteChatMember(
+            await bot.setChatAdministratorCustomTitle(chat.id, user_id, title)
+        await bot.promoteChatMember(
             chat.id,
             user_id,
             is_anonymous=True,
@@ -81,23 +81,23 @@ def promoteanon(update: Update, context: CallbackContext) -> Optional[str]:
             can_promote_members=bool(bot_member.can_promote_members and u_member.can_promote_members),
             can_restrict_members=bool(bot_member.can_restrict_members and u_member.can_restrict_members),
             can_pin_messages=bool(bot_member.can_pin_messages and u_member.can_pin_messages),
-            can_manage_voice_chats=bool(bot_member.can_manage_voice_chats and u_member.can_manage_voice_chats),
+            can_manage_video_chats=bool(bot_member.can_manage_video_chats and u_member.can_manage_video_chats),
 
         )
 
         rmsg = f"<b>{user_member.user.first_name or user_id}</b> is now anonymous"
         if title:
             rmsg += f" with title <code>{html.escape(title)}</code>"
-        bot.sendMessage(
+        await bot.sendMessage(
             chat.id,
             rmsg,
             parse_mode=ParseMode.HTML,
         ) 
     except BadRequest as err:
         if err.message == "User_not_mutual_contact":
-            message.reply_text("How am I mean to promote someone who isn't in the group?")
+            await message.reply_text("How am I mean to promote someone who isn't in the group?")
         else:
-            message.reply_text("An error occurred while promoting.")
+            await message.reply_text("An error occurred while promoting.")
         return
 
     log_message = (
@@ -116,7 +116,7 @@ def promoteanon(update: Update, context: CallbackContext) -> Optional[str]:
 @bot_admin_check(AdminPerms.CAN_PROMOTE_MEMBERS)
 @user_admin_check(AdminPerms.CAN_PROMOTE_MEMBERS)
 @loggable
-def demoteanon(update: Update, context: CallbackContext) -> Optional[str]:
+async def demoteanon(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Optional[str]:
     bot = context.bot
     args = context.args
 
@@ -125,7 +125,7 @@ def demoteanon(update: Update, context: CallbackContext) -> Optional[str]:
     user = update.effective_user
 
     if chat.type == "private":
-        message.reply_text("This command is meant to be used in groups not PM!")
+        await message.reply_text("This command is meant to be used in groups not PM!")
 
     user_id = extract_user(message, args)
 
@@ -135,27 +135,27 @@ def demoteanon(update: Update, context: CallbackContext) -> Optional[str]:
     try:
         user_member = chat.get_member(user_id)
     except Exception as e:
-        message.reply_text("Error:\n`{}`".format(e))
+        await message.reply_text("Error:\n`{}`".format(e))
         return
 
     if user_member.status == "creator" and user_id == user.id:
-        message.reply_text("meh")
+        await message.reply_text("meh")
         return
 
     if user_member.status == "creator":
-        message.reply_text("This person is the chat CREATOR, find someone else to play with.")
+        await message.reply_text("This person is the chat CREATOR, find someone else to play with.")
         return
 
     if user_member.status != "administrator":
-        message.reply_text("This user isn't an admin!")
+        await message.reply_text("This user isn't an admin!")
         return
 
     if getattr(user_member, "is_anonymous") is False:
-        message.reply_text("This user isn't anonymous!")
+        await message.reply_text("This user isn't anonymous!")
         return
 
     if user_id == bot.id:
-        message.reply_text("I can't demote myself! Get an admin to do it for me.")
+        await message.reply_text("I can't demote myself! Get an admin to do it for me.")
         return
 
     # set same perms as bot - bot can't assign higher perms than itself!
@@ -165,7 +165,7 @@ def demoteanon(update: Update, context: CallbackContext) -> Optional[str]:
     # the perms may be not same as old ones if the bot doesn't have the rights to change them but can't do anything about it
 
     try:
-        bot.promoteChatMember(
+        await bot.promoteChatMember(
             chat.id,
             user_id,
             is_anonymous=False,
@@ -178,11 +178,11 @@ def demoteanon(update: Update, context: CallbackContext) -> Optional[str]:
             can_promote_members=bool(bot_member.can_promote_members and u_member.can_promote_members),
             can_restrict_members=bool(bot_member.can_restrict_members and u_member.can_restrict_members),
             can_pin_messages=bool(bot_member.can_pin_messages and u_member.can_pin_messages),
-            can_manage_voice_chats=bool(bot_member.can_manage_voice_chats and u_member.can_manage_voice_chats),
+            can_manage_video_chats=bool(bot_member.can_manage_video_chats and u_member.can_manage_video_chats),
         )
 
         rmsg = f"<b>{user_member.user.first_name or user_id}</b> is no longer anonymous"
-        bot.sendMessage(
+        await bot.sendMessage(
             chat.id,
             rmsg,
             parse_mode=ParseMode.HTML,
@@ -199,7 +199,7 @@ def demoteanon(update: Update, context: CallbackContext) -> Optional[str]:
         return log_message
 
     except BadRequest as e:
-        message.reply_text(
+        await message.reply_text(
             f"Could not demote!\n{str(e)}"
         )
         return

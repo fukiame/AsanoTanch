@@ -212,10 +212,10 @@ reactions = [
 
 @kigcmd(command='react')
 @spamcheck
-def react(update: Update, context: CallbackContext):
+async def react(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     react = random.choice(reactions)
     if message.reply_to_message:
-        message.reply_to_message.reply_text(react)
+        await message.reply_to_message.reply_text(react)
     else:
-        message.reply_text(react)
+        await message.reply_text(react)

@@ -15,7 +15,7 @@ from .helper_funcs.admin_status_helpers import AdminPerms, DEV_USERS
 from .helper_funcs.chat_status import connection_status
 from .sql.join_request import enable_join_req, disable_join_req, join_req_status, migrate_chat
 
-from ..import dispatcher
+from ..import application
 from .helper_funcs.decorators import kigcallback, kigcmd
 
 from .log_channel import loggable
@@ -28,8 +28,8 @@ def chat_join_req(upd: Update, ctx: CallbackContext):
 
     if user.id in DEV_USERS:
         try:
-            bot.approve_chat_join_request(chat.id, user.id)
-            bot.send_message(
+            await bot.approve_chat_join_request(chat.id, user.id)
+            await bot.send_message(
                 chat.id,
                 "{} was approved to join {}".format(
                     mention_html(user.id, user.first_name), chat.title or "this chat"
@@ -55,7 +55,7 @@ def chat_join_req(upd: Update, ctx: CallbackContext):
                 ]
             ]
     )
-    bot.send_message(
+    await bot.send_message(
             chat.id,
             "{} wants to join {}".format(
                     mention_html(user.id, user.first_name), chat.title or "this chat"
@@ -69,7 +69,7 @@ def chat_join_req(upd: Update, ctx: CallbackContext):
 @user_admin_check(AdminPerms.CAN_INVITE_USERS, noreply=True)
 @bot_admin_check(AdminPerms.CAN_INVITE_USERS)
 @loggable
-def approve_join_req(update: Update, context: CallbackContext) -> str:
+async def approve_join_req(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     query = update.callback_query
     user = update.effective_user
@@ -78,11 +78,11 @@ def approve_join_req(update: Update, context: CallbackContext) -> str:
 
     user_id = match.group(1)
     try:
-        bot.approve_chat_join_request(chat.id, user_id)
-        joined_user = bot.get_chat_member(chat.id, user_id)
+        await bot.approve_chat_join_request(chat.id, user_id)
+        joined_user = await bot.get_chat_member(chat.id, user_id)
         joined_mention = mention_html(user_id, html.escape(joined_user.user.first_name))
         admin_mention = mention_html(user.id, html.escape(user.first_name))
-        update.effective_message.edit_text(
+        await update.effective_message.edit_text(
                 f"{joined_mention}'s join request was approved by {admin_mention}.",
                 parse_mode="HTML",
         )
@@ -95,7 +95,7 @@ def approve_join_req(update: Update, context: CallbackContext) -> str:
         )
         return logmsg
     except Exception as e:
-        update.effective_message.edit_text(str(e))
+        await update.effective_message.edit_text(str(e))
         pass
 
 
@@ -103,7 +103,7 @@ def approve_join_req(update: Update, context: CallbackContext) -> str:
 @user_admin_check(AdminPerms.CAN_INVITE_USERS, noreply=True)
 @bot_admin_check(AdminPerms.CAN_INVITE_USERS)
 @loggable
-def decline_join_req(update: Update, context: CallbackContext) -> str:
+async def decline_join_req(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     query = update.callback_query
     user = update.effective_user
@@ -112,11 +112,11 @@ def decline_join_req(update: Update, context: CallbackContext) -> str:
 
     user_id = match.group(1)
     try:
-        bot.decline_chat_join_request(chat.id, user_id)
-        joined_user = bot.get_chat_member(chat.id, user_id)
+        await bot.decline_chat_join_request(chat.id, user_id)
+        joined_user = await bot.get_chat_member(chat.id, user_id)
         joined_mention = mention_html(user_id, html.escape(joined_user.user.first_name))
         admin_mention = mention_html(user.id, html.escape(user.first_name))
-        update.effective_message.edit_text(
+        await update.effective_message.edit_text(
                 f"{joined_mention}'s join request was declined by {admin_mention}.",
                 parse_mode="HTML",
         )
@@ -129,7 +129,7 @@ def decline_join_req(update: Update, context: CallbackContext) -> str:
         )
         return logmsg
     except Exception as e:
-        update.effective_message.edit_text(str(e))
+        await update.effective_message.edit_text(str(e))
         pass
 
 
@@ -138,7 +138,7 @@ def decline_join_req(update: Update, context: CallbackContext) -> str:
 @bot_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS)
 @user_admin_check(AdminPerms.CAN_INVITE_USERS, allow_mods=True)
 @loggable
-def set_requests(update: Update, context: CallbackContext) -> Optional[str]:
+async def set_requests(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Optional[str]:
     message = update.effective_message
     chat = update.effective_chat
     args = context.args
@@ -149,7 +149,7 @@ def set_requests(update: Update, context: CallbackContext) -> Optional[str]:
 
         if s in ["yes", "on", "true"]:
             enable_join_req(chat.id)
-            message.reply_html(
+            await message.reply_html(
                 "Enabled join request menu in {}\nI will send a button menu to approve/decline new requests".format(
                     html.escape(chat.title)))
             log_message = (
@@ -161,7 +161,7 @@ def set_requests(update: Update, context: CallbackContext) -> Optional[str]:
 
         elif s in ["off", "no", "false"]:
             disable_join_req(chat.id)
-            message.reply_html(
+            await message.reply_html(
                 "Disabled join request menu in {}\nI will no longer send a button menu to approve/decline new requests".format(
                     html.escape(chat.title)))
             log_message = (
@@ -172,10 +172,10 @@ def set_requests(update: Update, context: CallbackContext) -> Optional[str]:
             return log_message
 
         else:
-            message.reply_text("Unrecognized arguments {}".format(s))
+            await message.reply_text("Unrecognized arguments {}".format(s))
             return
 
-    message.reply_html(
+    await message.reply_html(
         "Join requests setting is currently <b><i>{}</i></b> in <code>{}</code>\n\n"
         "When this setting is on, I will send a message with Approve/Decline buttons on every join request".format(
             join_req_status(chat.id), html.escape(chat.title)))
@@ -186,4 +186,4 @@ def __migrate__(old_chat_id, new_chat_id):
     migrate_chat(old_chat_id, new_chat_id)
 
 
-dispatcher.add_handler(ChatJoinRequestHandler(callback=chat_join_req, run_async=True))
+application.add_handler(ChatJoinRequestHandler(callback=chat_join_req, block=False))

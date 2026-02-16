@@ -22,19 +22,19 @@ def get_invalid_chats(update: Update, context: CallbackContext, remove: bool = F
             progress_bar = f"{progress}% completed in getting invalid chats."
             if progress_message:
                 try:
-                    bot.editMessageText(
+                    await bot.editMessageText(
                         progress_bar, chat_id, progress_message.message_id
                     )
                 except:
                     pass
             else:
-                progress_message = bot.sendMessage(chat_id, progress_bar)
+                progress_message = await bot.sendMessage(chat_id, progress_bar)
             progress += 5
 
         cid = chat.chat_id
         sleep(0.1)
         try:
-            bot.get_chat(cid, timeout=60)
+            await bot.get_chat(cid, timeout=60)
         except (BadRequest, Unauthorized):
             kicked_chats += 1
             chat_list.append(cid)
@@ -56,7 +56,7 @@ def get_invalid_chats(update: Update, context: CallbackContext, remove: bool = F
 
 @kigcmd(command='dbcleanup')
 @dev_plus
-def dbcleanup(update: Update, context: CallbackContext):
+async def dbcleanup(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
 
     msg.reply_text("Getting invalid chat count ...")
@@ -66,12 +66,12 @@ def dbcleanup(update: Update, context: CallbackContext):
 
     buttons = [[InlineKeyboardButton("Cleanup DB", callback_data="db_cleanup")]]
 
-    update.effective_message.reply_text(
+    await update.effective_message.reply_text(
         reply, reply_markup=InlineKeyboardMarkup(buttons)
     )
 
 @kigcallback(pattern="db_.*")
-def callback_button(update: Update, context: CallbackContext):
+async def callback_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     query = update.callback_query
     message = query.message
@@ -80,25 +80,25 @@ def callback_button(update: Update, context: CallbackContext):
 
     admin_list = [OWNER_ID] + DEV_USERS
 
-    bot.answer_callback_query(query.id)
+    await bot.answer_callback_query(query.id)
 
     if query_type == "db_leave_chat" and query.from_user.id in admin_list:
-        bot.editMessageText("Leaving chats ...", chat_id, message.message_id)
+        await bot.editMessageText("Leaving chats ...", chat_id, message.message_id)
         chat_count = get_muted_chats(update, context, True)
-        bot.sendMessage(chat_id, f"Left {chat_count} chats.")
+        await bot.sendMessage(chat_id, f"Left {chat_count} chats.")
     elif (
         query_type == "db_leave_chat"
         or query_type == "db_cleanup"
         and query.from_user.id not in admin_list
     ):
-        query.answer("You are not allowed to use this.")
+        await query.answer("You are not allowed to use this.")
     elif query_type == "db_cleanup":
-        bot.editMessageText("Cleaning up DB ...", chat_id, message.message_id)
+        await bot.editMessageText("Cleaning up DB ...", chat_id, message.message_id)
         invalid_chat_count = get_invalid_chats(update, context, True)
         reply = "Cleaned up {} chats from db.".format(
             invalid_chat_count
         )
-        bot.sendMessage(chat_id, reply)
+        await bot.sendMessage(chat_id, reply)
 
 __mod_name__ = "DB Cleanup"
 

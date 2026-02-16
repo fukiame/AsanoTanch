@@ -14,13 +14,13 @@ from .helper_funcs.admin_status import user_admin_check, bot_admin_check, AdminP
 
 
 
-@kigcmd(command='setgpic', run_async=True, can_disable=False)
+@kigcmd(command='setgpic', block=False, can_disable=False)
 @spamcheck
 @connection_status
 @bot_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def setpic(update: Update, context: CallbackContext) -> str:
+async def setpic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     chat = update.effective_chat
     msg = update.effective_message
@@ -40,11 +40,11 @@ def setpic(update: Update, context: CallbackContext) -> str:
         file_id = msg.reply_to_message.document.file_id
 
     try:
-        image_file = context.bot.get_file(file_id)  # kanged from stickers
+        image_file = await context.bot.get_file(file_id)  # kanged from stickers
         image_data = image_file.download(out=BytesIO())
         image_data.seek(0)
 
-        bot.set_chat_photo(chat.id, image_data)
+        await bot.set_chat_photo(chat.id, image_data)
         msg.reply_text(
                 f"<b>{user.first_name}</b> changed the group photo."
                 if not msg.sender_chat else "Group photo has been changed.",
@@ -62,20 +62,20 @@ def setpic(update: Update, context: CallbackContext) -> str:
 
 
 
-@kigcmd(command='delgpic', run_async=True, can_disable=False)
+@kigcmd(command='delgpic', block=False, can_disable=False)
 @spamcheck
 @connection_status
 @bot_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def delpic(update: Update, context: CallbackContext) -> str:
+async def delpic(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     chat = update.effective_chat
     msg = update.effective_message
     user = update.effective_user
 
     try:
-        bot.delete_chat_photo(chat.id)
+        await bot.delete_chat_photo(chat.id)
         msg.reply_text(
                 f"<b>{user.first_name}</b> deleted the group photo."
                 if not msg.sender_chat else "Group photo has been deleted.",
@@ -92,13 +92,13 @@ def delpic(update: Update, context: CallbackContext) -> str:
         return ''
 
 
-@kigcmd(command='setgtitle', run_async=True, can_disable=False)
+@kigcmd(command='setgtitle', block=False, can_disable=False)
 @spamcheck
 @connection_status
 @bot_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def set_title(update: Update, context: CallbackContext) -> str:
+async def set_title(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     chat = update.effective_chat
     msg = update.effective_message
@@ -117,7 +117,7 @@ def set_title(update: Update, context: CallbackContext) -> str:
         return ""
 
     try:
-        bot.set_chat_title(chat.id, title)
+        await bot.set_chat_title(chat.id, title)
         if len(title) > 255:  # telegram limits the title/description to 255 characters
             msg.reply_text("Title longer than 255 characters, Truncating it to 255 characters!")
         msg.reply_text(
@@ -136,13 +136,13 @@ def set_title(update: Update, context: CallbackContext) -> str:
         msg.reply_text("An Error occurred:\n" + str(e))
         return ''
 
-@kigcmd(command='setgdesc', run_async=True, can_disable=False)
+@kigcmd(command='setgdesc', block=False, can_disable=False)
 @spamcheck
 @connection_status
 @bot_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def set_desc(update: Update, context: CallbackContext) -> str:
+async def set_desc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     chat = update.effective_chat
     msg = update.effective_message
@@ -161,7 +161,7 @@ def set_desc(update: Update, context: CallbackContext) -> str:
         return ""
 
     try:
-        bot.set_chat_description(chat.id, title)
+        await bot.set_chat_description(chat.id, title)
         if len(title) > 255: # telegram limits the title/description to 255 characters
             msg.reply_text("Description longer than 255 characters, Truncating it to 255 characters!")
         msg.reply_text(
@@ -181,13 +181,13 @@ def set_desc(update: Update, context: CallbackContext) -> str:
         return ''
 
 
-@kigcmd(command=['setgstickers', 'setgsticker'], run_async=True, can_disable=False)
+@kigcmd(command=['setgstickers', 'setgsticker'], block=False, can_disable=False)
 @spamcheck
 @connection_status
 @bot_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def set_stk_set(update: Update, context: CallbackContext) -> str:
+async def set_stk_set(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     bot = context.bot
     chat = update.effective_chat
     msg = update.effective_message
@@ -202,7 +202,7 @@ def set_stk_set(update: Update, context: CallbackContext) -> str:
 
     try:
         stk_set = msg.reply_to_message.sticker.set_name
-        bot.set_chat_sticker_set(chat.id, stk_set)
+        await bot.set_chat_sticker_set(chat.id, stk_set)
         msg.reply_text(
                 f"<b>{user.first_name}</b> changed the group stickers set."
                 if not msg.sender_chat else "Group stickers set has been changed.",

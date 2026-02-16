@@ -19,13 +19,13 @@ from .helper_funcs.decorators import kigcmd
 
 @kigcmd(command='runs')
 @spamcheck
-def runs(update: Update, context: CallbackContext):
-    update.effective_message.reply_text(random.choice(fun_strings.RUN_STRINGS))
+async def runs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(random.choice(fun_strings.RUN_STRINGS))
 
 
 @kigcmd(command='slap')
 @spamcheck
-def slap(update: Update, context: CallbackContext):
+async def slap(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot: telegram.Bot = context.bot
     args = context.args
     message = update.effective_message
@@ -51,7 +51,7 @@ def slap(update: Update, context: CallbackContext):
                     return
 
                 mutetime = int(time.time() + 60)
-                bot.restrict_chat_member(
+                await bot.restrict_chat_member(
                     chat.id,
                     message.from_user.id,
                     until_date=mutetime,
@@ -64,7 +64,7 @@ def slap(update: Update, context: CallbackContext):
 
     if user_id:
 
-        slapped_user = bot.get_chat(user_id)
+        slapped_user = await bot.get_chat(user_id)
         user1 = curr_user
         user2 = html.escape(slapped_user.first_name if slapped_user.first_name else slapped_user.title)
 
@@ -83,7 +83,7 @@ def slap(update: Update, context: CallbackContext):
 
 @kigcmd(command='pat')
 @spamcheck
-def pat(update: Update, context: CallbackContext):
+async def pat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     msg = str(update.message.text)
     try:
@@ -110,13 +110,13 @@ def pat(update: Update, context: CallbackContext):
             .decode("utf-8")
     )
     if "@" in msg and len(msg) > 5:
-        context.bot.send_photo(
+        await context.bot.send_photo(
             chat_id,
             f"https://headp.at/pats/{urllib.parse.quote(random.choice(pats))}",
             caption=msg,
         )
     else:
-        context.bot.send_photo(
+        await context.bot.send_photo(
             chat_id,
             f"https://headp.at/pats/{urllib.parse.quote(random.choice(pats))}",
             reply_to_message_id=msg_id,
@@ -125,19 +125,19 @@ def pat(update: Update, context: CallbackContext):
 
 @kigcmd(command='roll')
 @spamcheck
-def roll(update: Update, context: CallbackContext):
-    update.message.reply_text(random.choice(range(1, 7)))
+async def roll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(random.choice(range(1, 7)))
 
 
 @kigcmd(command='toss')
 @spamcheck
-def toss(update: Update, context: CallbackContext):
-    update.message.reply_text(random.choice(fun_strings.TOSS))
+async def toss(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(random.choice(fun_strings.TOSS))
 
 
 @kigcmd(command='shrug')
 @spamcheck
-def shrug(update: Update, context: CallbackContext):
+async def shrug(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     reply_text = (
         msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
@@ -147,7 +147,7 @@ def shrug(update: Update, context: CallbackContext):
 
 @kigcmd(command='rlg')
 @spamcheck
-def rlg(update: Update, context: CallbackContext):
+async def rlg(update: Update, context: ContextTypes.DEFAULT_TYPE):
     eyes = random.choice(fun_strings.EYES)
     mouth = random.choice(fun_strings.MOUTHS)
     ears = random.choice(fun_strings.EARS)
@@ -156,12 +156,12 @@ def rlg(update: Update, context: CallbackContext):
         repl = ears[0] + eyes[0] + mouth[0] + eyes[1] + ears[1]
     else:
         repl = ears[0] + eyes[0] + mouth[0] + eyes[0] + ears[1]
-    update.message.reply_text(repl)
+    await update.message.reply_text(repl)
 
 
 @kigcmd(command='decide')
 @spamcheck
-def decide(update: Update, context: CallbackContext):
+async def decide(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_text = (
         update.effective_message.reply_to_message.reply_text
         if update.effective_message.reply_to_message
@@ -172,7 +172,7 @@ def decide(update: Update, context: CallbackContext):
 
 @kigcmd(command='table')
 @spamcheck
-def table(update: Update, context: CallbackContext):
+async def table(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_text = (
         update.effective_message.reply_to_message.reply_text
         if update.effective_message.reply_to_message

@@ -1,6 +1,6 @@
 import importlib
 
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 from tg_bot.__main__ import (
     CHAT_SETTINGS,
     DATA_EXPORT,
@@ -20,10 +20,10 @@ from .helper_funcs.decorators import kigcmd
 
 @kigcmd(command='load')
 @dev_plus
-def load(update: Update, context: CallbackContext):
+async def load(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
-    text = message.text.split(" ", 1)[1]
-    load_messasge = message.reply_text(
+    text = await message.text.split(" ", 1)[1]
+    load_messasge = await message.reply_text(
         f"Attempting to load module : <b>{text}</b>", parse_mode=ParseMode.HTML
     )
 
@@ -45,10 +45,10 @@ def load(update: Update, context: CallbackContext):
         handlers = imported_module.__handlers__
         for handler in handlers:
             if type(handler) != tuple:
-                dispatcher.add_handler(handler)
+                application.add_handler(handler)
             else:
                 handler_name, priority = handler
-                dispatcher.add_handler(handler_name, priority)
+                application.add_handler(handler_name, priority)
     else:
         IMPORTED.pop(imported_module.__mod_name__.lower())
         load_messasge.edit_text("The module cannot be loaded.")
@@ -86,10 +86,10 @@ def load(update: Update, context: CallbackContext):
 
 @kigcmd(command='unload')
 @dev_plus
-def unload(update: Update, context: CallbackContext):
+async def unload(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
-    text = message.text.split(" ", 1)[1]
-    unload_messasge = message.reply_text(
+    text = await message.text.split(" ", 1)[1]
+    unload_messasge = await message.reply_text(
         f"Attempting to unload module : <b>{text}</b>", parse_mode=ParseMode.HTML
     )
 
@@ -113,10 +113,10 @@ def unload(update: Update, context: CallbackContext):
                 unload_messasge.edit_text("This module can't be unloaded!")
                 return
             elif type(handler) != tuple:
-                dispatcher.remove_handler(handler)
+                application.remove_handler(handler)
             else:
                 handler_name, priority = handler
-                dispatcher.remove_handler(handler_name, priority)
+                application.remove_handler(handler_name, priority)
     else:
         unload_messasge.edit_text("The module cannot be unloaded.")
         return
@@ -154,7 +154,7 @@ def unload(update: Update, context: CallbackContext):
 @kigcmd(command='listmodules')
 @spamcheck
 @sudo_plus
-def listmodules(update: Update, context: CallbackContext):
+async def listmodules(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     module_list = []
 
@@ -165,7 +165,7 @@ def listmodules(update: Update, context: CallbackContext):
         mod_name = file_info.__mod_name__
         module_list.append(f"- <code>{mod_name} ({file_name})</code>\n")
     module_list = "Following modules are loaded : \n\n" + "".join(module_list)
-    message.reply_text(module_list, parse_mode=ParseMode.HTML)
+    await message.reply_text(module_list, parse_mode=ParseMode.HTML)
 
 
 __mod_name__ = "Modules"

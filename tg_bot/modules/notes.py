@@ -6,7 +6,7 @@ import html
 from io import BytesIO
 from typing import Optional
 
-from .. import log, dispatcher, SUDO_USERS, spamcheck
+from .. import log, application, SUDO_USERS, spamcheck
 from .log_channel import loggable
 from .helper_funcs.parsing import Types, parse_filler, revertMd2HTML
 from .helper_funcs.chat_status import connection_status
@@ -106,7 +106,7 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
 
         try:
             if note.msgtype in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
-                bot.send_message(
+                await bot.send_message(
                         chat_id,
                         text,
                         reply_to_message_id=reply_id,
@@ -115,7 +115,7 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
                         disable_web_page_preview=bool(preview),
                         protect_content=bool(protect)
                 )
-            elif ENUM_FUNC_MAP[note.msgtype] == dispatcher.bot.send_sticker:
+            elif ENUM_FUNC_MAP[note.msgtype] == application.bot.send_sticker:
                 ENUM_FUNC_MAP[note.msgtype](
                         chat_id,
                         note.file,
@@ -135,13 +135,13 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
 
         except BadRequest as excp:
             if excp.message == "Entity_mention_user_invalid":
-                message.reply_text(
+                await message.reply_text(
                         "Looks like you tried to mention someone I've never seen before. If you really "
                     "want to mention them, forward one of their messages to me, and I'll be able "
                     "to tag them!"
                 )
             elif FILE_MATCHER.match(note.value):
-                message.reply_text(
+                await message.reply_text(
                         "This note was an incorrectly imported file from another bot - I can't use "
                     "it. If you really need it, you'll have to save it again. In "
                     "the meantime, I'll remove it from your notes list."
@@ -149,7 +149,7 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
                 sql.rm_note(chat_id, notename)
             else:
 
-                message.reply_text(
+                await message.reply_text(
                         "This note could not be sent, as it is incorrectly formatted. "
                     "Try getting the noformat version or ask in @TheBotsSupport if you can't figure out why!"
                 )
@@ -159,27 +159,27 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
                 log.warning("Message was: %s", str(note.value))
         return
     elif show_none:
-        message.reply_text("This note doesn't exist")
+        await message.reply_text("This note doesn't exist")
 
 
 @kigcmd(command="get")
 @spamcheck
 @connection_status
-def cmd_get(update: Update, context: CallbackContext):
+async def cmd_get(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     if len(args) >= 2:
         get(update, context, args[0].lower(), show_none=True, no_format=bool(args[1].lower() in ["raw", "noformat"]))
     elif len(args) >= 1:
         get(update, context, args[0].lower(), show_none=True)
     else:
-        update.effective_message.reply_text("Specify a note name!")
+        await update.effective_message.reply_text("Specify a note name!")
 
 
-@kigmsg((Filters.regex(r"^#[^\s]+")), group=-14, friendly='get')
+@kigmsg((filters.Regex(r"^#[^\s]+")), group=-14, friendly='get')
 @spamcheck
 @connection_status
-def hash_get(update: Update, context: CallbackContext):
-    msg = update.effective_message.text.split()
+async def hash_get(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = await update.effective_message.text.split()
     no_hash = msg[0][1:].lower()
     if len(msg) >= 2:
         return get(update, context, no_hash, show_none=False, no_format=msg[1].lower() in ["raw", "noformat"])
@@ -187,10 +187,10 @@ def hash_get(update: Update, context: CallbackContext):
     get(update, context, no_hash, show_none=False)
 
 
-@kigmsg((Filters.regex(r"^[/!>]\d+$")), group=-16, friendly='get')
+@kigmsg((filters.Regex(r"^[/!>]\d+$")), group=-16, friendly='get')
 @spamcheck
 @connection_status
-def slash_get(update: Update, context: CallbackContext):
+async def slash_get(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message, chat_id = update.effective_message.text, update.effective_chat.id
     no_slash = message[1:]
     note_list = sql.get_all_chat_notes(chat_id)
@@ -200,7 +200,7 @@ def slash_get(update: Update, context: CallbackContext):
         note_name = str(noteid).strip(">").split()[1]
         get(update, context, note_name, show_none=False)
     except IndexError:
-        update.effective_message.reply_text("Wrong Note ID!")
+        await update.effective_message.reply_text("Wrong Note ID!")
 
 
 @kigcmd(command='save')
@@ -208,7 +208,7 @@ def slash_get(update: Update, context: CallbackContext):
 @connection_status
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def save(update: Update, _: CallbackContext) -> Optional[str]:
+async def save(update: Update, _: ContextTypes.DEFAULT_TYPE) -> Optional[str]:
     chat_id = update.effective_chat.id
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat
@@ -255,7 +255,7 @@ def save(update: Update, _: CallbackContext) -> Optional[str]:
 @connection_status
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
 @loggable
-def clear(update: Update, context: CallbackContext) -> str:
+async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     args = context.args
     chat = update.effective_chat
     chat_id = chat.id
@@ -265,7 +265,7 @@ def clear(update: Update, context: CallbackContext) -> str:
         notename = args[0].lower()
 
         if sql.rm_note(chat_id, notename):
-            update.effective_message.reply_text(f"Cleared note '{notename}'.")
+            await update.effective_message.reply_text(f"Cleared note '{notename}'.")
             logmsg = (
                     f"<b>{html.escape(chat.title)}:</b>\n"
                     f"#CLEARNOTE\n"
@@ -274,21 +274,21 @@ def clear(update: Update, context: CallbackContext) -> str:
             )
             return logmsg
         else:
-            update.effective_message.reply_text("That's not a note in my database!")
+            await update.effective_message.reply_text("That's not a note in my database!")
             return ''
     else:
-        update.effective_message.reply_text("Provide a notename.")
+        await update.effective_message.reply_text("Provide a notename.")
         return ''
 
 
 @kigcmd(command=['removeallnotes', 'clearall'])
 @spamcheck
-def clearall(update: Update, _: CallbackContext):
+async def clearall(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
     member = chat.get_member(user.id)
     if member.status != "creator" and user.id not in SUDO_USERS:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Only the chat owner can clear all notes at once."
         )
     else:
@@ -302,7 +302,7 @@ def clearall(update: Update, _: CallbackContext):
                 [InlineKeyboardButton(text="Cancel", callback_data="notes_cancel")],
             ]
         )
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Are you sure you would like to clear ALL notes in {chat.title}? This action cannot be undone.",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
@@ -311,7 +311,7 @@ def clearall(update: Update, _: CallbackContext):
 
 @kigcallback(pattern=r"notes_.*")
 @loggable
-def clearall_btn(update: Update, _: CallbackContext) -> str:
+async def clearall_btn(update: Update, _: ContextTypes.DEFAULT_TYPE) -> str:
     query = update.callback_query
     chat = update.effective_chat
     message = update.effective_message
@@ -324,7 +324,7 @@ def clearall_btn(update: Update, _: CallbackContext) -> str:
                 for notename in note_list:
                     note = notename.name.lower()
                     sql.rm_note(chat.id, note)
-                message.edit_text("Deleted all notes.")
+                await message.edit_text("Deleted all notes.")
 
                 log_message = (
                     f"<b>{html.escape(chat.title)}:</b>\n"
@@ -337,28 +337,28 @@ def clearall_btn(update: Update, _: CallbackContext) -> str:
                 return ""
 
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
 
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            await query.answer("You need to be admin to do this.")
             return ""
     elif query.data == "notes_cancel":
         if member.status == "creator" or query.from_user.id in SUDO_USERS:
-            message.edit_text("Clearing of all notes has been cancelled.")
+            await message.edit_text("Clearing of all notes has been cancelled.")
             return ""
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            await query.answer("You need to be admin to do this.")
             return ""
 
 
 @kigcmd(command=["notes", "saved"])
 @spamcheck
 @connection_status
-def list_notes(update: Update, _: CallbackContext):
+async def list_notes(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     note_list = sql.get_all_chat_notes(chat_id)
     notes = len(note_list) + 1
@@ -369,14 +369,14 @@ def list_notes(update: Update, _: CallbackContext):
         else:
             note_name = f"`{note_id}.`  `#{(note.name.lower())}`\n"
         if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
-            update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+            await update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
             msg = ""
         msg += note_name
     if not note_list:
-        update.effective_message.reply_text("No notes in this chat!")
+        await update.effective_message.reply_text("No notes in this chat!")
 
     elif msg != '':
-        update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+        await update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 
 def __import_data__(chat_id, data):  # sourcery no-metrics
@@ -467,7 +467,7 @@ def __import_data__(chat_id, data):  # sourcery no-metrics
     if failures:
         with BytesIO(str.encode("\n".join(failures))) as output:
             output.name = "failed_imports.txt"
-            dispatcher.bot.send_document(
+            await application.bot.send_document(
                 chat_id,
                 document=output,
                 filename="failed_imports.txt",

@@ -25,14 +25,14 @@ from .. import spamcheck
 @bot_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
 @user_admin_check()
 # @loggable
-def set_antilinkedchannel(update: Update, context: CallbackContext):
+async def set_antilinkedchannel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat = update.effective_chat
     args = context.args
     user = update.effective_user
     if len(args) > 0:
         if not user_is_admin(update, user.id, perm = AdminPerms.CAN_CHANGE_INFO):
-            message.reply_text("You don't have enough rights!")
+            await message.reply_text("You don't have enough rights!")
             return u_na_errmsg(message, AdminPerms.CAN_CHANGE_INFO)
 
         s = args[0].lower()
@@ -40,32 +40,32 @@ def set_antilinkedchannel(update: Update, context: CallbackContext):
             if sql.status_pin(chat.id):
                 sql.disable_pin(chat.id)
                 sql.enable_linked(chat.id)
-                message.reply_html("Enabled CleanLinked and Disabled anti channel pin in {}".format(html.escape(chat.title)))
+                await message.reply_html("Enabled CleanLinked and Disabled anti channel pin in {}".format(html.escape(chat.title)))
             else:
                 sql.enable_linked(chat.id)
-                message.reply_html("Enabled anti linked channel in {}".format(html.escape(chat.title)))
+                await message.reply_html("Enabled anti linked channel in {}".format(html.escape(chat.title)))
         elif s in ["off", "no"]:
             sql.disable_linked(chat.id)
-            message.reply_html("Disabled anti linked channel in {}".format(html.escape(chat.title)))
+            await message.reply_html("Disabled anti linked channel in {}".format(html.escape(chat.title)))
         else:
-            message.reply_text("Unrecognized arguments {}".format(s))
+            await message.reply_text("Unrecognized arguments {}".format(s))
         return
 
-    message.reply_html(
+    await message.reply_html(
         "Linked channel deletion is currently {} in {}".format(sql.status_linked(chat.id), html.escape(chat.title)))
 
 
-@kigmsg(Filters.is_automatic_forward, group=111)
-def eliminate_linked_channel_msg(update: Update, _: CallbackContext):
+@kigmsg(filters.IS_AUTOMATIC_FORWARD, group=111)
+async def eliminate_linked_channel_msg(update: Update, _: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat = update.effective_chat
     if not sql.status_linked(chat.id):
         return
     try:
-        message.delete()
+        await message.delete()
     except TelegramError:
         sql.disable_linked(chat.id)
-        message.reply_text(
+        await message.reply_text(
             "I can't delete messages here, give me permissions first! Until then, I'll disable cleanlinked."
         )
         return
@@ -77,7 +77,7 @@ def eliminate_linked_channel_msg(update: Update, _: CallbackContext):
 @bot_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
 @user_admin_check()
 # @loggable
-def set_antipinchannel(update: Update, context: CallbackContext):
+async def set_antipinchannel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat = update.effective_chat
     args = context.args
@@ -85,7 +85,7 @@ def set_antipinchannel(update: Update, context: CallbackContext):
 
     if len(args) > 0:
         if not user_is_admin(update, user.id, perm = AdminPerms.CAN_CHANGE_INFO):
-            message.reply_text("You don't have enough rights!")
+            await message.reply_text("You don't have enough rights!")
             return u_na_errmsg(message, AdminPerms.CAN_CHANGE_INFO)
 
         s = args[0].lower()
@@ -93,33 +93,33 @@ def set_antipinchannel(update: Update, context: CallbackContext):
             if sql.status_linked(chat.id):
                 sql.disable_linked(chat.id)
                 sql.enable_pin(chat.id)
-                message.reply_html("Disabled CleanLinked and Enabled anti channel pin in {}".format(html.escape(chat.title)))
+                await message.reply_html("Disabled CleanLinked and Enabled anti channel pin in {}".format(html.escape(chat.title)))
             else:
                 sql.enable_pin(chat.id)
-                message.reply_html("Enabled anti channel pin in {}".format(html.escape(chat.title)))
+                await message.reply_html("Enabled anti channel pin in {}".format(html.escape(chat.title)))
         elif s in ["off", "no"]:
             sql.disable_pin(chat.id)
-            message.reply_html("Disabled anti channel pin in {}".format(html.escape(chat.title)))
+            await message.reply_html("Disabled anti channel pin in {}".format(html.escape(chat.title)))
         else:
-            message.reply_text("Unrecognized arguments {}".format(s))
+            await message.reply_text("Unrecognized arguments {}".format(s))
         return
 
-    message.reply_html(
+    await message.reply_html(
         "Linked channel message unpin is currently {} in {}".format(sql.status_pin(chat.id), html.escape(chat.title)))
 
 
-@kigmsg(Filters.is_automatic_forward | Filters.status_update.pinned_message, group=113)
-def eliminate_linked_channel_msg(update: Update, _: CallbackContext):
+@kigmsg(filters.IS_AUTOMATIC_FORWARD | filters.StatusUpdate.PINNED_MESSAGE, group=113)
+async def eliminate_linked_channel_msg(update: Update, _: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat = update.effective_chat
     if not sql.status_pin(chat.id):
         return
 
     try:
-        message.unpin()
+        await message.unpin()
     except TelegramError:
         sql.disable_pin(chat.id)
-        message.reply_text(
+        await message.reply_text(
             "I can't delete messages here, give me permissions first! Until then, I'll disable cleanlinked."
         )
         return

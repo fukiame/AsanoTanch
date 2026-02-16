@@ -3,7 +3,7 @@ from io import BytesIO
 from time import sleep
 
 import tg_bot.modules.sql.users_sql as sql
-from tg_bot import DEV_USERS, log, OWNER_ID, dispatcher, SYS_ADMIN, spamcheck
+from tg_bot import DEV_USERS, log, OWNER_ID, application, SYS_ADMIN, spamcheck
 from .helper_funcs.chat_status import dev_plus, sudo_plus
 from .sql.users_sql import get_all_users, update_user
 from telegram import TelegramError, Update, ParseMode
@@ -35,7 +35,7 @@ def get_user_id(username):
     else:
         for user_obj in users:
             try:
-                userdat = dispatcher.bot.get_chat(user_obj)
+                userdat = await application.bot.get_chat(user_obj)
                 if userdat.username == username:
                     return userdat.id
 
@@ -46,9 +46,9 @@ def get_user_id(username):
     return None
 
 
-@kigcmd(command='broadcast', filters=Filters.user((SYS_ADMIN|OWNER_ID)))
-def broadcast(update: Update, context: CallbackContext):
-    to_send = update.effective_message.text.split(None, 1)
+@kigcmd(command='broadcast', filters=filters.User((SYS_ADMIN|OWNER_ID)))
+async def broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    to_send = await update.effective_message.text.split(None, 1)
 
     if len(to_send) >= 2:
         to_group = False
@@ -66,7 +66,7 @@ def broadcast(update: Update, context: CallbackContext):
         if to_group:
             for chat in chats:
                 try:
-                    context.bot.sendMessage(
+                    await context.bot.sendMessage(
                         int(chat.chat_id),
                         to_send[1],
                         parse_mode=ParseMode.MARKDOWN,
@@ -78,7 +78,7 @@ def broadcast(update: Update, context: CallbackContext):
         if to_user:
             for user in users:
                 try:
-                    context.bot.sendMessage(
+                    await context.bot.sendMessage(
                         int(user.user_id),
                         to_send[1],
                         parse_mode=ParseMode.MARKDOWN,
@@ -87,13 +87,13 @@ def broadcast(update: Update, context: CallbackContext):
                     sleep(0.1)
                 except TelegramError:
                     failed_user += 1
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Broadcast complete.\nGroups failed: {failed}.\nUsers failed: {failed_user}."
         )
 
 
-@kigmsg((Filters.all & Filters.chat_type.groups), group=USERS_GROUP)
-def log_user(update: Update, _: CallbackContext):
+@kigmsg((filters.ALL & filters.ChatType.GROUPS), group=USERS_GROUP)
+async def log_user(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     msg = update.effective_message
 
@@ -150,13 +150,13 @@ def log_user(update: Update, _: CallbackContext):
 @kigcmd(command='chatlist')
 @spamcheck
 @sudo_plus
-def chats(update: Update, context: CallbackContext):
+async def chats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     all_chats = sql.get_all_chats() or []
     chatfile = "List of chats.\n0. Chat name | Chat ID | Members count\n"
     P = 1
     for chat in all_chats:
         try:
-            curr_chat = context.bot.getChat(chat.chat_id)
+            curr_chat = await context.bot.getChat(chat.chat_id)
             bot_member = curr_chat.get_member(context.bot.id)
             chat_members = curr_chat.get_member_count(context.bot.id)
             chatfile += "{}. {} | {} | {}\n".format(
@@ -168,23 +168,23 @@ def chats(update: Update, context: CallbackContext):
 
     with BytesIO(str.encode(chatfile)) as output:
         output.name = "glist.txt"
-        update.effective_message.reply_document(
+        await update.effective_message.reply_document(
             document=output,
             filename="glist.txt",
             caption="Here be the list of groups in my database.",
         )
 
-@kigmsg((Filters.all & Filters.chat_type.groups), group=USERS_GROUP)
-def chat_checker(update: Update, context: CallbackContext):
+@kigmsg((filters.ALL & filters.ChatType.GROUPS), group=USERS_GROUP)
+async def chat_checker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
-    if update.effective_message.chat.get_member(bot.id).can_send_messages is False:
-        bot.leaveChat(update.effective_message.chat.id)
+    if await update.effective_message.chat.get_member(bot.id).can_send_messages is False:
+        await bot.leaveChat(update.effective_message.chat.id)
 
 
 #def __user_info__(user_id):
 #    if user_id in [777000, 1087968824]:
 #        return """Groups count: <code>N/A</code>"""
-#    if user_id == dispatcher.bot.id:
+#    if user_id == application.bot.id:
 #        return """Groups count: Why are you stalking me?"""
 #    if user_id == OWNER_ID:
 #        return """Groups count: <code>N/A</code>"""

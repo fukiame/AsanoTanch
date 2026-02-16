@@ -1,6 +1,6 @@
 import html
 
-from .. import ALLOW_EXCL, CustomCommandHandler, dispatcher, spamcheck
+from .. import ALLOW_EXCL, CustomCommandHandler, application, spamcheck
 from .disable import DisableAbleCommandHandler
 from .helper_funcs.chat_status import (
 
@@ -42,18 +42,18 @@ command_list = [
     "leaderboard",
 ]
 
-for handler_list in dispatcher.handlers:
-    for handler in dispatcher.handlers[handler_list]:
+for handler_list in application.handlers:
+    for handler in application.handlers[handler_list]:
         if any(isinstance(handler, cmd_handler) for cmd_handler in CommandHandlerList):
             command_list += handler.command
 
-@kigmsg((Filters.command & Filters.chat_type.groups), group=BLUE_TEXT_CLEAN_GROUP)
-def clean_blue_text_must_click(update: Update, context: CallbackContext):
+@kigmsg((filters.COMMAND & filters.ChatType.GROUPS), group=BLUE_TEXT_CLEAN_GROUP)
+async def clean_blue_text_must_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     chat = update.effective_chat
     message = update.effective_message
     if chat.get_member(bot.id).can_delete_messages and sql.is_enabled(chat.id):
-        fst_word = message.text.strip().split(None, 1)[0]
+        fst_word = await message.text.strip().split(None, 1)[0]
 
         if len(fst_word) > 1 and any(
             fst_word.startswith(start) for start in CMD_STARTERS
@@ -67,14 +67,14 @@ def clean_blue_text_must_click(update: Update, context: CallbackContext):
                 return
 
             if command[0] not in command_list:
-                message.delete()
+                await message.delete()
 
 @kigcmd(command='cleanbluetext', pass_args=True)
 @spamcheck
 @connection_status
 @bot_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def set_blue_text_must_click(update: Update, context: CallbackContext):
+async def set_blue_text_must_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     message = update.effective_message
     bot, args = context.bot, context.args
@@ -86,30 +86,30 @@ def set_blue_text_must_click(update: Update, context: CallbackContext):
             reply = "Bluetext cleaning has been disabled for <b>{}</b>".format(
                 html.escape(chat.title)
             )
-            message.reply_text(reply, parse_mode=ParseMode.HTML)
+            await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
         elif val in ("yes", "on"):
             sql.set_cleanbt(chat.id, True)
             reply = "Bluetext cleaning has been enabled for <b>{}</b>".format(
                 html.escape(chat.title)
             )
-            message.reply_text(reply, parse_mode=ParseMode.HTML)
+            await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
         else:
             reply = "Invalid argument.Accepted values are 'yes', 'on', 'no', 'off'"
-            message.reply_text(reply)
+            await message.reply_text(reply)
     else:
         clean_status = sql.is_enabled(chat.id)
         clean_status = "Enabled" if clean_status else "Disabled"
         reply = "Bluetext cleaning for <b>{}</b> : <b>{}</b>".format(
             chat.title, clean_status
         )
-        message.reply_text(reply, parse_mode=ParseMode.HTML)
+        await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
 @kigcmd(command='ignorecleanbluetext', pass_args=True)
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def add_bluetext_ignore(update: Update, context: CallbackContext):
+async def add_bluetext_ignore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat = update.effective_chat
     user = update.effective_user
@@ -123,16 +123,16 @@ def add_bluetext_ignore(update: Update, context: CallbackContext):
             )
         else:
             reply = "Command is already ignored."
-        message.reply_text(reply, parse_mode=ParseMode.HTML)
+        await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
         reply = "No command supplied to be ignored."
-        message.reply_text(reply)
+        await message.reply_text(reply)
 
 @kigcmd(command='unignorecleanbluetext', pass_args=True)
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def remove_bluetext_ignore(update: Update, context: CallbackContext):
+async def remove_bluetext_ignore(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     chat = update.effective_chat
     args = context.args
@@ -148,15 +148,15 @@ def remove_bluetext_ignore(update: Update, context: CallbackContext):
             )
         else:
             reply = "Command isn't ignored currently."
-        message.reply_text(reply, parse_mode=ParseMode.HTML)
+        await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
         reply = "No command supplied to be unignored."
-        message.reply_text(reply)
+        await message.reply_text(reply)
 
 @kigcmd(command='ignoreglobalcleanbluetext', pass_args=True)
 @dev_plus
-def add_bluetext_ignore_global(update: Update, context: CallbackContext):
+async def add_bluetext_ignore_global(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     args = context.args
     if len(args) >= 1:
@@ -168,15 +168,15 @@ def add_bluetext_ignore_global(update: Update, context: CallbackContext):
             )
         else:
             reply = "Command is already ignored."
-        message.reply_text(reply, parse_mode=ParseMode.HTML)
+        await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
         reply = "No command supplied to be ignored."
-        message.reply_text(reply)
+        await message.reply_text(reply)
 
 @kigcmd(command='unignoreglobalcleanbluetext', pass_args=True)
 @dev_plus
-def remove_bluetext_ignore_global(update: Update, context: CallbackContext):
+async def remove_bluetext_ignore_global(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     args = context.args
     if len(args) >= 1:
@@ -188,15 +188,15 @@ def remove_bluetext_ignore_global(update: Update, context: CallbackContext):
             )
         else:
             reply = "Command isn't ignored currently."
-        message.reply_text(reply, parse_mode=ParseMode.HTML)
+        await message.reply_text(reply, parse_mode=ParseMode.HTML)
 
     else:
         reply = "No command supplied to be unignored."
-        message.reply_text(reply)
+        await message.reply_text(reply)
 
 @kigcmd(command='listcleanbluetext')
 @dev_plus
-def bluetext_ignore_list(update: Update, context: CallbackContext):
+async def bluetext_ignore_list(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     message = update.effective_message
     chat = update.effective_chat
@@ -218,10 +218,10 @@ def bluetext_ignore_list(update: Update, context: CallbackContext):
 
     if text == "":
         text = "No commands are currently ignored from bluetext cleaning."
-        message.reply_text(text)
+        await message.reply_text(text)
         return
 
-    message.reply_text(text, parse_mode=ParseMode.HTML)
+    await message.reply_text(text, parse_mode=ParseMode.HTML)
     return
 
 from .language import gs

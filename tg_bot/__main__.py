@@ -16,12 +16,12 @@ from telegram.ext import (
     CallbackContext,
     Filters
 )
-from telegram.ext.dispatcher import DispatcherHandlerStop
+from telegram.ext.application import DispatcherHandlerStop
 from telegram.utils.helpers import escape_markdown
 
 from tg_bot import (
     KInit,
-    dispatcher,
+    application,
     updater,
     TOKEN,
     WEBHOOK,
@@ -45,7 +45,7 @@ from tg_bot.modules.helper_funcs.admin_status import (
     user_is_admin
 )
 
-bot_firstname = dispatcher.bot.first_name.split(" ")[0]
+bot_firstname = await application.bot.first_name.split(" ")[0]
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -109,13 +109,13 @@ def send_help(chat_id, text, keyboard=None):
         kb.append([InlineKeyboardButton(text='Support', url='https://t.me/TheBotsSupport'),
         InlineKeyboardButton(text='Back', callback_data='start_back'), InlineKeyboardButton(text="Try inline", switch_inline_query_current_chat="")])
         keyboard = InlineKeyboardMarkup(kb)
-    dispatcher.bot.send_message(
+    await application.bot.send_message(
         chat_id=chat_id, text=text, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard
     )
 
 
 @kigcmd(command='text')
-def test(update: Update, _: CallbackContext):
+async def test(update: Update, _: ContextTypes.DEFAULT_TYPE):
     """#TODO
 
     Params:
@@ -123,14 +123,14 @@ def test(update: Update, _: CallbackContext):
         context: CallbackContext -
     """
     # pprint(ast.literal_eval(str(update)))
-    # update.effective_message.reply_text("Hola tester! _I_ *have* `markdown`", parse_mode=ParseMode.MARKDOWN)
-    update.effective_message.reply_text("*text*")
+    # await update.effective_message.reply_text("Hola tester! _I_ *have* `markdown`", parse_mode=ParseMode.MARKDOWN)
+    await update.effective_message.reply_text("*text*")
     print(update.effective_message)
 
 
 @kigcallback(pattern=r'start_back')
 @kigcmd(command='start', pass_args=True)
-def start(update: Update, context: CallbackContext):  # sourcery no-metrics
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     """#TODO
 
     Params:
@@ -144,7 +144,7 @@ def start(update: Update, context: CallbackContext):  # sourcery no-metrics
         query = update.callback_query
         if hasattr(query, 'id'):
             first_name = update.effective_user.first_name
-            update.effective_message.edit_text(
+            await update.effective_message.edit_text(
                 text=gs(chat.id, "pm_start_text").format(
                     escape_markdown(first_name),
                     escape_markdown(context.bot.first_name),
@@ -156,7 +156,7 @@ def start(update: Update, context: CallbackContext):  # sourcery no-metrics
                 ),
             )
 
-            context.bot.answer_callback_query(query.id)
+            await context.bot.answer_callback_query(query.id)
             return
 
     if update.effective_chat.type == "private":
@@ -185,7 +185,7 @@ def start(update: Update, context: CallbackContext):  # sourcery no-metrics
                 IMPORTED["nations"].send_nations(update)
             elif args[0].lower().startswith("stngs_"):
                 match = re.match("stngs_(.*)", args[0].lower())
-                chat = dispatcher.bot.getChat(match.group(1))
+                chat = await application.bot.getChat(match.group(1))
 
                 if user_is_admin(update, update.effective_user.id):
                     send_settings(match.group(1), update.effective_user.id, False)
@@ -197,7 +197,7 @@ def start(update: Update, context: CallbackContext):  # sourcery no-metrics
 
         else:
             first_name = update.effective_user.first_name
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 text=gs(chat.id, "pm_start_text").format(
                     escape_markdown(first_name),
                     escape_markdown(context.bot.first_name),
@@ -210,12 +210,12 @@ def start(update: Update, context: CallbackContext):  # sourcery no-metrics
             )
 
     else:
-        update.effective_message.reply_text(f"Hey, I'm {bot_firstname}.", parse_mode=ParseMode.MARKDOWN)
+        await update.effective_message.reply_text(f"Hey, I'm {bot_firstname}.", parse_mode=ParseMode.MARKDOWN)
     
     if hasattr(update, 'callback_query'):
         query = update.callback_query
         if hasattr(query, 'id'):
-            context.bot.answer_callback_query(query.id)
+            await context.bot.answer_callback_query(query.id)
 
 def start_buttons(context, chat):
     return [
@@ -242,7 +242,7 @@ def start_buttons(context, chat):
 
 
 # for test purposes
-def error_callback(_, context: CallbackContext):
+async def error_callback(_, context: ContextTypes.DEFAULT_TYPE):
     """#TODO
 
     Params:
@@ -273,7 +273,7 @@ def error_callback(_, context: CallbackContext):
 
 
 @kigcallback(pattern=r'help_')
-def help_button(update: Update, context: CallbackContext):
+async def help_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """#TODO
 
     Params:
@@ -312,7 +312,7 @@ def help_button(update: Update, context: CallbackContext):
                     InlineKeyboardButton(text='Support', url='https://t.me/TheBotsSupport')
                 ]
                     )
-            query.message.edit_text(
+            await query.message.edit_text(
                 text=text,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=InlineKeyboardMarkup(help_buttons),
@@ -328,7 +328,7 @@ def help_button(update: Update, context: CallbackContext):
                     InlineKeyboardButton(text="Try inline", switch_inline_query_current_chat="")
                 ]
                     )
-            query.message.edit_text(
+            await query.message.edit_text(
                 text=gs(chat.id, "pm_help_text".format(escape_markdown(bot_firstname))),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=InlineKeyboardMarkup(kb),
@@ -344,7 +344,7 @@ def help_button(update: Update, context: CallbackContext):
                     InlineKeyboardButton(text="Try inline", switch_inline_query_current_chat="")
                 ]
                     )
-            query.message.edit_text(
+            await query.message.edit_text(
                 text=gs(chat.id, "pm_help_text".format(escape_markdown(bot_firstname))),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=InlineKeyboardMarkup(kb),
@@ -359,22 +359,22 @@ def help_button(update: Update, context: CallbackContext):
                     InlineKeyboardButton(text="Try inline", switch_inline_query_current_chat="")
                 ]
                     )
-            query.message.edit_text(
+            await query.message.edit_text(
                 text=gs(chat.id, "pm_help_text".format(escape_markdown(bot_firstname))),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=InlineKeyboardMarkup(kb),
             )
 
         # ensure no spinny white circle
-        context.bot.answer_callback_query(query.id)
-        # query.message.delete()
+        await context.bot.answer_callback_query(query.id)
+        # await query.message.delete()
 
     except BadRequest:
         pass
 
 
 @kigcmd(command='help')
-def get_help(update: Update, context: CallbackContext):
+async def get_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''#TODO
 
     Params:
@@ -383,14 +383,14 @@ def get_help(update: Update, context: CallbackContext):
     '''
 
     chat = update.effective_chat  # type: Optional[Chat]
-    args = update.effective_message.text.split(None, 1)
+    args = await update.effective_message.text.split(None, 1)
 
     # ONLY send help in PM
     if chat.type != chat.PRIVATE:
         if len(args) >= 2:
             if any(args[1].lower() == x for x in HELPABLE):
                 module = args[1].lower()
-                update.effective_message.reply_text(
+                await update.effective_message.reply_text(
                     f"Contact me in PM to get help of {module.capitalize()}",
                     reply_markup=InlineKeyboardMarkup(
                         [
@@ -407,9 +407,9 @@ def get_help(update: Update, context: CallbackContext):
                 )
                 return
             else:
-                dispatcher.bot.send_message(chat.id, "'{}' is not a module".format(args[1].lower()))
+                await application.bot.send_message(chat.id, "'{}' is not a module".format(args[1].lower()))
                 return
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Contact me in PM to get the list of possible commands.",
             reply_markup=InlineKeyboardMarkup(
                 [
@@ -446,7 +446,7 @@ def get_help(update: Update, context: CallbackContext):
                 InlineKeyboardMarkup(kb),
             )
         else:
-            dispatcher.bot.send_message(chat.id, "'{}' is not a module".format(args[1].lower()))
+            await application.bot.send_message(chat.id, "'{}' is not a module".format(args[1].lower()))
 
     else:
         send_help(chat.id, (gs(chat.id, "pm_help_text")))
@@ -467,22 +467,22 @@ def send_settings(chat_id: int, user_id: int, user=False):
                 "*{}*:\n{}".format(mod.__mod_name__, mod.__user_settings__(user_id))
                 for mod in USER_SETTINGS.values()
             )
-            dispatcher.bot.send_message(
+            await application.bot.send_message(
                 user_id,
                 "These are your current settings:" + "\n\n" + settings,
                 parse_mode=ParseMode.MARKDOWN,
             )
 
         else:
-            dispatcher.bot.send_message(
+            await application.bot.send_message(
                 user_id,
                 "Seems like there aren't any user specific settings available :'(",
                 parse_mode=ParseMode.MARKDOWN,
             )
 
     elif CHAT_SETTINGS:
-        chat_name = dispatcher.bot.getChat(chat_id).title
-        dispatcher.bot.send_message(
+        chat_name = await application.bot.getChat(chat_id).title
+        await application.bot.send_message(
             user_id,
             text="Which module would you like to check {}'s settings for?".format(
                 chat_name
@@ -492,7 +492,7 @@ def send_settings(chat_id: int, user_id: int, user=False):
             ),
         )
     else:
-        dispatcher.bot.send_message(
+        await application.bot.send_message(
             user_id,
             "Seems like there aren't any chat settings available :'(\nSend this "
             "in a group chat you're admin in to find its current settings!",
@@ -501,7 +501,7 @@ def send_settings(chat_id: int, user_id: int, user=False):
 
 
 @kigcallback(pattern=r"stngs_")
-def settings_button(update: Update, context: CallbackContext):
+async def settings_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''#TODO
 
     Params:
@@ -520,7 +520,7 @@ def settings_button(update: Update, context: CallbackContext):
         if mod_match:
             chat_id = mod_match.group(1)
             module = mod_match.group(2)
-            chat = bot.get_chat(chat_id)
+            chat = await bot.get_chat(chat_id)
             text = "*{}* has the following settings for the *{}* module:\n\n".format(
                 escape_markdown(chat.title), CHAT_SETTINGS[module].__mod_name__
             ) + CHAT_SETTINGS[module].__chat_settings__(chat_id, user.id)
@@ -536,7 +536,7 @@ def settings_button(update: Update, context: CallbackContext):
                         ]
             keyboard.append(kbrd)
             replymrkp = InlineKeyboardMarkup(keyboard)
-            query.message.edit_text(
+            await query.message.edit_text(
                 text=text,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=replymrkp
@@ -545,8 +545,8 @@ def settings_button(update: Update, context: CallbackContext):
         elif prev_match:
             chat_id = prev_match.group(1)
             curr_page = int(prev_match.group(2))
-            chat = bot.get_chat(chat_id)
-            query.message.reply_text(
+            chat = await bot.get_chat(chat_id)
+            await query.message.reply_text(
                 "Hi there! There are quite a few settings for {} - go ahead and pick what "
                 "you're interested in.".format(chat.title),
                 reply_markup=InlineKeyboardMarkup(
@@ -559,8 +559,8 @@ def settings_button(update: Update, context: CallbackContext):
         elif next_match:
             chat_id = next_match.group(1)
             next_page = int(next_match.group(2))
-            chat = bot.get_chat(chat_id)
-            query.message.edit_text(
+            chat = await bot.get_chat(chat_id)
+            await query.message.edit_text(
                 "Hi there! There are quite a few settings for {} - go ahead and pick what "
                 "you're interested in.".format(chat.title),
                 reply_markup=InlineKeyboardMarkup(
@@ -572,8 +572,8 @@ def settings_button(update: Update, context: CallbackContext):
 
         elif back_match:
             chat_id = back_match.group(1)
-            chat = bot.get_chat(chat_id)
-            query.message.edit_text(
+            chat = await bot.get_chat(chat_id)
+            await query.message.edit_text(
                 text="Hi there! There are quite a few settings for {} - go ahead and pick what "
                      "you're interested in.".format(escape_markdown(chat.title)),
                 parse_mode=ParseMode.MARKDOWN,
@@ -583,7 +583,7 @@ def settings_button(update: Update, context: CallbackContext):
             )
 
         # ensure no spinny white circle
-        bot.answer_callback_query(query.id)
+        await bot.answer_callback_query(query.id)
     except BadRequest as excp:
         if excp.message not in [
             'Message is not modified',
@@ -594,7 +594,7 @@ def settings_button(update: Update, context: CallbackContext):
 
 
 @kigcmd(command='settings')
-def get_settings(update: Update, context: CallbackContext):
+async def get_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''#TODO
 
     Params:
@@ -632,7 +632,7 @@ def get_settings(update: Update, context: CallbackContext):
 
 
 @kigcmd(command='donate')
-def donate(update: Update, _: CallbackContext):
+async def donate(update: Update, _: ContextTypes.DEFAULT_TYPE):
     """#TODO
 
     Params:
@@ -640,17 +640,17 @@ def donate(update: Update, _: CallbackContext):
         context: CallbackContext -
     """
 
-    update.effective_message.reply_text("I'm free for everyone to use!")
+    await update.effective_message.reply_text("I'm free for everyone to use!")
 
 @kigcmd(command='support')
-def support(update: Update, context: CallbackContext):
+async def support(update: Update, context: ContextTypes.DEFAULT_TYPE):
     supporttext = "Join the support chat\n@TheBotsSupport\n\nGet the latest news\n@LukeBots"
-    update.effective_message.reply_text(supporttext)
+    await update.effective_message.reply_text(supporttext)
 
 
 
-@kigmsg(Filters.status_update.migrate)
-def migrate_chats(update: Update, _: CallbackContext):
+@kigmsg(filters.StatusUpdate.MIGRATE)
+async def migrate_chats(update: Update, _: ContextTypes.DEFAULT_TYPE):
     """#TODO
 
     Params:
@@ -677,29 +677,29 @@ def migrate_chats(update: Update, _: CallbackContext):
 
 
 def main():
-    dispatcher.add_error_handler(error_callback)
-    # dispatcher.add_error_handler(error_handler)
+    application.add_error_handler(error_callback)
+    # application.add_error_handler(error_handler)
     allowed_updates = ['message', 'edited_message', 'callback_query', 'callback_query', 'my_chat_member',
                         'chat_member', 'chat_join_request', 'channel_post', 'edited_channel_post', 'inline_query']
 
     if WEBHOOK:
         log.info("Using webhooks.")
-        updater.start_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, allowed_updates=allowed_updates, webhook_url=URL+TOKEN, drop_pending_updates=KInit.DROP_UPDATES, cert=CERT_PATH if CERT_PATH else None)
+        application.run_webhook(listen="0.0.0.0", port=PORT, url_path=TOKEN, allowed_updates=allowed_updates, webhook_url=URL+TOKEN, drop_pending_updates=KInit.DROP_UPDATES, cert=CERT_PATH if CERT_PATH else None)
 
-        print(f"Updater started! Using webhooks. | BOT: [@{dispatcher.bot.username}]")
+        print(f"Updater started! Using webhooks. | BOT: [@{application.bot.username}]")
 
     else:
-        KigyoINIT.bot_id = dispatcher.bot.id
-        KigyoINIT.bot_username = dispatcher.bot.username
-        KigyoINIT.bot_name = dispatcher.bot.first_name
+        KigyoINIT.bot_id = application.bot.id
+        KigyoINIT.bot_username = application.bot.username
+        KigyoINIT.bot_name = application.bot.first_name
 
-        updater.start_polling(
+        application.run_polling(
                 timeout=15, read_latency=4, allowed_updates=allowed_updates, drop_pending_updates=KInit.DROP_UPDATES)
-        print(f"Updater started! Using long polling. | BOT: [@{dispatcher.bot.username}]")
-    dispatcher.bot.sendMessage(OWNER_ID, "Master, I'm awake!")
+        print(f"Updater started! Using long polling. | BOT: [@{application.bot.username}]")
+    await application.bot.sendMessage(OWNER_ID, "Master, I'm awake!")
 
 
 if __name__ == "__main__":
-    log.debug(f"[{dispatcher.bot.username}] Successfully loaded modules: " + str(ALL_MODULES))
+    log.debug(f"[{application.bot.username}] Successfully loaded modules: " + str(ALL_MODULES))
     main()
     updater.idle()

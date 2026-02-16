@@ -7,7 +7,7 @@ from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandle
 from telegram.utils.helpers import mention_html, mention_markdown
 
 import tg_bot.modules.sql.blsticker_sql as sql
-from tg_bot import log as LOGGER, dispatcher
+from tg_bot import log as LOGGER, application
 from .connection import connected
 from .disable import DisableAbleCommandHandler
 from .helper_funcs.alternate import send_message
@@ -25,7 +25,7 @@ from .warns import warn
 
 
 @user_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS, allow_mods = True)
-def blackliststicker(update: Update, context: CallbackContext):
+async def blackliststicker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global text
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
@@ -62,7 +62,7 @@ def blackliststicker(update: Update, context: CallbackContext):
 
 
 @user_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS, allow_mods = True)
-def add_blackliststicker(update: Update, context: CallbackContext):
+async def add_blackliststicker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
@@ -142,7 +142,7 @@ def add_blackliststicker(update: Update, context: CallbackContext):
 
 
 @user_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS, allow_mods = True)
-def unblackliststicker(update: Update, context: CallbackContext):
+async def unblackliststicker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
@@ -230,7 +230,7 @@ def unblackliststicker(update: Update, context: CallbackContext):
 
 @user_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS, allow_mods = True)
 @loggable
-def blacklist_mode(update: Update, context: CallbackContext):
+async def blacklist_mode(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global settypeblacklist
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
@@ -239,9 +239,9 @@ def blacklist_mode(update: Update, context: CallbackContext):
     bot, args = context.bot, context.args
     conn = connected(bot, update, chat, user.id, need_admin=True)
     if conn:
-        chat = dispatcher.bot.getChat(conn)
+        chat = await application.bot.getChat(conn)
         chat_id = conn
-        chat.title = dispatcher.bot.getChat(conn).title
+        chat.title = await application.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
             send_message(
@@ -344,7 +344,7 @@ def blacklist_mode(update: Update, context: CallbackContext):
 
 
 @user_not_admin_check
-def del_blackliststicker(update: Update, context: CallbackContext):
+async def del_blackliststicker(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     chat = update.effective_chat  # type: Optional[Chat]
     message = update.effective_message  # type: Optional[Message]
@@ -364,9 +364,9 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                 if getmode == 0:
                     return
                 elif getmode == 1:
-                    message.delete()
+                    await message.delete()
                 elif getmode == 2:
-                    message.delete()
+                    await message.delete()
                     warn(
                         update.effective_user,
                         update,
@@ -379,13 +379,13 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     )
                     return
                 elif getmode == 3:
-                    message.delete()
-                    bot.restrict_chat_member(
+                    await message.delete()
+                    await bot.restrict_chat_member(
                         chat.id,
                         update.effective_user.id,
                         permissions=ChatPermissions(can_send_messages=False),
                     )
-                    bot.sendMessage(
+                    await bot.sendMessage(
                         chat.id,
                         "{} muted because using '{}' which in blacklist stickers".format(
                             mention_markdown(user.id, user.first_name), trigger,
@@ -394,9 +394,9 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     )
                     return
                 elif getmode == 4:
-                    message.delete()
+                    await message.delete()
                     if res := chat.unban_member(update.effective_user.id):
-                        bot.sendMessage(
+                        await bot.sendMessage(
                             chat.id,
                             "{} kicked because using '{}' which in blacklist stickers".format(
                                 mention_markdown(user.id, user.first_name), trigger,
@@ -405,9 +405,9 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                         )
                     return
                 elif getmode == 5:
-                    message.delete()
+                    await message.delete()
                     chat.ban_member(user.id)
-                    bot.sendMessage(
+                    await bot.sendMessage(
                         chat.id,
                         "{} banned because using '{}' which in blacklist stickers".format(
                             mention_markdown(user.id, user.first_name), trigger,
@@ -416,10 +416,10 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     )
                     return
                 elif getmode == 6:
-                    message.delete()
+                    await message.delete()
                     bantime = extract_time(message, value)
                     chat.ban_member(user.id, until_date=bantime)
-                    bot.sendMessage(
+                    await bot.sendMessage(
                         chat.id,
                         "{} banned for {} because using '{}' which in blacklist stickers".format(
                             mention_markdown(user.id, user.first_name), value, trigger,
@@ -428,15 +428,15 @@ def del_blackliststicker(update: Update, context: CallbackContext):
                     )
                     return
                 elif getmode == 7:
-                    message.delete()
+                    await message.delete()
                     mutetime = extract_time(message, value)
-                    bot.restrict_chat_member(
+                    await bot.restrict_chat_member(
                         chat.id,
                         user.id,
                         permissions=ChatPermissions(can_send_messages=False),
                         until_date=mutetime,
                     )
-                    bot.sendMessage(
+                    await bot.sendMessage(
                         chat.id,
                         "{} muted for {} because using '{}' which in blacklist stickers".format(
                             mention_markdown(user.id, user.first_name), value, trigger,
@@ -480,21 +480,21 @@ def get_help(chat):
 
 
 BLACKLIST_STICKER_HANDLER = DisableAbleCommandHandler(
-    "blsticker", blackliststicker, admin_ok=True, run_async=True
+    "blsticker", blackliststicker, admin_ok=True, block=False
 )
 ADDBLACKLIST_STICKER_HANDLER = DisableAbleCommandHandler(
-    "addblsticker", add_blackliststicker, run_async=True
+    "addblsticker", add_blackliststicker, block=False
 )
 UNBLACKLIST_STICKER_HANDLER = CommandHandler(
-    ["unblsticker", "rmblsticker"], unblackliststicker, run_async=True
+    ["unblsticker", "rmblsticker"], unblackliststicker, block=False
 )
-BLACKLISTMODE_HANDLER = CommandHandler("blstickermode", blacklist_mode, run_async=True)
+BLACKLISTMODE_HANDLER = CommandHandler("blstickermode", blacklist_mode, block=False)
 BLACKLIST_STICKER_DEL_HANDLER = MessageHandler(
-    Filters.sticker & Filters.chat_type.groups, del_blackliststicker, run_async=True
+    filters.STICKER & filters.ChatType.GROUPS, del_blackliststicker, block=False
 )
 
-dispatcher.add_handler(BLACKLIST_STICKER_HANDLER)
-dispatcher.add_handler(ADDBLACKLIST_STICKER_HANDLER)
-dispatcher.add_handler(UNBLACKLIST_STICKER_HANDLER)
-dispatcher.add_handler(BLACKLISTMODE_HANDLER)
-dispatcher.add_handler(BLACKLIST_STICKER_DEL_HANDLER)
+application.add_handler(BLACKLIST_STICKER_HANDLER)
+application.add_handler(ADDBLACKLIST_STICKER_HANDLER)
+application.add_handler(UNBLACKLIST_STICKER_HANDLER)
+application.add_handler(BLACKLISTMODE_HANDLER)
+application.add_handler(BLACKLIST_STICKER_DEL_HANDLER)

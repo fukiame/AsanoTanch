@@ -29,7 +29,7 @@ if is_module_loaded(FILENAME):
     from telegram.error import BadRequest, Unauthorized
     from telegram.utils.helpers import escape_markdown
 
-    from tg_bot import BOT_LOGS, log, dispatcher
+    from tg_bot import BOT_LOGS, log, application
     from .sql import log_channel_sql as sql
  
 
@@ -95,7 +95,7 @@ if is_module_loaded(FILENAME):
     ):
         bot = context.bot
         try:
-            bot.send_message(
+            await bot.send_message(
                 log_chat_id,
                 result,
                 parse_mode=ParseMode.HTML,
@@ -103,7 +103,7 @@ if is_module_loaded(FILENAME):
             )
         except BadRequest as excp:
             if excp.message == "Chat not found":
-                bot.send_message(
+                await bot.send_message(
                     orig_chat_id, "This log channel has been deleted - unsetting."
                 )
                 sql.stop_chat_logging(orig_chat_id)
@@ -112,14 +112,14 @@ if is_module_loaded(FILENAME):
                 log.warning(result)
                 log.exception("Could not parse")
 
-                bot.send_message(
+                await bot.send_message(
                     log_chat_id,
                     result
                     + "\n\nFormatting has been disabled due to an unexpected error.",
                 )
         except Unauthorized as excp:
             if excp.message == "bot is not a member of the channel chat":
-                bot.send_message(
+                await bot.send_message(
                     orig_chat_id, "I don't have access to the log channel - unsetting."
                 )
                 sql.stop_chat_logging(orig_chat_id)
@@ -128,40 +128,40 @@ if is_module_loaded(FILENAME):
     @kigcmd(command='logchannel')
     @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @spamcheck
-    def logging(update: Update, context: CallbackContext):
+    async def logging(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot = context.bot
         message = update.effective_message
         chat = update.effective_chat
 
         log_channel = sql.get_chat_log_channel(chat.id)
         if log_channel:
-            log_channel_info = bot.get_chat(log_channel)
-            message.reply_text(
+            log_channel_info = await bot.get_chat(log_channel)
+            await message.reply_text(
                 f"This group has all it's logs sent to:"
                 f" {escape_markdown(log_channel_info.title)} (`{log_channel}`)",
                 parse_mode=ParseMode.MARKDOWN,
             )
 
         else:
-            message.reply_text("No log channel has been set for this group!")
+            await message.reply_text("No log channel has been set for this group!")
 
 
     @kigcmd(command='setlog')
     @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @spamcheck
-    def setlog(update: Update, context: CallbackContext):
+    async def setlog(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot = context.bot
         message = update.effective_message
         chat = update.effective_chat
         if chat.type == chat.CHANNEL:
-            message.reply_text(
+            await message.reply_text(
                 "Now, forward the /setlog to the group you want to tie this channel to!"
             )
 
         elif message.forward_from_chat:
             sql.set_chat_log_channel(chat.id, message.forward_from_chat.id)
             try:
-                message.delete()
+                await message.delete()
             except BadRequest as excp:
                 if excp.message != 'Message to delete not found':
                     log.exception(
@@ -169,20 +169,20 @@ if is_module_loaded(FILENAME):
                     )
 
             try:
-                bot.send_message(
+                await bot.send_message(
                     message.forward_from_chat.id,
                     f"This channel has been set as the log channel for {chat.title or chat.first_name}.",
                 )
             except Unauthorized as excp:
                 if excp.message == "Forbidden: bot is not a member of the channel chat":
-                    bot.send_message(chat.id, "Successfully set log channel!")
+                    await bot.send_message(chat.id, "Successfully set log channel!")
                 else:
                     log.exception("ERROR in setting the log channel.")
 
-            bot.send_message(chat.id, "Successfully set log channel!")
+            await bot.send_message(chat.id, "Successfully set log channel!")
 
         else:
-            message.reply_text(
+            await message.reply_text(
                 "The steps to set a log channel are:\n"
                 " - add bot to the desired channel\n"
                 " - send /setlog to the channel\n"
@@ -193,20 +193,20 @@ if is_module_loaded(FILENAME):
     @kigcmd(command='unsetlog')
     @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
     @spamcheck
-    def unsetlog(update: Update, context: CallbackContext):
+    async def unsetlog(update: Update, context: ContextTypes.DEFAULT_TYPE):
         bot = context.bot
         message = update.effective_message
         chat = update.effective_chat
 
         log_channel = sql.stop_chat_logging(chat.id)
         if log_channel:
-            bot.send_message(
+            await bot.send_message(
                 log_channel, f"Channel has been unlinked from {chat.title}"
             )
-            message.reply_text("Log channel has been un-set.")
+            await message.reply_text("Log channel has been un-set.")
 
         else:
-            message.reply_text("No log channel has been set yet!")
+            await message.reply_text("No log channel has been set yet!")
 
 
     def __stats__():
@@ -220,7 +220,7 @@ if is_module_loaded(FILENAME):
     def __chat_settings__(chat_id, user_id):
         log_channel = sql.get_chat_log_channel(chat_id)
         if log_channel:
-            log_channel_info = dispatcher.bot.get_chat(log_channel)
+            log_channel_info = await application.bot.get_chat(log_channel)
             return f"This group has all it's logs sent to: {escape_markdown(log_channel_info.title)} (`{log_channel}`)"
         return "No log channel is set for this group!"
 
@@ -251,7 +251,7 @@ else:
 
 @kigcmd("logsettings")
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def log_settings(update: Update, _: CallbackContext):
+async def log_settings(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     chat_set = sql.get_chat_setting(chat_id=chat.id)
     message = update.effective_message
@@ -282,7 +282,7 @@ from .sql import log_channel_sql as sql
 
 @kigcallback(pattern=r"log_tog_.*")
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, noreply=True)
-def log_setting_callback(update: Update, context: CallbackContext):
+async def log_setting_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     cb = update.callback_query
     user = cb.from_user
     chat = cb.message.chat

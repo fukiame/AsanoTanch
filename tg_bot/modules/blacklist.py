@@ -43,7 +43,7 @@ class BlacklistActions(IntEnum):
 @spamcheck
 @user_admin_check()
 @typing_action
-def blacklist(update, context):
+async def blacklist(update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     args = context.args
 
@@ -93,7 +93,7 @@ def blacklist(update, context):
 @bot_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @typing_action
-def add_blacklist(update, _):
+async def add_blacklist(update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     chat = update.effective_chat
     words = msg.text.split(None, 1)
@@ -157,7 +157,7 @@ def extract_bl_and_action(text: str) -> (str, BlacklistActions):
 @connection_status
 @bot_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def unblacklist(update, _):
+async def unblacklist(update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     chat = update.effective_chat
     words = msg.text.split(None, 1)
@@ -236,7 +236,7 @@ def unblacklist(update, _):
 @bot_admin_check(AdminPerms.CAN_RESTRICT_MEMBERS)
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @loggable
-def blacklist_mode(update, context):  # sourcery no-metrics
+async def blacklist_mode(update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     chat = update.effective_chat
     user = update.effective_user
     msg = update.effective_message
@@ -341,10 +341,10 @@ def findall(p, s):
         i = s.find(p, i + 1)
 
 
-@kigmsg(((Filters.text | Filters.command | Filters.sticker | Filters.photo | Filters.video | Filters.audio | Filters.document | Filters.animation | Filters.voice | Filters.video_note) & Filters.chat_type.groups),
+@kigmsg(((filters.TEXT | filters.COMMAND | filters.STICKER | filters.PHOTO | filters.VIDEO | filters.AUDIO | filters.DOCUMENT | filters.ANIMATION | filters.VOICE | filters.VIDEO_NOTE) & filters.ChatType.GROUPS),
         group=BLACKLIST_GROUP)
 @user_not_admin_check
-def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metrics
+async def del_blacklist(update: Update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     chat = update.effective_chat
     message = update.effective_message
     user = message.sender_chat or update.effective_user
@@ -369,9 +369,9 @@ def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metr
                     case 0:
                         return
                     case 1:
-                        message.delete()
+                        await message.delete()
                     case 2:
-                        message.delete()
+                        await message.delete()
                         warn(
                             update.effective_user,
                             update,
@@ -381,53 +381,53 @@ def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metr
                         )
                         return
                     case 3:
-                        message.delete()
-                        bot.restrict_chat_member(
+                        await message.delete()
+                        await bot.restrict_chat_member(
                             chat.id,
                             update.effective_user.id,
                             permissions=ChatPermissions(can_send_messages=False),
                         )
-                        bot.sendMessage(
+                        await bot.sendMessage(
                             chat.id,
                             f"Muted {user.first_name} for using Blacklisted word: {trigger}!",
                         )
                         return
                     case 4:
-                        message.delete()
+                        await message.delete()
                         res = chat.unban_member(update.effective_user.id)
                         if res:
-                            bot.sendMessage(
+                            await bot.sendMessage(
                                 chat.id,
                                 f"Kicked {user.first_name} for using Blacklisted word: {trigger}!",
                             )
                         return
                     case 5:
-                        message.delete()
+                        await message.delete()
                         chat.ban_member(user.id)
-                        bot.sendMessage(
+                        await bot.sendMessage(
                             chat.id,
                             f"Banned {user.first_name} for using Blacklisted word: {trigger}",
                         )
                         return
                     case 6:
-                        message.delete()
+                        await message.delete()
                         bantime = extract_time(message, value)
                         chat.ban_member(user.id, until_date=bantime)
-                        bot.sendMessage(
+                        await bot.sendMessage(
                             chat.id,
                             f"Banned {user.first_name} until '{value}' for using Blacklisted word: {trigger}!",
                         )
                         return
                     case 7:
-                        message.delete()
+                        await message.delete()
                         mutetime = extract_time(message, value)
-                        bot.restrict_chat_member(
+                        await bot.restrict_chat_member(
                             chat.id,
                             user.id,
                             until_date=mutetime,
                             permissions=ChatPermissions(can_send_messages=False),
                         )
-                        bot.sendMessage(
+                        await bot.sendMessage(
                             chat.id,
                             f"Muted {user.first_name} until '{value}' for using Blacklisted word: {trigger}!",
                         )
@@ -438,14 +438,14 @@ def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metr
             break
 
 
-@kigcmd(command=["removeallblacklists", "removeallblocklists", "unblacklistall"], filters=Filters.chat_type.groups)
+@kigcmd(command=["removeallblacklists", "removeallblocklists", "unblacklistall"], filters=filters.ChatType.GROUPS)
 @spamcheck
-def rmall_filters(update, context):
+async def rmall_filters(update, context: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
     user = update.effective_user
     member = chat.get_member(user.id)
     if member.status != "creator" and user.id not in SUDO_USERS:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Only the chat owner can clear all blacklists at once."
         )
     else:
@@ -459,7 +459,7 @@ def rmall_filters(update, context):
                 [InlineKeyboardButton(text="Cancel", callback_data="blacklists_cancel")],
             ]
         )
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Are you sure you would like to stop ALL blacklists in {chat.title}? This action cannot be undone.",
             reply_markup=buttons,
             parse_mode=ParseMode.MARKDOWN,
@@ -468,7 +468,7 @@ def rmall_filters(update, context):
 
 @kigcallback(pattern=r"blacklists_.*")
 @loggable
-def rmall_callback(update, context) -> str:
+async def rmall_callback(update, context: ContextTypes.DEFAULT_TYPE) -> str:
     query = update.callback_query
     chat = update.effective_chat
     msg = update.effective_message
@@ -500,21 +500,21 @@ def rmall_callback(update, context) -> str:
             return log_message
 
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
 
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            await query.answer("You need to be admin to do this.")
             return ""
     elif query.data == "blacklists_cancel":
         if member.status == "creator" or query.from_user.id in SUDO_USERS:
             msg.edit_text("Clearing of all filters has been cancelled.")
             return ""
         if member.status == "administrator":
-            query.answer("Only owner of the chat can do this.")
+            await query.answer("Only owner of the chat can do this.")
             return ""
         if member.status == "member":
-            query.answer("You need to be admin to do this.")
+            await query.answer("You need to be admin to do this.")
             return ""
 
 

@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from telegram.ext import CommandHandler, CallbackQueryHandler
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 import tg_bot.modules.sql.language_sql as sql
 from tg_bot.langs import get_string, get_languages, get_language
 
@@ -34,7 +34,7 @@ from .helper_funcs.admin_status import user_admin_check, AdminPerms
 
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
-def set_lang(update: Update, _) -> None:
+async def set_lang(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
     msg = update.effective_message
 
@@ -59,15 +59,15 @@ def set_lang(update: Update, _) -> None:
 
 
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, noreply=True)
-def lang_button(update: Update, _) -> None:
+async def lang_button(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     chat = update.effective_chat
 
-    query.answer()
-    lang = query.data.split("_")[1]
+    await query.answer()
+    lang = await query.data.split("_")[1]
     sql.set_lang(chat.id, lang)
 
-    query.message.edit_text(
+    await query.message.edit_text(
         gs(chat.id, "set_chat_lang").format(get_language(lang)[:-3])
     )
 
@@ -75,5 +75,5 @@ def lang_button(update: Update, _) -> None:
 SETLANG_HANDLER = CommandHandler("language", set_lang)
 SETLANG_BUTTON_HANDLER = CallbackQueryHandler(lang_button, pattern=r"setLang_")
 
-# dispatcher.add_handler(SETLANG_HANDLER)
-# dispatcher.add_handler(SETLANG_BUTTON_HANDLER)
+# application.add_handler(SETLANG_HANDLER)
+# application.add_handler(SETLANG_BUTTON_HANDLER)

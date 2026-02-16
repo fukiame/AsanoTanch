@@ -2,19 +2,19 @@
 import os
 from time import sleep
 
-from tg_bot import OWNER_ID, dispatcher
+from tg_bot import OWNER_ID, application
 from .helper_funcs.extraction import extract_user
 from .helper_funcs.chat_status import dev_plus
 from .sql.users_sql import get_user_com_chats
 from telegram import Update
 from telegram.error import BadRequest, RetryAfter, Unauthorized
 from telegram.ext import CallbackContext, CommandHandler, Filters
-from telegram.ext.dispatcher import run_async
+from telegram.ext.application import run_async
 from .helper_funcs.decorators import kigcmd
 
-@kigcmd(command="getchats", run_async=True)
+@kigcmd(command="getchats", block=False)
 @dev_plus
-def get_user_common_chats(update: Update, context: CallbackContext):
+async def get_user_common_chats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot, args = context.bot, context.args
     msg = update.effective_message
     user = extract_user(msg, args)
@@ -25,11 +25,11 @@ def get_user_common_chats(update: Update, context: CallbackContext):
     if not common_list:
         msg.reply_text("No common chats with this user!")
         return
-    name = bot.get_chat(user).first_name
+    name = await bot.get_chat(user).first_name
     text = f"<b>Common chats with {name}</b>\n"
     for chat in common_list:
         try:
-            chat_name = bot.get_chat(chat).title
+            chat_name = await bot.get_chat(chat).title
             sleep(0.3)
             text += f"• <code>{chat_name}</code>\n"
         except BadRequest:

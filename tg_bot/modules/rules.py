@@ -1,7 +1,7 @@
 from typing import Optional
 
 import tg_bot.modules.sql.rules_sql as sql
-from tg_bot import dispatcher, spamcheck
+from tg_bot import application, spamcheck
 from .helper_funcs.string_handling import markdown_parser
 from telegram import (
     InlineKeyboardButton,
@@ -28,24 +28,24 @@ from .helper_funcs.admin_status import (
 
 
 
-@kigcmd(command='rules', filters=Filters.chat_type.groups)
-def get_rules(update: Update, _: CallbackContext):
+@kigcmd(command='rules', filters=filters.ChatType.GROUPS)
+async def get_rules(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     send_rules(update, chat_id)
 
 
 # Do not async - not from a handler
 def send_rules(update, chat_id, from_pm=False):
-    bot = dispatcher.bot
+    bot = application.bot
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message
     try:
-        chat = bot.get_chat(chat_id)
+        chat = await bot.get_chat(chat_id)
     except BadRequest as excp:
         if excp.message != "Chat not found" or not from_pm:
             raise
 
-        bot.send_message(
+        await bot.send_message(
             user.id,
             "The rules shortcut for this chat hasn't been set properly! Ask admins to "
             "fix this.\nMaybe they forgot the hyphen in ID",
@@ -55,11 +55,11 @@ def send_rules(update, chat_id, from_pm=False):
     text = f"The rules for *{escape_markdown(chat.title)}* are:\n\n{rules}"
 
     if from_pm and rules:
-        bot.send_message(
+        await bot.send_message(
             user.id, text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True
         )
     elif from_pm:
-        bot.send_message(
+        await bot.send_message(
             user.id,
             "The group admins haven't set any rules for this chat yet. "
             "This probably doesn't mean it's lawless though...!",
@@ -76,21 +76,21 @@ def send_rules(update, chat_id, from_pm=False):
         )
         txt = "Please click the button below to see the rules."
         if not message.reply_to_message:
-            message.reply_text(txt, reply_markup=btn)
+            await message.reply_text(txt, reply_markup=btn)
 
         if message.reply_to_message:
-            message.reply_to_message.reply_text(txt, reply_markup=btn)
+            await message.reply_to_message.reply_text(txt, reply_markup=btn)
     else:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "The group admins haven't set any rules for this chat yet. "
             "This probably doesn't mean it's lawless though...!"
         )
 
 
-@kigcmd(command='setrules', filters=Filters.chat_type.groups)
+@kigcmd(command='setrules', filters=filters.ChatType.GROUPS)
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
-def set_rules(update: Update, context: CallbackContext):
+async def set_rules(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
@@ -106,20 +106,20 @@ def set_rules(update: Update, context: CallbackContext):
         )
 
         sql.set_rules(chat_id, markdown_rules)
-        update.effective_message.reply_text("Successfully set rules for this group.")
+        await update.effective_message.reply_text("Successfully set rules for this group.")
 
 
-@kigcmd(command='clearrules', filters=Filters.chat_type.groups)
+@kigcmd(command='clearrules', filters=filters.ChatType.GROUPS)
 @spamcheck
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO, allow_mods = True)
-def clear_rules(update: Update, context: CallbackContext):
+async def clear_rules(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
 
     sql.set_rules(chat_id, "")
-    update.effective_message.reply_text("Successfully cleared rules!")
+    await update.effective_message.reply_text("Successfully cleared rules!")
 
 
 def __stats__():

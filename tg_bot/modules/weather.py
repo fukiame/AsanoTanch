@@ -7,7 +7,7 @@ from requests import get
 from telegram import Bot, Update, ParseMode
 from telegram.ext import Updater, CommandHandler
 from telegram.ext import CallbackContext, run_async
-from tg_bot import WEATHER_API, dispatcher, spamcheck
+from tg_bot import WEATHER_API, application, spamcheck
 from .sql.clear_cmd_sql import get_clearcmd
 from .helper_funcs.misc import delete
 from .helper_funcs.decorators import kigcmd
@@ -24,7 +24,7 @@ def get_tz(con):
 
 @kigcmd(command='weather')
 @spamcheck
-def weather(update: Update, context: CallbackContext):
+async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     chat = update.effective_chat
     message = update.effective_message
@@ -56,7 +56,7 @@ def weather(update: Update, context: CallbackContext):
             request = get(url)
             result = json.loads(request.text)
         except ConnectionError:
-            return message.reply_text("Connection timed out! please try again later.")
+            return await message.reply_text("Connection timed out! please try again later.")
 
         if request.status_code != 200:
             msg = "No weather information for this location!"
@@ -176,7 +176,7 @@ def weather(update: Update, context: CallbackContext):
         msg =  "Please specify a city or country"
             
             
-    delmsg = message.reply_text(
+    delmsg = await message.reply_text(
         text=msg,
         parse_mode=ParseMode.MARKDOWN,
         disable_web_page_preview=True,
@@ -185,4 +185,4 @@ def weather(update: Update, context: CallbackContext):
     cleartime = get_clearcmd(chat.id, "weather")
 
     if cleartime:
-        context.dispatcher.run_async(delete, delmsg, cleartime.time)
+        context.application.run_async(delete, delmsg, cleartime.time)

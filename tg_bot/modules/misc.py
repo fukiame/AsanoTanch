@@ -14,7 +14,7 @@ from subprocess import Popen, PIPE
 from tg_bot import (
     MESSAGE_DUMP,
     MOD_USERS,
-    dispatcher,
+    application,
     OWNER_ID,
     SUDO_USERS,
     SUPPORT_USERS,
@@ -39,7 +39,7 @@ from platform import python_version
 from .helper_funcs.decorators import kigcmd, kigcallback
 
 MARKDOWN_HELP = f"""
-Markdown is a very powerful formatting tool supported by telegram. {dispatcher.bot.first_name} has some enhancements, to make sure that \
+Markdown is a very powerful formatting tool supported by telegram. {application.bot.first_name} has some enhancements, to make sure that \
 saved messages are correctly parsed, and to allow you to create buttons.
 
 - <code>_italic_</code>: wrapping text with '_' will produce italic text
@@ -61,15 +61,15 @@ This will create two buttons on a single line, instead of one button per line.
 
 Keep in mind that your message <b>MUST</b> contain some text other than just a button!
 """
-WHITELISTS = ([777000, 1087968824, dispatcher.bot.id, OWNER_ID, SYS_ADMIN] + DEV_USERS + SUDO_USERS + WHITELIST_USERS)
-ELEVATED = ([777000, 1087968824, dispatcher.bot.id, OWNER_ID, SYS_ADMIN] + DEV_USERS + SUDO_USERS + SUPPORT_USERS + WHITELIST_USERS + MOD_USERS)
+WHITELISTS = ([777000, 1087968824, application.bot.id, OWNER_ID, SYS_ADMIN] + DEV_USERS + SUDO_USERS + WHITELIST_USERS)
+ELEVATED = ([777000, 1087968824, application.bot.id, OWNER_ID, SYS_ADMIN] + DEV_USERS + SUDO_USERS + SUPPORT_USERS + WHITELIST_USERS + MOD_USERS)
 
 def mention_html_chat(chat_id: Union[int, str], name: str) -> str:
     return f'<a href="tg://t.me/{chat_id}">{html.escape(name)}</a>'
 
 @kigcmd(command='id', pass_args=True)
 @spamcheck
-def get_id(update: Update, context: CallbackContext):
+async def get_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot, args = context.bot, context.args
     message = update.effective_message
     chat = update.effective_chat
@@ -92,7 +92,7 @@ def get_id(update: Update, context: CallbackContext):
 
         else:
 
-            user = bot.get_chat(user_id)
+            user = await bot.get_chat(user_id)
             msg.reply_text(
 
                 f"<b>Telegram IDs:</b>\n"
@@ -115,27 +115,27 @@ def get_id(update: Update, context: CallbackContext):
 
 @kigcmd(command='gifid')
 @spamcheck
-def gifid(update: Update, _):
+async def gifid(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     if msg.reply_to_message and msg.reply_to_message.animation:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             f"Gif ID:\n<code>{msg.reply_to_message.animation.file_id}</code>",
             parse_mode=ParseMode.HTML,
         )
     else:
-        update.effective_message.reply_text("Please reply to a gif to get its ID.")
+        await update.effective_message.reply_text("Please reply to a gif to get its ID.")
 
 
 @kigcmd(command='whois', pass_args=True)
 @spamcheck
-def info(update: Update, context: CallbackContext):  # sourcery no-metrics
+async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     bot = context.bot
     args = context.args
     message = update.effective_message
     chat = update.effective_chat
     user_id = extract_user(update.effective_message, args)
     if user_id:
-        user = bot.get_chat(user_id)
+        user = await bot.get_chat(user_id)
     elif not message.reply_to_message and not args:
         user = message.sender_chat or message.from_user
     elif not message.reply_to_message and (
@@ -144,15 +144,15 @@ def info(update: Update, context: CallbackContext):  # sourcery no-metrics
             len(args) >= 1
             and not args[0].startswith("@")
             and not args[0].isdigit()
-            and not message.parse_entities([MessageEntity.TEXT_MENTION])
+            and not await message.parse_entities([MessageEntity.TEXT_MENTION])
         )
     ):
-        message.reply_text("I can't extract a user from this.")
+        await message.reply_text("I can't extract a user from this.")
         return
     else:
         return
 
-    temp = message.reply_text("<code>Checking Info...</code>", parse_mode=ParseMode.HTML)
+    temp = await message.reply_text("<code>Checking Info...</code>", parse_mode=ParseMode.HTML)
 
     if isinstance(user, User):
         text = get_user_info(user, chat)
@@ -165,14 +165,14 @@ def info(update: Update, context: CallbackContext):  # sourcery no-metrics
 
 @kigcmd(command=['info', 'u',], pass_args=True)
 @spamcheck
-def info(update: Update, context: CallbackContext):  # sourcery no-metrics
+async def info(update: Update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     bot = context.bot
     args = context.args
     message = update.effective_message
     chat = update.effective_chat
     user_id = extract_user(update.effective_message, args)
     if user_id:
-        user = bot.get_chat(user_id)
+        user = await bot.get_chat(user_id)
     elif not message.reply_to_message and not args:
         user = (
             message.sender_chat
@@ -185,15 +185,15 @@ def info(update: Update, context: CallbackContext):  # sourcery no-metrics
             len(args) >= 1
             and not args[0].startswith("@")
             and not args[0].lstrip("-").isdigit()
-            and not message.parse_entities([MessageEntity.TEXT_MENTION])
+            and not await message.parse_entities([MessageEntity.TEXT_MENTION])
         )
     ):
-        message.reply_text("I can't extract a user from this.")
+        await message.reply_text("I can't extract a user from this.")
         return
     else:
         return
 
-    temp = message.reply_text("<code>Checking Info...</code>", parse_mode=ParseMode.HTML)
+    temp = await message.reply_text("<code>Checking Info...</code>", parse_mode=ParseMode.HTML)
 
     if hasattr(user, 'type') and user.type != "private":
         text = get_chat_info(user)
@@ -205,7 +205,7 @@ def info(update: Update, context: CallbackContext):  # sourcery no-metrics
     )
 
 def get_user_info(user, chat, full_info=False):
-    bot = dispatcher.bot
+    bot = application.bot
     text = (
         f"<b>User Info:</b>\n"
         f"ㅤ<b>First Name:</b> {mention_html(user.id, user.first_name or 'None')}"
@@ -222,19 +222,19 @@ def get_user_info(user, chat, full_info=False):
         text += f"\nㅤ<b>Chats:</b> <code>{num_chats}</code>"
 
     if user.id == OWNER_ID:
-        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Owner</a>".format(escape_markdown(dispatcher.bot.username))
+        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Owner</a>".format(escape_markdown(application.bot.username))
     elif user.id == SYS_ADMIN:
         text += ""
     elif user.id in DEV_USERS:
-        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Developer</a>".format(escape_markdown(dispatcher.bot.username))
+        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Developer</a>".format(escape_markdown(application.bot.username))
     elif user.id in SUDO_USERS:
-        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Sudo</a>".format(escape_markdown(dispatcher.bot.username))
+        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Sudo</a>".format(escape_markdown(application.bot.username))
     elif user.id in SUPPORT_USERS:
-        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Support</a>".format(escape_markdown(dispatcher.bot.username))
+        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Support</a>".format(escape_markdown(application.bot.username))
     elif user.id in MOD_USERS:
-        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Moderator</a>".format(escape_markdown(dispatcher.bot.username))
+        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Moderator</a>".format(escape_markdown(application.bot.username))
     elif user.id in WHITELIST_USERS:
-        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Whitelist</a>".format(escape_markdown(dispatcher.bot.username))
+        text += "\nㅤ<b>User status:</b> <a href='https://t.me/{}?start=nations'>Whitelist</a>".format(escape_markdown(application.bot.username))
 
     if full_info:
         try:
@@ -256,7 +256,7 @@ def get_user_info(user, chat, full_info=False):
                             pass
 
             if user_member.status == "administrator":
-                result = bot.get_chat_member(chat.id, user.id).to_dict()
+                result = await bot.get_chat_member(chat.id, user.id).to_dict()
                 if "custom_title" in result.keys():
                     custom_title = result["custom_title"]
                     text += f"\nㅤ<b>Title:</b> <code>{custom_title}</code>"
@@ -295,13 +295,13 @@ def get_chat_info(user):
 
 @kigcmd(command='pfp', pass_args=True)
 @spamcheck
-def infopfp(update: Update, context: CallbackContext):  # sourcery no-metrics
+async def infopfp(update: Update, context: ContextTypes.DEFAULT_TYPE):  # sourcery no-metrics
     bot = context.bot
     args = context.args
     message = update.effective_message
     user_id = extract_user(update.effective_message, args)
     if user_id:
-        user = bot.get_chat(user_id)
+        user = await bot.get_chat(user_id)
 
     elif not message.reply_to_message and not args:
         user = message.from_user
@@ -312,16 +312,16 @@ def infopfp(update: Update, context: CallbackContext):  # sourcery no-metrics
             len(args) >= 1
             and not args[0].startswith("@")
             and not args[0].isdigit()
-            and not message.parse_entities([MessageEntity.TEXT_MENTION])
+            and not await message.parse_entities([MessageEntity.TEXT_MENTION])
         )
     ):
-        message.reply_text("I can't extract a user from this.")
+        await message.reply_text("I can't extract a user from this.")
         return
 
     else:
         return
 
-    #temp = message.reply_text("<code>Stealing this user's Profile picture...</code>", parse_mode=ParseMode.HTML)
+    #temp = await message.reply_text("<code>Stealing this user's Profile picture...</code>", parse_mode=ParseMode.HTML)
 
     text = (
         f"<b>User Info:</b>\n"
@@ -337,13 +337,13 @@ def infopfp(update: Update, context: CallbackContext):  # sourcery no-metrics
         text += "\nThis Person doesn't have a Profile picture\n"
     if INFOPIC:
         try:
-            profile = bot.get_user_profile_photos(user.id).photos[0][-1]
-            _file = bot.get_file(profile["file_id"])
+            profile = await bot.get_user_profile_photos(user.id).photos[0][-1]
+            _file = await bot.get_file(profile["file_id"])
 
             _file = _file.download(out=BytesIO())
             _file.seek(0)
 
-            message.reply_photo(
+            await message.reply_photo(
                 photo=_file,
                 caption=(text),
                 parse_mode=ParseMode.HTML,
@@ -351,7 +351,7 @@ def infopfp(update: Update, context: CallbackContext):  # sourcery no-metrics
 #    temp.delete()
         # Incase user don't have profile pic, send normal text
         except IndexError:
-            message.reply_text(
+            await message.reply_text(
                 text, parse_mode=ParseMode.HTML, disable_web_page_preview=True
             )
 
@@ -359,16 +359,16 @@ def infopfp(update: Update, context: CallbackContext):  # sourcery no-metrics
 
 @kigcmd(command='echo', pass_args=True)
 @sudo_plus
-def echo(update: Update, _):
-    args = update.effective_message.text.split(None, 1)
+async def echo(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    args = await update.effective_message.text.split(None, 1)
     message = update.effective_message
 
     if message.reply_to_message:
-        message.reply_to_message.reply_text(args[1])
+        await message.reply_to_message.reply_text(args[1])
     else:
-        message.reply_text(args[1], quote=False)
+        await message.reply_text(args[1], quote=False)
     try:
-        message.delete()
+        await message.delete()
     except BadRequest:
         pass
 
@@ -377,15 +377,15 @@ def shell(command):
     stdout, stderr = process.communicate()
     return (stdout, stderr)
 
-bot_firstname = dispatcher.bot.first_name.split(" ")[0]
-@kigcmd(command='markdownhelp', filters=Filters.chat_type.private)
-def markdown_help(update: Update, _):
+bot_firstname = await application.bot.first_name.split(" ")[0]
+@kigcmd(command='markdownhelp', filters=filters.ChatType.PRIVATE)
+async def markdown_help(update: Update, _: ContextTypes.DEFAULT_TYPE):
     chat = update.effective_chat
-    update.effective_message.reply_text((gs(chat.id, "markdown_help_text".format(bot_firstname))), parse_mode=ParseMode.HTML)
-    update.effective_message.reply_text(
+    await update.effective_message.reply_text((gs(chat.id, "markdown_help_text".format(bot_firstname))), parse_mode=ParseMode.HTML)
+    await update.effective_message.reply_text(
         "Try forwarding the following message to me, and you'll see!"
     )
-    update.effective_message.reply_text(
+    await update.effective_message.reply_text(
         "/save test This is a markdown test. _italics_, *bold*, `code`, "
         "[URL](example.com) [button](buttonurl:github.com) "
         "[button2](buttonurl://google.com:same)"
@@ -420,7 +420,7 @@ stats_str = '''
 
 @kigcmd(command='uptime', can_disable=False)
 @sudo_plus
-def uptimee(update: Update, _):
+async def uptimee(update: Update, _: ContextTypes.DEFAULT_TYPE):
     uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     botuptime = get_readable_time((time.time() - StartTime))
     msg = update.effective_message
@@ -430,7 +430,7 @@ def uptimee(update: Update, _):
 
 @kigcmd(command='stats', can_disable=False)
 @dev_plus
-def stats(update, context):
+async def stats(update, context: ContextTypes.DEFAULT_TYPE):
     db_size = SESSION.execute("SELECT pg_size_pretty(pg_database_size(current_database()))").scalar_one_or_none()
     uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     botuptime = get_readable_time((time.time() - StartTime))
@@ -465,14 +465,14 @@ def stats(update, context):
         status += f"*• Commit*: `{str(e)}`\\n"
 
     try:
-        update.effective_message.reply_text(status +
+        await update.effective_message.reply_text(status +
             "\n*╒═══「 Bot statistics: 」*\n"
             + "\n".join([mod.__stats__() for mod in STATS])
             + "\n\n⍙ [GitHub](https://github.com/itsLuuke) ⍚ [OdinRobot](https://github.com/OdinRobot) \n\n"
             + "╘══「 by [ルーク](https://t.me/itsLuuke) 」\n",
         parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(kb), disable_web_page_preview=True)
     except BaseException:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             (
                 (
                     (
@@ -490,29 +490,29 @@ def stats(update, context):
 
 @kigcmd(command='ping')
 @sudo_plus
-def ping(update: Update, _):
+async def ping(update: Update, _: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     start_time = time.time()
     message = msg.reply_text("Pinging...")
     end_time = time.time()
     ping_time = round((end_time - start_time) * 1000, 3)
-    message.edit_text(
+    await message.edit_text(
         "*Pong!!!*\n`{}ms`".format(ping_time), parse_mode=ParseMode.MARKDOWN
     )
 
 
 @kigcallback(pattern=r'^pingCB')
-def pingCallback(update: Update, context: CallbackContext):
+async def pingCallback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     user = query.from_user.id
     if user != (OWNER_ID|SYS_ADMIN) and user not in SUDO_USERS:
-        query.answer('Not authorised to use this!')
+        await query.answer('Not authorised to use this!')
     else:
         start_time = time.time()
         requests.get('https://api.telegram.org')
         end_time = time.time()
         ping_time = round((end_time - start_time) * 1000, 3)
-        query.answer('Telegram API Responce: {}ms'.format(ping_time))
+        await query.answer('Telegram API Responce: {}ms'.format(ping_time))
 
 
 def get_help(chat):

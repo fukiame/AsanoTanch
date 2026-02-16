@@ -19,7 +19,7 @@ import tg_bot.modules.sql.logger_sql as sql
 @connection_status
 @user_admin_check(AdminPerms.CAN_CHANGE_INFO)
 @loggable
-def announcestat(update: Update, context: CallbackContext) -> str:
+async def announcestat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     args = context.args
     if len(args) > 0:
         user = update.effective_user
@@ -27,7 +27,7 @@ def announcestat(update: Update, context: CallbackContext) -> str:
 
         if args[0].lower() in ["on", "yes", "true"]:
             sql.enable_chat_log(update.effective_chat.id)
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 "I've enabled announcements in this group. Now any admin actions in your group will be announced."
             )
             logmsg = (
@@ -40,7 +40,7 @@ def announcestat(update: Update, context: CallbackContext) -> str:
 
         elif args[0].lower() in ["off", "no", "false"]:
             sql.disable_chat_log(update.effective_chat.id)
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 "I've disabled announcements in this group. Now admin actions in your group will not be announced."
             )
             logmsg = (
@@ -51,7 +51,7 @@ def announcestat(update: Update, context: CallbackContext) -> str:
             )
             return logmsg
     else:
-        update.effective_message.reply_text(
+        await update.effective_message.reply_text(
             "Give me some arguments to choose a setting! on/off, yes/no!\n\n"
             "Your current setting is: {}\n"
             "When True, any admin actions in your group will be announced."

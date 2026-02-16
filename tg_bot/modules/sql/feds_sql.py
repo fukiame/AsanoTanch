@@ -5,7 +5,7 @@ from sqlalchemy.sql.sqltypes import BigInteger
 from sqlalchemy.exc import DataError
 from telegram.error import BadRequest, Unauthorized
 
-from tg_bot import dispatcher
+from tg_bot import application
 from tg_bot.modules.sql import SESSION, BASE
 
 
@@ -688,7 +688,7 @@ def get_fed_log(fed_id):
         return False
     elif fed_setting.get("flog"):
         try:
-            dispatcher.bot.get_chat(fed_setting.get("flog"))
+            await application.bot.get_chat(fed_setting.get("flog"))
         except BadRequest:
             set_fed_log(fed_id, None)
             return False

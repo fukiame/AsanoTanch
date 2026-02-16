@@ -16,7 +16,7 @@ from .helper_funcs.decorators import kigcmd, register, kigcallback
 
 @kigcmd(command='leave')
 @dev_plus
-def leave(update: Update, context: CallbackContext):
+async def leave(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
 
     if args := context.args:
@@ -24,24 +24,24 @@ def leave(update: Update, context: CallbackContext):
         leave_msg = " ".join(args[1:])
         try:
             if len(leave_msg) >= 1:
-                context.bot.send_message(chat_id, leave_msg)
-            bot.leave_chat(int(chat_id))
+                await context.bot.send_message(chat_id, leave_msg)
+            await bot.leave_chat(int(chat_id))
             try:
-                update.effective_message.reply_text("Left chat.")
+                await update.effective_message.reply_text("Left chat.")
             except Unauthorized:
                 pass
         except TelegramError:
-            update.effective_message.reply_text("Failed to leave chat for some reason.")
+            await update.effective_message.reply_text("Failed to leave chat for some reason.")
     elif update.effective_message.chat.type != "private":
         chat = update.effective_chat
         # user = update.effective_user
         kb = [[
             InlineKeyboardButton(text="I am sure of this action.", callback_data="leavechat_cb_({})".format(chat.id))
         ]]
-        update.effective_message.reply_text("I'm going to leave {}, press the button below to confirm".format(chat.title), reply_markup=InlineKeyboardMarkup(kb))
+        await update.effective_message.reply_text("I'm going to leave {}, press the button below to confirm".format(chat.title), reply_markup=InlineKeyboardMarkup(kb))
 
-@kigcallback(pattern=r"leavechat_cb_", run_async=True)
-def leave_cb(update: Update, context: CallbackContext):
+@kigcallback(pattern=r"leavechat_cb_", block=False)
+async def leave_cb(update: Update, context: ContextTypes.DEFAULT_TYPE):
     bot = context.bot
     callback = update.callback_query
     if callback.from_user.id not in DEV_USERS:
@@ -51,12 +51,12 @@ def leave_cb(update: Update, context: CallbackContext):
     match = re.match(r"leavechat_cb_\((.+?)\)", callback.data)
     chat = int(match.group(1))
     callback.edit_message_text("I'm outa here.")
-    bot.leave_chat(chat_id=chat)
+    await bot.leave_chat(chat_id=chat)
 
 @kigcmd(command='gitpull')
 @dev_plus
-def gitpull(update: Update, context: CallbackContext):
-    sent_msg = update.effective_message.reply_text(
+async def gitpull(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    sent_msg = await update.effective_message.reply_text(
         "Pulling all changes from remote and then attempting to restart."
     )
     subprocess.Popen("git pull", stdout=subprocess.PIPE, shell=True)
@@ -73,8 +73,8 @@ def gitpull(update: Update, context: CallbackContext):
 
 @kigcmd(command='restart')
 @dev_plus
-def restart(update: Update, context: CallbackContext):
-    update.effective_message.reply_text(
+async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.effective_message.reply_text(
         "Starting a new instance and shutting down this one"
     )
 
@@ -90,11 +90,11 @@ async def getstats(event):
 
 @kigcmd(command='pipinstall')
 @dev_plus
-def pip_install(update: Update, context: CallbackContext):
+async def pip_install(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message = update.effective_message
     args = context.args
     if not args:
-        message.reply_text("Enter a package name.")
+        await message.reply_text("Enter a package name.")
         return
     if len(args) >= 1:
         cmd = "py -m pip install {}".format(' '.join(args))
@@ -110,38 +110,38 @@ def pip_install(update: Update, context: CallbackContext):
         if stderr:
             reply += f"*Stderr*\n`{stderr}`\n"
 
-        message.reply_text(text=reply, parse_mode=ParseMode.MARKDOWN)
+        await message.reply_text(text=reply, parse_mode=ParseMode.MARKDOWN)
 
 @kigcmd(command='lockdown')
 @dev_plus
-def allow_groups(update: Update, context: CallbackContext):
+async def allow_groups(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
     global ALLOW_CHATS
     if not args:
         state = "Lockdown is " + "on" if not ALLOW_CHATS else "off"
-        update.effective_message.reply_text(f"Current state: {state}")
+        await update.effective_message.reply_text(f"Current state: {state}")
         return
     if args[0].lower() in ["off", "no"]:
         ALLOW_CHATS = True
     elif args[0].lower() in ["yes", "on"]:
         ALLOW_CHATS = False
     else:
-        update.effective_message.reply_text("Format: /lockdown Yes/No or Off/On")
+        await update.effective_message.reply_text("Format: /lockdown Yes/No or Off/On")
         return
-    update.effective_message.reply_text("Done! lockdown value toggled.")
+    await update.effective_message.reply_text("Done! lockdown value toggled.")
 
 @kigcmd(command='getinfo') # todo: flood fed rules gbanstat locks? reports
 # ! make as chat and get current if possible
 # ? spacing?
 @dev_plus      
-def get_chat_by_id(update: Update, context: CallbackContext):
+async def get_chat_by_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.effective_message
     args = context.args
     if not args:
         msg.reply_text("<i>Chat ID required</i>", parse_mode=ParseMode.HTML)
         return
     if len(args) >= 1:
-        data = context.bot.get_chat(args[0])
+        data = await context.bot.get_chat(args[0])
         m = "<b>Found chat, below are the details.</b>\n\n"
         m += "<b>Title</b>: {}\n".format(html.escape(data.title))
         m += "<b>Members</b>: {}\n\n".format(data.get_member_count())

@@ -6,7 +6,7 @@ from tg_bot import (
     SUDO_USERS,
     SUPPORT_USERS,
     WHITELIST_USERS,
-    dispatcher,
+    application,
     MOD_USERS
 )
 
@@ -47,11 +47,11 @@ def dev_plus(func):
             pass
         elif DEL_CMDS and " " not in update.effective_message.text:
             try:
-                update.effective_message.delete()
+                await update.effective_message.delete()
             except TelegramError:
                 pass
         else:
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 "This is a developer restricted command."
                 " You do not have permissions to run this."
             )
@@ -71,11 +71,11 @@ def sudo_plus(func):
             pass
         elif DEL_CMDS and " " not in update.effective_message.text:
             try:
-                update.effective_message.delete()
+                await update.effective_message.delete()
             except TelegramError:
                 pass
         else:
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 "This command is restricted to users with special access, you can't use it."
             )
 
@@ -92,7 +92,7 @@ def support_plus(func):
             return func(update, context, *args, **kwargs)
         elif DEL_CMDS and " " not in update.effective_message.text:
             try:
-                update.effective_message.delete()
+                await update.effective_message.delete()
             except TelegramError:
                 pass
 
@@ -109,7 +109,7 @@ def whitelist_plus(func):
         if user and is_whitelist_plus(user.id):
             return func(update, context, *args, **kwargs)
         else:
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                 "You don't have access to use this.\nVisit @TheBotsSupport"
             )
 
@@ -128,11 +128,11 @@ def connection_status(func):
                 update.effective_user.id,
                 need_admin=False,
         ):
-            chat = dispatcher.bot.getChat(conn)
-            update.__setattr__("_effective_chat", chat)
+            chat = await application.bot.getChat(conn)
+            await update.__setattr__("_effective_chat", chat)
             return func(update, context, *args, **kwargs)
         elif update.effective_message.chat.type == "private":
-            update.effective_message.reply_text(
+            await update.effective_message.reply_text(
                     "Send /connect in a group that you and I have in common first."
             )
             return connected_status

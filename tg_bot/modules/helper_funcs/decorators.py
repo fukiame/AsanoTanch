@@ -3,13 +3,13 @@ from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from tg_bot.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
 from telegram.ext import CallbackQueryHandler, InlineQueryHandler
 from telegram.ext.filters import BaseFilter, Filters
-from tg_bot import dispatcher as d, log, OWNER_ID
+from tg_bot import application as d, log, OWNER_ID
 from typing import Optional, Union, List
 from tg_bot.modules.helper_funcs.handlers import CustomCommandHandler as CommandHandler, CustomMessageHandler as MessageHandler
 import traceback, html, requests
 class KigyoTelegramHandler:
     def __init__(self, d):
-        self._dispatcher = d
+        self._application = d
 
     def command(
             self, command: str, filters: Optional[BaseFilter] = None, admin_ok: bool = False, pass_args: bool = False,
@@ -17,29 +17,29 @@ class KigyoTelegramHandler:
             group: Optional[int] = 40
     ):
         if filters:
-           filters = filters & ~Filters.update.edited_message
+           filters = filters & ~filters.Update.edited_message
         else:
-            filters = ~Filters.update.edited_message
+            filters = ~filters.Update.edited_message
         def _command(func):
             try:
                 if can_disable:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         DisableAbleCommandHandler(command, func, filters=filters, run_async=run_async,
                                                   pass_args=pass_args, admin_ok=admin_ok), group
                     )
                 else:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         CommandHandler(command, func, filters=filters, run_async=run_async, pass_args=pass_args), group
                     )
                 log.debug(f"[KIGCMD] Loaded handler {command} for function {func.__name__} in group {group}")
             except TypeError:
                 if can_disable:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         DisableAbleCommandHandler(command, func, filters=filters, run_async=run_async,
                                                   pass_args=pass_args, admin_ok=admin_ok, pass_chat_data=pass_chat_data)
                     )
                 else:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         CommandHandler(command, func, filters=filters, run_async=run_async, pass_args=pass_args,
                                        pass_chat_data=pass_chat_data)
                     )
@@ -52,27 +52,27 @@ class KigyoTelegramHandler:
     def message(self, pattern: Optional[BaseFilter] = None, can_disable: bool = True, run_async: bool = True,
                 group: Optional[int] = 60, friendly=None):
         if pattern:
-           pattern = pattern & ~Filters.update.edited_message
+           pattern = pattern & ~filters.Update.edited_message
         else:
-           pattern = ~Filters.update.edited_message
+           pattern = ~filters.Update.edited_message
         def _message(func):
             try:
                 if can_disable:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         DisableAbleMessageHandler(pattern, func, friendly=friendly, run_async=run_async), group
                     )
                 else:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         MessageHandler(pattern, func, run_async=run_async), group
                     )
                 log.debug(f"[KIGMSG] Loaded filter pattern {pattern} for function {func.__name__} in group {group}")
             except TypeError:
                 if can_disable:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         DisableAbleMessageHandler(pattern, func, friendly=friendly, run_async=run_async)
                     )
                 else:
-                    self._dispatcher.add_handler(
+                    self._application.add_handler(
                         MessageHandler(pattern, func, run_async=run_async)
                     )
                 log.debug(f"[KIGMSG] Loaded filter pattern {pattern} for function {func.__name__}")
@@ -83,7 +83,7 @@ class KigyoTelegramHandler:
 
     def callbackquery(self, pattern: str = None, run_async: bool = True):
         def _callbackquery(func):
-            self._dispatcher.add_handler(CallbackQueryHandler(pattern=pattern, callback=func, run_async=run_async))
+            self._application.add_handler(CallbackQueryHandler(pattern=pattern, callback=func, run_async=run_async))
             log.debug(f'[KIGCALLBACK] Loaded callbackquery handler with pattern {pattern} for function {func.__name__}')
             return func
 
@@ -92,7 +92,7 @@ class KigyoTelegramHandler:
     def inlinequery(self, pattern: Optional[str] = None, run_async: bool = True, pass_user_data: bool = True,
                     pass_chat_data: bool = True, chat_types: List[str] = None):
         def _inlinequery(func):
-            self._dispatcher.add_handler(
+            self._application.add_handler(
                 InlineQueryHandler(pattern=pattern, callback=func, run_async=run_async, pass_user_data=pass_user_data,
                                    pass_chat_data=pass_chat_data, chat_types=chat_types))
             log.debug(

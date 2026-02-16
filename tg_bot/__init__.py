@@ -177,7 +177,7 @@ from tg_bot.modules.sql import SESSION
 
 updater: Updater = tg.Updater(token=TOKEN, base_url=KInit.BOT_API_URL, base_file_url=KInit.BOT_API_FILE_URL, workers=min(32, os.cpu_count() + 4), request_kwargs={"read_timeout": 10, "connect_timeout": 10})
 
-dispatcher: Dispatcher = updater.dispatcher
+application: Dispatcher = updater.application
 j: JobQueue = updater.job_queue
 
 
@@ -217,8 +217,8 @@ def spamcheck(func):
         elif int(user.id) in SPAMMERS:
             return False
         elif str(chat.id) in GROUP_BLACKLIST:
-            dispatcher.bot.sendMessage(chat.id, "This group is blacklisted, I'm outa here...")
-            dispatcher.bot.leaveChat(chat.id)
+            await application.bot.sendMessage(chat.id, "This group is blacklisted, I'm outa here...")
+            await application.bot.leaveChat(chat.id)
             return False
         return func(update, context, *args, **kwargs)
     return check_user

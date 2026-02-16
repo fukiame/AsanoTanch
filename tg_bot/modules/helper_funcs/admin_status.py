@@ -9,7 +9,7 @@ from threading import RLock
 from telegram import Chat, Update, ChatMember
 from telegram.ext import CallbackContext as Ctx, CallbackQueryHandler as CBHandler
 
-from tg_bot import dispatcher
+from tg_bot import application
 
 from .admin_status_helpers import (
 	ADMINS_CACHE as A_CACHE,
@@ -42,7 +42,7 @@ def get_bot_member(chat_id: int) -> ChatMember:
 	try:
 		return B_CACHE[chat_id]
 	except KeyError:
-		mem = dispatcher.bot.getChatMember(chat_id, dispatcher.bot.id)
+		mem = await application.bot.getChatMember(chat_id, application.bot.id)
 		B_CACHE[chat_id] = mem
 		return mem
 
@@ -58,26 +58,26 @@ def bot_admin_check(permission: AdminPerms = None):
 			chat = update.effective_chat
 			if chat.type == "private" or chat.all_members_are_administrators:
 				return func(update, context, *args, **kwargs)
-			bot_id = dispatcher.bot.id
+			bot_id = application.bot.id
 
 			try:  # try to get from cache
 				bot_member = B_CACHE[chat.id]
 			except KeyError:  # if not in cache, get from API and save to cache
-				bot_member = dispatcher.bot.getChatMember(chat.id, bot_id)
+				bot_member = await application.bot.getChatMember(chat.id, bot_id)
 				B_CACHE[chat.id] = bot_member
 
 			if permission:  # if a perm is required, check for it
 				if getattr(bot_member, permission.value):
 					func(update, context, *args, **kwargs)
 					return
-				return update.effective_message.reply_text(
+				return await update.effective_message.reply_text(
 						f"I can't perform this action due to missing permissions;\n"
 						f"Make sure i am an admin and {permission.name.lower().replace('is_', 'am ').replace('_', ' ')}!")
 
 			if bot_member.status == "administrator":  # if no perm is required, check for admin-ship only
 				return func(update, context, *args, **kwargs)
 			else:  # not admin
-				return update.effective_message.reply_text("I can't perform this action because I'm not admin!")
+				return await update.effective_message.reply_text("I can't perform this action because I'm not admin!")
 
 		return wrapped
 
@@ -127,7 +127,7 @@ def get_mem_from_cache(user_id: int, chat_id: int) -> ChatMember:
 					return i
 
 		except KeyError:
-			admins = dispatcher.bot.getChatAdministrators(chat_id)
+			admins = await application.bot.getChatAdministrators(chat_id)
 			A_CACHE[chat_id] = admins
 			for i in admins:
 				if i.user.id == user_id:
@@ -224,4 +224,4 @@ def perm_callback_check(upd: Update, _: Ctx):
 	return cb[1](cb[0][0], cb[0][1])  # return func(update, context)
 
 
-dispatcher.add_handler(CBHandler(perm_callback_check, pattern = "anonCB", run_async=True))
+application.add_handler(CBHandler(perm_callback_check, pattern = "anonCB", block=False))

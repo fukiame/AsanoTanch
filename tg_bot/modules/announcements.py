@@ -12,7 +12,7 @@ from telegram.ext import CallbackContext
 from telegram.ext.chatmemberhandler import ChatMemberHandler
 
 import tg_bot.modules.sql.log_channel_sql as logsql
-from tg_bot import OWNER_ID, dispatcher
+from tg_bot import OWNER_ID, application
 from tg_bot.modules.log_channel import loggable
 
 import tg_bot.modules.sql.logger_sql as sql
@@ -40,7 +40,7 @@ def do_announce(chat):  # announce to chat or only to log channel?
 
 
 @loggable
-def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]:
+async def chatmemberupdates(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Optional[str]:
     bot = context.bot
     chat = update.effective_chat
     message = update.effective_message
@@ -54,8 +54,8 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
     if title_change is not None and status_change is None:  # extract title changes for admins
         oldtitle, newtitle = title_change
-        cause_name = update.chat_member.from_user.mention_html()
-        member_name = update.chat_member.new_chat_member.user.mention_html()
+        cause_name = await update.chat_member.from_user.mention_html()
+        member_name = await update.chat_member.new_chat_member.user.mention_html()
         if oldtitle != newtitle:
 
             if str(update.chat_member.from_user.id) == str(bot.id):  # bot action
@@ -64,7 +64,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
                 if oldtitle is None:
                     if do_announce(chat):
-                        update.effective_chat.send_message(
+                        await update.effective_chat.send_message(
                             f"{member_name}'s title was set by {cause_name}.\nold title: {oldtitle}\nnew title: '<code>{newtitle}</code>'",
                             parse_mode=ParseMode.HTML,
                         )
@@ -80,7 +80,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
                 elif newtitle is None:
                     if do_announce(chat):
-                        update.effective_chat.send_message(
+                        await update.effective_chat.send_message(
                             f"{member_name}'s title was removed by {cause_name}.\nold title: '<code>{oldtitle}</code"
                             f">'\nnew title: {newtitle}",
                             parse_mode=ParseMode.HTML,
@@ -97,7 +97,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
                 else:
                     if do_announce(chat):
-                        update.effective_chat.send_message(
+                        await update.effective_chat.send_message(
                             f"{member_name}'s title was changed by {cause_name}.\nold title: '<code>{oldtitle}</code"
                             f">'\nnew title: '<code>{newtitle}</code>'",
                             parse_mode=ParseMode.HTML,
@@ -121,12 +121,12 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
             return ''  # we handle these in their respective modules same as before
         else:
 
-            cause_name = update.chat_member.from_user.mention_html()
-            member_name = update.chat_member.new_chat_member.user.mention_html()
+            cause_name = await update.chat_member.from_user.mention_html()
+            member_name = await update.chat_member.new_chat_member.user.mention_html()
 
             if oldstat == "administrator" and newstat == "member":
                 if do_announce(chat):
-                    update.effective_chat.send_message(
+                    await update.effective_chat.send_message(
                         f"{member_name} was demoted by {cause_name}.",
                         parse_mode=ParseMode.HTML,
                     )
@@ -144,7 +144,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
             if oldstat == "administrator" and newstat == "kicked":
                 if do_announce(chat):
-                    update.effective_chat.send_message(
+                    await update.effective_chat.send_message(
                         f"{member_name} was demoted and removed by {cause_name}.",
                         parse_mode=ParseMode.HTML,
                     )
@@ -179,7 +179,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
                     oldtitle, newtitle = title_change
                     if oldtitle != newtitle:
                         if do_announce(chat):
-                            update.effective_chat.send_message(
+                            await update.effective_chat.send_message(
                                 f"{member_name} was promoted by {cause_name} with the title <code>{newtitle}</code>.",
                                 parse_mode=ParseMode.HTML,
                             )
@@ -198,7 +198,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
                 else:
                     if do_announce(chat):
-                        update.effective_chat.send_message(
+                        await update.effective_chat.send_message(
                             f"{member_name} was promoted by {cause_name}.",
                             parse_mode=ParseMode.HTML,
                         )
@@ -216,7 +216,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
             if oldstat != "restricted" and newstat == "restricted":
                 if do_announce(chat):
-                    update.effective_chat.send_message(
+                    await update.effective_chat.send_message(
                         f"{member_name} was muted by {cause_name}.",
                         parse_mode=ParseMode.HTML,
                     )
@@ -234,7 +234,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
             if oldstat == "restricted" and newstat != "restricted":
                 if do_announce(chat):
-                    update.effective_chat.send_message(
+                    await update.effective_chat.send_message(
                         f"{member_name} was unmuted by {cause_name}.",
                         parse_mode=ParseMode.HTML,
                     )
@@ -251,13 +251,13 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
                 return log_message
 
         if str(update.chat_member.from_user.id) == str(bot.id):
-            cause_name = message.from_user.mention_html()
+            cause_name = await message.from_user.mention_html()
         else:
-            cause_name = update.chat_member.from_user.mention_html()
+            cause_name = await update.chat_member.from_user.mention_html()
 
         if oldstat != "kicked" and newstat == "kicked":
             if do_announce(chat):
-                update.effective_chat.send_message(
+                await update.effective_chat.send_message(
                     f"{member_name} was banned by {cause_name}.",
                     parse_mode=ParseMode.HTML,
                 )
@@ -275,7 +275,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
         if oldstat == "kicked" and newstat != "kicked":
             if do_announce(chat):
-                update.effective_chat.send_message(
+                await update.effective_chat.send_message(
                     f"{member_name} was unbanned by {cause_name}.",
                     parse_mode=ParseMode.HTML,
                 )
@@ -293,7 +293,7 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
 
         if oldstat == "kicked" and newstat == "member":
             if do_announce(chat):
-                update.effective_chat.send_message(
+                await update.effective_chat.send_message(
                     f"{member_name} was unbanned and added by {cause_name}.",
                     parse_mode=ParseMode.HTML,
                 )
@@ -365,12 +365,12 @@ def chatmemberupdates(update: Update, context: CallbackContext) -> Optional[str]
                 )
                 return log_message
 
-def mychatmemberupdates(update: Update, _: CallbackContext):
+async def mychatmemberupdates(update: Update, _: ContextTypes.DEFAULT_TYPE):
     result = extract_status_change(update.my_chat_member)
     status_change, _1 = result
     chat = update.effective_chat
     chatname = chat.title or chat.first_name or 'None'
-    cause_name = update.effective_user.mention_html() if update.effective_user else "Unknown"
+    cause_name = await update.effective_user.mention_html() if update.effective_user else "Unknown"
     if status_change is not None:
         status = ','.join(status_change)
         oldstat = str(status.split(",")[0])
@@ -384,9 +384,9 @@ def mychatmemberupdates(update: Update, _: CallbackContext):
                 f"<b>ID</b>: <code>{update.effective_user.id}</code>\n"
                 f"<b>Chat ID</b>: <code>{update.effective_chat.id}</code>"
             )
-            dispatcher.bot.send_message(OWNER_ID, new_group, parse_mode=ParseMode.HTML)
+            await application.bot.send_message(OWNER_ID, new_group, parse_mode=ParseMode.HTML)
 
-def admincacheupdates(update: Update, _: CallbackContext):
+async def admincacheupdates(update: Update, _: ContextTypes.DEFAULT_TYPE):
     try:
         oldstat = update.chat_member.old_chat_member.status
         newstat = update.chat_member.new_chat_member.status
@@ -399,18 +399,18 @@ def admincacheupdates(update: Update, _: CallbackContext):
         and newstat == "administrator"
     ):
 
-        A_CACHE[update.effective_chat.id] = update.effective_chat.get_administrators()
-        # B_CACHE[update.effective_chat.id] = update.effective_chat.get_member(dispatcher.bot.id)
+        A_CACHE[update.effective_chat.id] = await update.effective_chat.get_administrators()
+        # B_CACHE[update.effective_chat.id] = await update.effective_chat.get_member(application.bot.id)
 
 
-def botstatchanged(update: Update, _: CallbackContext):
+async def botstatchanged(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if update.effective_chat.type != "private":
         try:
-            B_CACHE[update.effective_chat.id] = update.effective_chat.get_member(dispatcher.bot.id)
+            B_CACHE[update.effective_chat.id] = await update.effective_chat.get_member(application.bot.id)
         except TelegramError:
             pass
 
-dispatcher.add_handler(ChatMemberHandler(chatmemberupdates, ChatMemberHandler.CHAT_MEMBER, run_async=True), group=-21)
-dispatcher.add_handler(ChatMemberHandler(mychatmemberupdates, ChatMemberHandler.MY_CHAT_MEMBER, run_async=True), group=-23)
-dispatcher.add_handler(ChatMemberHandler(botstatchanged, ChatMemberHandler.MY_CHAT_MEMBER, run_async=True), group=-25)
-dispatcher.add_handler(ChatMemberHandler(admincacheupdates, ChatMemberHandler.CHAT_MEMBER, run_async=True), group=-22)
+application.add_handler(ChatMemberHandler(chatmemberupdates, ChatMemberHandler.CHAT_MEMBER, block=False), group=-21)
+application.add_handler(ChatMemberHandler(mychatmemberupdates, ChatMemberHandler.MY_CHAT_MEMBER, block=False), group=-23)
+application.add_handler(ChatMemberHandler(botstatchanged, ChatMemberHandler.MY_CHAT_MEMBER, block=False), group=-25)
+application.add_handler(ChatMemberHandler(admincacheupdates, ChatMemberHandler.CHAT_MEMBER, block=False), group=-22)

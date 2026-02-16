@@ -9,7 +9,7 @@ from telegram.utils.helpers import mention_html
 
 from tg_bot.modules.helper_funcs.admin_status import user_is_admin
 from tg_bot.modules.sql.notes_sql import Buttons
-from tg_bot import dispatcher
+from tg_bot import application
 
 
 BTN_LINK_REGEX = re.compile(
@@ -31,14 +31,14 @@ class Types(IntEnum):
 
 
 ENUM_FUNC_MAP = {
-    Types.TEXT.value: dispatcher.bot.send_message,
-    Types.BUTTON_TEXT.value: dispatcher.bot.send_message,
-    Types.STICKER.value: dispatcher.bot.send_sticker,
-    Types.DOCUMENT.value: dispatcher.bot.send_document,
-    Types.PHOTO.value: dispatcher.bot.send_photo,
-    Types.AUDIO.value: dispatcher.bot.send_audio,
-    Types.VOICE.value: dispatcher.bot.send_voice,
-    Types.VIDEO.value: dispatcher.bot.send_video,
+    Types.TEXT.value: application.bot.send_message,
+    Types.BUTTON_TEXT.value: application.bot.send_message,
+    Types.STICKER.value: application.bot.send_sticker,
+    Types.DOCUMENT.value: application.bot.send_document,
+    Types.PHOTO.value: application.bot.send_photo,
+    Types.AUDIO.value: application.bot.send_audio,
+    Types.VOICE.value: application.bot.send_voice,
+    Types.VIDEO.value: application.bot.send_video,
 }
 
 VALID_FORMATTERS = [

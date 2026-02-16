@@ -34,7 +34,7 @@ def remove_prefix(text, prefix):
     return text
 
 @kiginline()
-def inlinequery(update: Update, _) -> None:
+async def inlinequery(update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
     """
     Main InlineQueryHandler callback.
     """
@@ -64,7 +64,7 @@ def inlinequery(update: Update, _) -> None:
         "about": about,
     }
 
-    if (f := query.split(" ", 1)[0]) in inline_funcs:
+    if (f := await query.split(" ", 1)[0]) in inline_funcs:
         inline_funcs[f](remove_prefix(query, f).strip(), update, user)
     else:
         for ihelp in inline_help_dicts:
@@ -89,7 +89,7 @@ def inlinequery(update: Update, _) -> None:
                 )
             )
 
-        update.inline_query.answer(results, cache_time=5)
+        await update.inline_query.answer(results, cache_time=5)
 
 
 def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
@@ -100,14 +100,14 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
     user_id = update.effective_user.id
 
     try:
-        search = query.split(" ", 1)[1]
+        search = await query.split(" ", 1)[1]
     except IndexError:
         search = user_id
 
     try:
-        user = bot.get_chat(int(search))
+        user = await bot.get_chat(int(search))
     except (BadRequest, ValueError):
-        user = bot.get_chat(user_id)
+        user = await bot.get_chat(user_id)
 
     chat = update.effective_chat
     sql.update_user(user.id, user.username)
@@ -176,14 +176,14 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
         ),
     ]
 
-    update.inline_query.answer(results, cache_time=5)
+    await update.inline_query.answer(results, cache_time=5)
 
 
 def about(query: str, update: Update, context: CallbackContext) -> None:
     """Handle the inline query."""
     query = update.inline_query.query
     user_id = update.effective_user.id
-    user = context.bot.get_chat(user_id)
+    user = await context.bot.get_chat(user_id)
     sql.update_user(user.id, user.username)
     about_text = f"""
     Ōɖìղ • オーディン (@{context.bot.username})
@@ -233,4 +233,4 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
             reply_markup=kb
         )
     )
-    update.inline_query.answer(results)
+    await update.inline_query.answer(results)
