@@ -45,10 +45,10 @@ log = logging.getLogger('[Enterprise]')
 
 log.info("LOGGER is starting. | Project maintained by: github.com/itsLuuke (t.me/itsLuuke)")
 
-# if version < 3.6, stop bot.
-if sys.version_info[0] < 3 or sys.version_info[1] < 7:
+# if version < 3.10, stop bot.
+if sys.version_info[0] < 3 or sys.version_info[1] < 10:
     log.error(
-        "You MUST have a python version of at least 3.7! Multiple features depend on this. Bot quitting."
+        "You MUST have a python version of at least 3.10! Multiple features depend on this. Bot quitting."
     )
     quit(1)
 
