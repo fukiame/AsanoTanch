@@ -44,16 +44,16 @@ def inlinequery(update: Update, _) -> None:
     results: List = []
     inline_help_dicts = [
         {
-            "title": " “info” Account info on Ōɖìղ • オーディン",
-            "description": "Look up a Telegram account in Ōɖìղ • オーディン database",
-            "message_text": "Click the button below to look up a person in Ōɖìղ • オーディン database using their Telegram ID",
+            "title": " “info” account info on Asano Tanch | 浅野てんき",
+            "description": "look up a Telegram account in Asano Tanch database",
+            "message_text": "click the button below to look up a person in using their Telegram ID",
             "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
             "keyboard": "info ",
         },
         {
-            "title": " “about” About",
-            "description": "Know about Ōɖìղ • オーディン",
-            "message_text": "Click the button below to get to know about Ōɖìղ • オーディン.",
+            "title": " “about” about",
+            "description": "Know about Asano Tanch | 浅野てんき",
+            "message_text": "Click the button below to get to know about this bot.",
             "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
             "keyboard": "about ",
         },
@@ -154,10 +154,10 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
         [
             [
                 InlineKeyboardButton(
-                    text="Report Error", url='https://t.me/TheBotsSupport'
+                    text="report error", url='https://t.me/asanotanchb_support'
                 ),
                 InlineKeyboardButton(
-                    text="Search again",
+                    text="search again",
                     switch_inline_query_current_chat="info ",
                 ),
             ]
@@ -186,47 +186,40 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
     user = context.bot.get_chat(user_id)
     sql.update_user(user.id, user.username)
     about_text = f"""
-    Ōɖìղ • オーディン (@{context.bot.username})
-    Maintained by [ルーク](t.me/itsLuuke)
-    Built with ❤️ using python-telegram-bot v{str(__version__)}
-    Running on Python {python_version()}
+    Asano Tanch | 浅野てんき // (@{context.bot.username})
+    maintained by [フキ雨](t.me/fukiame)
+    built with python-telegram-bot v{str(__version__)}
+    running on python {python_version()}
     """
     results: list = []
     kb = InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton(
-                    text="Support",
-                    url=f"https://t.me/TheBotsSupport",
+                    text="support",
+                    url=f"https://t.me/asanotanchb_support",
                 ),
                 InlineKeyboardButton(
-                    text="Channel",
-                    url=f"https://t.me/LukeBots",
+                    text="channel",
+                    url=f"https://t.me/asanotanchb_news",
                 ),
-                InlineKeyboardButton(
-                    text="Maintainer",
-                    url=f"https://t.me/itsLuuke",
-                ),
-
             ],
             [
                 InlineKeyboardButton(
-                    text="GitLab",
-                    url=f"https://www.gitlab.com/OdinRobot/OdinRobot",
+                    text="disroot git",
+                    url=f"https://git.disroot.org/fukiame/AsanoTanch",
                 ),
                 InlineKeyboardButton(
-                    text="GitHub",
-                    url="https://www.github.com/OdinRobot/OdinRobot",
+                    text="github",
+                    url="https://github.com/fukiame/AsanoTanch",
                 ),
             ],
         ])
 
     results.append(
-
-        InlineQueryResultArticle
-            (
+        InlineQueryResultArticle(
             id=str(uuid4()),
-            title=f"About Ōɖìղ • オーディン (@{context.bot.username})",
+            title=f"about Asano Tanch | 浅野てんき // (@{context.bot.username})",
             input_message_content=InputTextMessageContent(about_text, parse_mode=ParseMode.MARKDOWN,
                                                           disable_web_page_preview=True),
             thumb_url="https://telegra.ph/file/c741074ba2291655a8546.jpg",

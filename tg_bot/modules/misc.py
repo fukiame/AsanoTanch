@@ -421,11 +421,15 @@ stats_str = '''
 @kigcmd(command='uptime', can_disable=False)
 @sudo_plus
 def uptimee(update: Update, _):
-    uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     botuptime = get_readable_time((time.time() - StartTime))
     msg = update.effective_message
-    rspnc = "*• Uptime:* " + str(botuptime) + "\n"
-    rspnc += "*• System Start time:* " + str(uptime)
+    rspnc = ""
+    try:
+        uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+        rspnc += "*- bot uptime:* " + str(botuptime) + "\n"
+    except PermissionError:
+        pass
+    rspnc += "*- sys uptime:* " + str(uptime)
     msg.reply_text(rspnc, parse_mode=ParseMode.MARKDOWN)
 
 @kigcmd(command='stats', can_disable=False)
@@ -433,61 +437,57 @@ def uptimee(update: Update, _):
 def stats(update, context):
     db_size = SESSION.execute("SELECT pg_size_pretty(pg_database_size(current_database()))").scalar_one_or_none()
     botuptime = get_readable_time((time.time() - StartTime))
-    status = "*╒═══「 System statistics: 」*\n\n"
+    status = "*system stats*\n\n"
     try:
         uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
-        status += "*• System Start time:* " + str(uptime) + "\n"
+        status += "*- sys uptime:* " + str(uptime) + "\n"
     except PermissionError:
         pass
     uname = platform.uname()
-    status += "*• System:* " + str(uname.system) + "\n"
-    status += "*• Node name:* " + escape_markdown(str(uname.node)) + "\n"
-    status += "*• Release:* " + escape_markdown(str(uname.release)) + "\n"
-    status += "*• Machine:* " + escape_markdown(str(uname.machine)) + "\n"
+    status += "*- uname:* " + str(uname.system) + "\n"
+    status += "*- hostname:* " + escape_markdown(str(uname.node)) + "\n"
+    status += "*- rel:* " + escape_markdown(str(uname.release)) + "\n"
+    status += "*- arch:* " + escape_markdown(str(uname.machine)) + "\n"
 
     mem = virtual_memory()
     disk = disk_usage("/")
     try:
         cpu = cpu_percent()
-        status += "*• CPU:* " + str(cpu) + " %\n"
+        status += "*- cpu:* " + str(cpu) + " %\n"
     except PermissionError:
         pass
-    status += "*• RAM:* " + str(mem[2]) + " %\n"
-    status += "*• Storage:* " + str(disk[3]) + " %\n\n"
-    status += "*• Python version:* " + python_version() + "\n"
-    status += "*• python-telegram-bot:* " + str(ptbver) + "\n"
-    status += "*• Uptime:* " + str(botuptime) + "\n"
-    status += "*• Database size:* " + str(db_size) + "\n"
+    status += "*- ram:* " + str(mem[2]) + " %\n"
+    status += "*- storage:* " + str(disk[3]) + " %\n\n"
+    status += "*- Python ver:* " + python_version() + "\n"
+    status += "*- ptb:* " + str(ptbver) + "\n"
+    status += "*- bot uptime:* " + str(botuptime) + "\n"
+    status += "*- db size:* " + str(db_size) + "\n"
     kb = [
           [
-           InlineKeyboardButton('Ping', callback_data='pingCB')
+           InlineKeyboardButton('ping', callback_data='pingCB')
           ]
     ]
     try:
         repo = git.Repo(search_parent_directories=True)
         sha = repo.head.object.hexsha
-        status += f"*• Commit*: `{sha[:9]}`\n"
+        status += f"*- commit*: `{sha[:9]}`\n"
     except Exception as e:
-        status += f"*• Commit*: `{str(e)}`\\n"
+        status += f"*- commit*: `{str(e)}`\\n"
 
     try:
         update.effective_message.reply_text(status +
-            "\n*╒═══「 Bot statistics: 」*\n"
+            "\n*bot stats*\n"
             + "\n".join([mod.__stats__() for mod in STATS])
-            + "\n\n⍙ [GitHub](https://github.com/itsLuuke) ⍚ [OdinRobot](https://github.com/OdinRobot) \n\n"
-            + "╘══「 by [ルーク](https://t.me/itsLuuke) 」\n",
+            + "\n\n[GitHub](https://github.com/fukiame/AsanoTanch)\n",
         parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(kb), disable_web_page_preview=True)
     except BaseException:
         update.effective_message.reply_text(
             (
                 (
-                    (
-                        "\n*Bot statistics*:\n"
-                        + "\n".join(mod.__stats__() for mod in STATS)
-                    )
-                    + "\n\n⍙ [GitHub](https://github.com/itsLuuke) ⍚ [OdinRobot](https://github.com/OdinRobot) \n\n"
+                    "\n*bot stats*:\n"
+                    + "\n".join(mod.__stats__() for mod in STATS)
                 )
-                + "╘══「 by [ルーク](https://t.me/itsLuuke) 」\n"
+                + "\n\n[GitHub](https://github.com/fukiame/AsanoTanch)\n\n"
             ),
             parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup(kb),
