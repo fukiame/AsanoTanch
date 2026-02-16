@@ -106,8 +106,6 @@ if is_module_loaded(FILENAME):
                     user_id = None
 
                 if self.filters(update):
-                    if SpamChecker.check_user(user_id):
-                        return None
                     if sql.is_command_disabled(chat.id, self.friendly):
                         return False
                     return True
