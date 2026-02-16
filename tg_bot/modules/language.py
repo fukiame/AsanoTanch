@@ -1,7 +1,7 @@
 from typing import Union, List, Dict, Callable, Generator, Any
 import itertools
 from collections.abc import Iterable
-from telegram.ext import CommandHandler, CallbackQueryHandler
+from telegram.ext import CommandHandler, CallbackQueryHandler, ContextTypes
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 
 from tg_bot import application, spamcheck

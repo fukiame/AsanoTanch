@@ -1,8 +1,9 @@
-from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
-from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
+from telegram import InlineKeyboardButton
+from telegram import InlineKeyboardMarkup
 from tg_bot.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
 from telegram.ext import CallbackQueryHandler, InlineQueryHandler
-from telegram.ext.filters import BaseFilter, Filters
+from telegram.ext import filters as Filters
+from telegram.ext.filters import BaseFilter
 from tg_bot import application as d, log, OWNER_ID
 from typing import Optional, Union, List
 from tg_bot.modules.helper_funcs.handlers import CustomCommandHandler as CommandHandler, CustomMessageHandler as MessageHandler

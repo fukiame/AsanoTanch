@@ -9,7 +9,7 @@ from PIL import Image
 from telegram import (Bot, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode,
                       TelegramError, Update)
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from .helper_funcs.decorators import kigcmd
 
 

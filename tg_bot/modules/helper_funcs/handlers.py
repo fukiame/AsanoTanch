@@ -1,7 +1,7 @@
 import telegram.ext as tg
 from telegram import Update
-from telegram.ext.filters import Filters
-from telegram.ext.messagehandler import MessageHandler
+import telegram.ext.filters as Filters
+from telegram.ext import MessageHandler
 from tg_bot import DEV_USERS, MOD_USERS, OWNER_ID, SUDO_USERS, SYS_ADMIN, WHITELIST_USERS, SUPPORT_USERS
 import tg_bot.modules.sql.blacklistusers_sql as sql
 
@@ -17,9 +17,9 @@ class CustomCommandHandler(tg.CommandHandler):
     def __init__(self, command, callback, block=False, **kwargs):
         if "admin_ok" in kwargs:
             del kwargs["admin_ok"]
-        super().__init__(command, callback, run_async=run_async, **kwargs)
+        super().__init__(command, callback, block=block, **kwargs)
 
-    def check_update(self, update):
+    async def check_update(self, update):
         if not isinstance(update, Update) or not update.effective_message:
             return
         message = update.effective_message

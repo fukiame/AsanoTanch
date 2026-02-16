@@ -35,9 +35,9 @@ from telegram import (
 from telegram.error import BadRequest, TelegramError
 from telegram.ext import (
     CallbackContext,
-    Filters, ChatMemberHandler, MessageHandler,
+    filters, ChatMemberHandler, MessageHandler,
 )
-from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
+from telegram.helpers import escape_markdown, mention_html, mention_markdown
 from .helper_funcs.decorators import kigcmd, kigmsg, kigcallback
 from .helper_funcs.admin_status import (
     user_admin_check,

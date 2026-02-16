@@ -13,7 +13,7 @@ from telegram import (
 )
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, Filters
-from telegram.utils.helpers import escape_markdown
+from telegram.helpers import escape_markdown
 from .helper_funcs.decorators import kigcmd
 
 from .helper_funcs.admin_status import (

@@ -4,7 +4,7 @@ from typing import Optional
 from telegram import Chat, Message, ParseMode, Update, User, ChatPermissions
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, CommandHandler, Filters, MessageHandler
-from telegram.utils.helpers import mention_html, mention_markdown
+from telegram.helpers import mention_html, mention_markdown
 
 import tg_bot.modules.sql.blsticker_sql as sql
 from tg_bot import log as LOGGER, application

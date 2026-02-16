@@ -1,9 +1,10 @@
 from typing import Union, Optional
 
 from future.utils import string_types
-from telegram import ParseMode, Update, Chat
-from telegram.ext import CommandHandler, MessageHandler
-from telegram.utils.helpers import escape_markdown
+from telegram import Update, Chat
+from telegram.constants import ParseMode
+from telegram.ext import CommandHandler, MessageHandler, ContextTypes
+from telegram.helpers import escape_markdown
 
 from tg_bot import application, spamcheck
  
@@ -47,7 +48,7 @@ if is_module_loaded(FILENAME):
                 DISABLE_CMDS.extend(command)
                 if admin_ok:
                     ADMIN_CMDS.extend(command)
-        def check_update(self, update):
+        async def check_update(self, update):
             if not isinstance(update, Update) or not update.effective_message:
                 return
             message = update.effective_message
@@ -96,7 +97,7 @@ if is_module_loaded(FILENAME):
             super().__init__(pattern, callback, run_async=run_async, **kwargs)
             DISABLE_OTHER.append(friendly or pattern)
             self.friendly = friendly or pattern
-        def check_update(self, update):
+        async def check_update(self, update):
             if isinstance(update, Update) and update.effective_message:
                 chat = update.effective_chat
 
@@ -300,10 +301,10 @@ It'll also allow you to autodelete them, stopping people from bluetexting.
     """
 
     DISABLE_HANDLER = CommandHandler(
-        "disable", disable, pass_args=True, block=False
+        "disable", disable, block=False
     )  # , filters=filters.ChatType.GROUPS)
     ENABLE_HANDLER = CommandHandler(
-        "enable", enable, pass_args=True, block=False
+        "enable", enable, block=False
     )  # , filters=filters.ChatType.GROUPS)
     COMMANDS_HANDLER = CommandHandler(
         ["cmds", "disabled"], commands, block=False

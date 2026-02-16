@@ -202,7 +202,7 @@ async def changelog(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #     des = "You can get repo shortcuts by using `/fetch repo`, or `&repo`.\n"
 #     for repo in repo_list:
 #         repo_name = " • `{}`\n".format(repo.name)
-#         if len(msg) + len(repo_name) > MAX_MESSAGE_LENGTH:
+#         if len(msg) + len(repo_name) > MessageLimit.MAX_TEXT_LENGTH:
 #             deletion(update, context, await update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN))
 #             msg = ""
 #         msg += repo_name

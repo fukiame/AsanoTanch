@@ -5,7 +5,7 @@ from telegram import Bot, Update, ParseMode
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 from telegram.ext.filters import Filters
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from tg_bot import SUDO_USERS, spamcheck, application
 

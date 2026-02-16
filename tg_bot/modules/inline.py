@@ -11,7 +11,7 @@ from telegram import InlineQueryResultArticle, ParseMode, InputTextMessageConten
 from telegram import __version__
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import escape_markdown, mention_html
+from telegram.helpers import escape_markdown, mention_html
 
 import tg_bot.modules.sql.users_sql as sql
 from tg_bot import (

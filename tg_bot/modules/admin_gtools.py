@@ -3,7 +3,7 @@ import html
 from telegram import ParseMode, Update
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from telegram.vendor.ptb_urllib3.urllib3.packages.six import BytesIO
 
 from .. import spamcheck

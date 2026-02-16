@@ -10,7 +10,7 @@ from telegram.ext import (
     Filters,
 )
 import tg_bot.modules.sql.log_channel_sql as logsql
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from .helper_funcs.decorators import kigcmd, kigmsg, kigcallback
 from .helper_funcs.admin_status import (
     user_admin_check,

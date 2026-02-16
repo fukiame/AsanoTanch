@@ -6,7 +6,8 @@
 from enum import Enum
 from cachetools import TTLCache
 
-from telegram import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, ParseMode, Message, Update, message
+from telegram import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton, Message, Update
+from telegram.constants import ParseMode
 
 from tg_bot import OWNER_ID, SYS_ADMIN, DEV_USERS, MOD_USERS, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS
 

@@ -1,4 +1,4 @@
-from telegram.utils.helpers import escape_markdown
+from telegram.helpers import escape_markdown
 from tg_bot import application
 from .helper_funcs.decorators import kigcallback
 from telegram import (

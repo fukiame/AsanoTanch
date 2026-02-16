@@ -34,7 +34,7 @@ from telegram.ext import (
     DispatcherHandlerStop,
     Filters,
 )
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from .helper_funcs.decorators import kigcmd, kigmsg, kigcallback
 
 from .helper_funcs.admin_status import (
@@ -663,7 +663,7 @@ async def list_warn_filters(update: Update, context: ContextTypes.DEFAULT_TYPE):
     filter_list = CURRENT_WARNING_FILTER_STRING
     for keyword in all_handlers:
         entry = f" - {html.escape(keyword)}\n"
-        if len(entry) + len(filter_list) > telegram.MAX_MESSAGE_LENGTH:
+        if len(entry) + len(filter_list) > telegram.MessageLimit.MAX_TEXT_LENGTH:
             await update.effective_message.reply_text(filter_list, parse_mode=ParseMode.HTML)
             filter_list = entry
         else:

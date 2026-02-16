@@ -38,7 +38,7 @@ def bot_is_admin(chat: Chat, perm: Optional[AdminPerms] = None) -> bool:
 	return bot_member.status == "administrator"  # bot can't be owner
 
 
-def get_bot_member(chat_id: int) -> ChatMember:
+async def get_bot_member(chat_id: int) -> ChatMember:
 	try:
 		return B_CACHE[chat_id]
 	except KeyError:
@@ -53,7 +53,7 @@ def get_bot_member(chat_id: int) -> ChatMember:
 def bot_admin_check(permission: AdminPerms = None):
 	def wrapper(func):
 		@wraps(func)
-		def wrapped(update: Update, context: Ctx, *args, **kwargs):
+		async def wrapped(update: Update, context: Ctx, *args, **kwargs):
 			nonlocal permission
 			chat = update.effective_chat
 			if chat.type == "private" or chat.all_members_are_administrators:
@@ -119,7 +119,7 @@ def user_is_admin(update: Update,
 RLOCK = RLock()
 
 
-def get_mem_from_cache(user_id: int, chat_id: int) -> ChatMember:
+async def get_mem_from_cache(user_id: int, chat_id: int) -> ChatMember:
 	with RLOCK:
 		try:
 			for i in A_CACHE[chat_id]:

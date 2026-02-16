@@ -1,10 +1,10 @@
 import html
 
 from telegram import Update
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from .. import spamcheck
 from .log_channel import loggable

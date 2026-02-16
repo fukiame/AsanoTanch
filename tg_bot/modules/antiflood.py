@@ -3,7 +3,7 @@ import re
 from typing import Optional, Union
 
 from telegram import Message, Chat, Update, User, ChatPermissions
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from telegram.ext import Filters, CallbackContext
 from telegram.error import BadRequest
 

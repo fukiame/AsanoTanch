@@ -23,7 +23,7 @@ from .log_channel import loggable
 from telegram import Bot, Chat, ChatPermissions, ParseMode, Update, replymarkup
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from .language import gs
 from .helper_funcs.decorators import kigcmd, kigcallback
 

@@ -5,7 +5,7 @@ from html import escape
 
 from telegram import InlineKeyboardButton, Message, Update
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from tg_bot.modules.helper_funcs.admin_status import user_is_admin
 from tg_bot.modules.sql.notes_sql import Buttons

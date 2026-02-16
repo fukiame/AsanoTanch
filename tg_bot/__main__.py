@@ -9,15 +9,16 @@ import re
 from sys import argv
 from typing import Optional
 
-from telegram import Update, ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.error import (TelegramError, Unauthorized, BadRequest,
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.constants import ParseMode
+from telegram.error import (TelegramError, Forbidden, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
 from telegram.ext import (
     CallbackContext,
-    Filters
+    filters
 )
-from telegram.ext.application import DispatcherHandlerStop
-from telegram.utils.helpers import escape_markdown
+from telegram.ext import ApplicationHandlerStop
+from telegram.helpers import escape_markdown
 
 from tg_bot import (
     KInit,
@@ -45,7 +46,7 @@ from tg_bot.modules.helper_funcs.admin_status import (
     user_is_admin
 )
 
-bot_firstname = await application.bot.first_name.split(" ")[0]
+bot_firstname = application.bot.first_name.split(" ")[0]
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -95,7 +96,7 @@ for module_name in ALL_MODULES:
 
 
 # do not async
-def send_help(chat_id, text, keyboard=None):
+async def send_help(chat_id, text, keyboard=None):
     """#TODO
 
     Params:
@@ -252,7 +253,7 @@ async def error_callback(_, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         raise context.error
-    except (Unauthorized, BadRequest):
+    except (Forbidden, BadRequest):
         pass
         # remove update.message.chat_id from conversation list
     except BadRequest:
@@ -452,7 +453,7 @@ async def get_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         send_help(chat.id, (gs(chat.id, "pm_help_text")))
 
 
-def send_settings(chat_id: int, user_id: int, user=False):
+async def send_settings(chat_id: int, user_id: int, user=False):
     '''#TODO
 
     Params:
@@ -673,10 +674,10 @@ async def migrate_chats(update: Update, _: ContextTypes.DEFAULT_TYPE):
         mod.__migrate__(old_chat, new_chat)
 
     log.info("Successfully migrated!")
-    raise DispatcherHandlerStop
+    raise ApplicationHandlerStop
 
 
-def main():
+async def main():
     application.add_error_handler(error_callback)
     # application.add_error_handler(error_handler)
     allowed_updates = ['message', 'edited_message', 'callback_query', 'callback_query', 'my_chat_member',

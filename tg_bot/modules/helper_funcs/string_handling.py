@@ -7,8 +7,8 @@ import markdown2
 import emoji
 
 from telegram import MessageEntity
-from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
-from telegram.utils.helpers import escape_markdown
+from telegram import InlineKeyboardMarkup
+from telegram.helpers import escape_markdown
 
 # NOTE: the url \ escape may cause double escapes
 # match * (bold) (don't escape if in url)
@@ -436,7 +436,7 @@ def escape_chars(text: str, to_escape: List[str]) -> str:
     return new_text
 
 
-def extract_time(message, time_val):
+async def extract_time(message, time_val):
     if any(time_val.endswith(unit) for unit in ("m", "h", "d")):
         unit = time_val[-1]
         time_num = time_val[:-1]  # type: str

@@ -3,7 +3,7 @@ import html
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, Update, User
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, Filters
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 import tg_bot.modules.sql.approve_sql as sql
 

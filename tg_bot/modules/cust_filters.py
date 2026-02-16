@@ -9,7 +9,7 @@ from telegram.ext import (
     DispatcherHandlerStop,
     Filters,
 )
-from telegram.utils.helpers import  escape_markdown, mention_html
+from telegram.helpers import  escape_markdown, mention_html
 
 from tg_bot import application, log, SUDO_USERS, spamcheck
 
@@ -83,7 +83,7 @@ async def list_handlers(update, context: ContextTypes.DEFAULT_TYPE):
 
     for keyword in all_handlers:
         entry = " • `{}`\n".format(escape_markdown(keyword))
-        if len(entry) + len(filter_list) > telegram.MAX_MESSAGE_LENGTH:
+        if len(entry) + len(filter_list) > telegram.MessageLimit.MAX_TEXT_LENGTH:
             send_message(
                 update.effective_message,
                 filter_list.format(chat_name),

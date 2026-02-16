@@ -4,7 +4,7 @@ from telegram import Message, Chat, ParseMode, MessageEntity, message
 from telegram import TelegramError, ChatPermissions
 from telegram.error import BadRequest
 from telegram.ext import Filters
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from .helper_funcs.chat_status import connection_status
 from .helper_funcs.decorators import kigcmd, kigmsg
 from alphabet_detector import AlphabetDetector

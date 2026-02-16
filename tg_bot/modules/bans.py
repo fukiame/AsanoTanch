@@ -4,7 +4,7 @@ from typing import Optional, Union
 from telegram import Bot, Chat, ChatMember, Message, Update, ParseMode, User
 from telegram.error import BadRequest
 from telegram.ext import Filters, CallbackContext
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from tg_bot import (
     BAN_STICKER,

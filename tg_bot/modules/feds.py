@@ -19,7 +19,7 @@ from telegram import (
     InlineKeyboardButton,
     ChatAction, Message,
 )
-from telegram.utils.helpers import mention_html, mention_markdown
+from telegram.helpers import mention_html, mention_markdown
 
 from .connection import AdminPerms
 from .helper_funcs.admin_status import user_is_admin, bot_is_admin

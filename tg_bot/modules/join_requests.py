@@ -8,7 +8,7 @@ from telegram.ext import ChatJoinRequestHandler
 from telegram.ext.callbackcontext import CallbackContext
 from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from .helper_funcs.admin_status import bot_admin_check, user_admin_check
 from .helper_funcs.admin_status_helpers import AdminPerms, DEV_USERS

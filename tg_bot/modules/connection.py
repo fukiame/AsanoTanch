@@ -1,11 +1,13 @@
 import time
 import re
 
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, Update, Bot
-from telegram.error import BadRequest, Unauthorized
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton, Update, Bot
+from telegram.constants import ParseMode
+from telegram.error import BadRequest, Forbidden
 from telegram.ext import (
     CommandHandler,
     CallbackQueryHandler,
+    ContextTypes,
 )
 
 import tg_bot.modules.sql.connection_sql as sql
@@ -237,7 +239,7 @@ async def connect_chat(update, context: ContextTypes.DEFAULT_TYPE):  # sourcery 
                     )
                 except BadRequest:
                     pass
-                except Unauthorized:
+                except Forbidden:
                     pass
             else:
                 send_message(update.effective_message, "Connection failed!")
@@ -260,7 +262,7 @@ async def disconnect_chat(update, context: ContextTypes.DEFAULT_TYPE):
         send_message(update.effective_message, "This command is only available in PM.")
 
 
-def connected(bot: Bot, update: Update, chat, user_id, need_admin=True):
+async def connected(bot: Bot, update: Update, chat, user_id, need_admin=True):
     user = update.effective_user
 
     if chat.type == chat.PRIVATE and sql.get_connected_chat(user_id):
@@ -387,11 +389,11 @@ from .language import gs
 def get_help(chat):
     return gs(chat, "connections_help")
 
-CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, pass_args=True, block=False)
+CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, block=False)
 CONNECTION_CHAT_HANDLER = CommandHandler("connection", connection_chat, block=False)
 DISCONNECT_CHAT_HANDLER = CommandHandler("disconnect", disconnect_chat, block=False)
 ALLOW_CONNECTIONS_HANDLER = CommandHandler(
-    "allowconnect", allow_connections, pass_args=True, block=False
+    "allowconnect", allow_connections, block=False
 )
 HELP_CONNECT_CHAT_HANDLER = CommandHandler(
     "helpconnect", help_connect_chat, block=False

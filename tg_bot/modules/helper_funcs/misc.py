@@ -2,9 +2,11 @@ from typing import Dict, List
 import typing
 from uuid import uuid4
 from asyncio import sleep
-from telegram.message import Message
+from telegram import Message
 from tg_bot import NO_LOAD
-from telegram import MAX_MESSAGE_LENGTH, Bot, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, InlineQueryResultArticle, InputTextMessageContent
+from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultArticle, InputTextMessageContent
+from telegram.constants import ParseMode
+from telegram.constants import MessageLimit
 from telegram.error import TelegramError
 from tg_bot.modules.helper_funcs.string_handling import button_markdown_parser_v2, reply_button_parser_v2
 from tg_bot.modules.helper_funcs.msg_types import Types
@@ -30,14 +32,14 @@ class EqInlineKeyboardButton(InlineKeyboardButton):
 
 
 def split_message(msg: str) -> List[str]:
-    if len(msg) < MAX_MESSAGE_LENGTH:
+    if len(msg) < MessageLimit.MAX_TEXT_LENGTH:
         return [msg]
 
     lines = msg.splitlines(True)
     small_msg = ""
     result = []
     for line in lines:
-        if len(small_msg) + len(line) < MAX_MESSAGE_LENGTH:
+        if len(small_msg) + len(line) < MessageLimit.MAX_TEXT_LENGTH:
             small_msg += line
         else:
             result.append(small_msg)
@@ -103,7 +105,7 @@ def article(
         reply_markup=reply_markup,
     )
 
-def send_to_list(
+async def send_to_list(
     bot: Bot, send_to: list, message: str, markdown=False, html=False
 ) -> None:
     if html and markdown:

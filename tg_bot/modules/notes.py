@@ -22,7 +22,7 @@ from .helper_funcs.admin_status import (
 from .helper_funcs.decorators import kigcmd, kigmsg, kigcallback
 import tg_bot.modules.sql.notes_sql as sql
 from telegram import (
-    MAX_MESSAGE_LENGTH,
+    MessageLimit.MAX_TEXT_LENGTH,
     InlineKeyboardMarkup,
     Message,
     ParseMode,
@@ -30,7 +30,7 @@ from telegram import (
     InlineKeyboardButton,
 )
 from telegram.error import BadRequest
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 from telegram.ext import (
     CallbackContext,
     Filters,
@@ -368,7 +368,7 @@ async def list_notes(update: Update, _: ContextTypes.DEFAULT_TYPE):
             note_name = f"`{note_id:2}.`  `#{(note.name.lower())}`\n"
         else:
             note_name = f"`{note_id}.`  `#{(note.name.lower())}`\n"
-        if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
+        if len(msg) + len(note_name) > MessageLimit.MAX_TEXT_LENGTH:
             await update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
             msg = ""
         msg += note_name

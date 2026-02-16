@@ -27,7 +27,7 @@ FILENAME = __name__.rsplit(".", 1)[-1]
 if is_module_loaded(FILENAME):
     from telegram import ParseMode, Update, InlineKeyboardMarkup, InlineKeyboardButton
     from telegram.error import BadRequest, Unauthorized
-    from telegram.utils.helpers import escape_markdown
+    from telegram.helpers import escape_markdown
 
     from tg_bot import BOT_LOGS, log, application
     from .sql import log_channel_sql as sql

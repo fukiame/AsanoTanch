@@ -4,7 +4,7 @@ import sys
 import time
 from typing import List
 import telegram.ext as tg
-from telegram.ext import Dispatcher, JobQueue, Updater
+from telegram.ext import Application, JobQueue, Updater
 from configparser import ConfigParser
 from functools import wraps
 from dataclasses import dataclass
@@ -175,10 +175,18 @@ except AttributeError:
 
 from tg_bot.modules.sql import SESSION
 
-updater: Updater = tg.Updater(token=TOKEN, base_url=KInit.BOT_API_URL, base_file_url=KInit.BOT_API_FILE_URL, workers=min(32, os.cpu_count() + 4), request_kwargs={"read_timeout": 10, "connect_timeout": 10})
+builder = Application.builder()
+builder.token(TOKEN)
+builder.base_url(KInit.BOT_API_URL)
+builder.base_file_url(KInit.BOT_API_FILE_URL)
+builder.read_timeout(10)
+builder.connect_timeout(10)
+#workers=min(32, os.cpu_count() + 4)
 
-application: Dispatcher = updater.application
-j: JobQueue = updater.job_queue
+application: Application = builder.build()
+updater: Updater = tg.Updater(application.bot, application.update_queue)
+
+j: JobQueue = application.job_queue
 
 
 
@@ -200,7 +208,7 @@ if CUSTOM_CMD and len(CUSTOM_CMD) >= 1:
 
 def spamcheck(func):
     @wraps(func)
-    def check_user(update, context, *args, **kwargs):
+    async def check_user(update, context, *args, **kwargs):
         try:
             chat = update.effective_chat
             user = update.effective_message.sender_chat or update.effective_user

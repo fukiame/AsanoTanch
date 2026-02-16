@@ -13,7 +13,7 @@ from telegram import ParseMode, Update
 from telegram.ext import (
     CallbackContext,
     CommandHandler,
-    Filters,
+    filters,
 
 )
 from .helper_funcs.decorators import kigcmd, kigmsg

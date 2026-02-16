@@ -6,7 +6,7 @@ from pytimeparse.timeparse import timeparse
 
 from telegram import Chat, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.ext import CallbackContext
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from .log_channel import loggable
 

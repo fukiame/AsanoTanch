@@ -9,7 +9,7 @@ from io import BytesIO
 from telegram import Update, MessageEntity, ParseMode
 from telegram.error import BadRequest
 from telegram.ext import Filters, CallbackContext
-from telegram.utils.helpers import mention_html, escape_markdown
+from telegram.helpers import mention_html, escape_markdown
 from subprocess import Popen, PIPE
 from tg_bot import (
     MESSAGE_DUMP,

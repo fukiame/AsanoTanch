@@ -7,7 +7,7 @@ from telegram import ChatPermissions, Update
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, Filters
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 import tg_bot.modules.sql.blacklist_sql as sql
 from .. import SUDO_USERS, log, spamcheck
 from .sql.approve_sql import is_approved

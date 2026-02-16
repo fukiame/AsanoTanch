@@ -1,7 +1,7 @@
 from typing import Optional
 
 from telegram.ext.filters import Filters
-from telegram.utils.helpers import mention_html
+from telegram.helpers import mention_html
 
 from .helper_funcs.decorators import kigcmd, kigmsg
 from telegram import TelegramError, Update
