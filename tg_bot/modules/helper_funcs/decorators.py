@@ -5,7 +5,7 @@ from telegram.ext import CallbackQueryHandler, InlineQueryHandler
 from telegram.ext.filters import BaseFilter, Filters
 from tg_bot import dispatcher as d, log, OWNER_ID
 from typing import Optional, Union, List
-from tg_bot.modules.helper_funcs.handlers import CustomCommandHandler as CommandHandler, CustomMessageHandler as MessageHandler, SpamChecker
+from tg_bot.modules.helper_funcs.handlers import CustomCommandHandler as CommandHandler, CustomMessageHandler as MessageHandler
 import traceback, html, requests
 class KigyoTelegramHandler:
     def __init__(self, d):
@@ -146,8 +146,6 @@ def register(**args):
             if check.edit_date and check.is_channel and not check.is_group:
                 return
             user_id = check.sender_id
-            if SpamChecker.check_user(user_id):
-                return
             if groups_only and not check.is_group:
                 await check.respond("This command can only be used in groups")
                 return

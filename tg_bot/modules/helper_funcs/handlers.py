@@ -46,9 +46,6 @@ class CustomCommandHandler(tg.CommandHandler):
                 ):
                     return None
 
-                if SpamChecker.check_user(user_id):
-                    return None
-
                 filter_result = self.filters(update)
                 if filter_result:
                     return args, filter_result
@@ -70,8 +67,6 @@ class CustomMessageHandler(MessageHandler):
                 user_id = None
 
             if self.filters(update):
-                if SpamChecker.check_user(user_id):
-                    return None
                 return True
             return False
 

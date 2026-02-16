@@ -7,7 +7,7 @@ from telegram.utils.helpers import escape_markdown
 
 from tg_bot import dispatcher, spamcheck
  
-from .helper_funcs.handlers import CMD_STARTERS, SpamChecker
+from .helper_funcs.handlers import CMD_STARTERS
 from .helper_funcs.misc import is_module_loaded
 from .helper_funcs.alternate import send_message, typing_action
 from .language import gs
@@ -70,9 +70,6 @@ if is_module_loaded(FILENAME):
                         command[0].lower() in self.command
                         and command[1].lower() == message.bot.username.lower()
                     ):
-                        return None
-
-                    if SpamChecker.check_user(user_id):
                         return None
 
                     filter_result = self.filters(update)
