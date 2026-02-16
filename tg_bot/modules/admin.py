@@ -13,7 +13,7 @@ from .helper_funcs.chat_status import connection_status
 from .helper_funcs.extraction import extract_user, extract_user_and_text
 from .log_channel import loggable
 from .language import gs
-from .helper_funcs.decorators import kigcmd, register
+from .helper_funcs.decorators import kigcmd
 
 from .helper_funcs.admin_status import (
     user_admin_check,

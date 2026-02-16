@@ -6,7 +6,7 @@ from telegram.ext import CallbackContext
 
 from .. import BACKUP_PASS, CASH_API_KEY, CF_API_KEY, DB_URI, LASTFM_API_KEY, TIME_API_KEY, TOKEN, dispatcher
 from .helper_funcs.chat_status import dev_plus
-from .helper_funcs.decorators import kigcmd, register
+from .helper_funcs.decorators import kigcmd
 
 DEBUG_MODE = False
 
@@ -47,22 +47,6 @@ def asdebug(update: Update, context: CallbackContext):
         message.reply_text("Global announcement is currently on.")
     else:
         message.reply_text("Global announcement is currently off.")
-
-@register(pattern='.*')
-async def i_do_nothing_yes(event):
-    global DEBUG_MODE
-    if DEBUG_MODE:
-        print(f"-{event.from_id} ({event.chat_id}) : {event.text}")
-        if os.path.exists("updates.txt"):
-            with open("updates.txt", "r") as f:
-                text = f.read()
-            with open("updates.txt", "w+") as f:
-                f.write(text + f"\n-{event.from_id} ({event.chat_id}) : {event.text}")
-        else:
-            with open("updates.txt", "w+") as f:
-                f.write(
-                    f"- {event.from_id} ({event.chat_id}) : {event.text} | {datetime.datetime.now()}"
-                )
 
 
 @kigcmd(command='logs')

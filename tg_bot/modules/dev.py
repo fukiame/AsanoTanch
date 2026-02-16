@@ -12,7 +12,7 @@ from telegram.ext import CallbackContext
 import asyncio
 from statistics import mean
 from time import monotonic as time
-from .helper_funcs.decorators import kigcmd, register, kigcallback
+from .helper_funcs.decorators import kigcmd, kigcallback
 
 @kigcmd(command='leave')
 @dev_plus
@@ -80,13 +80,6 @@ def restart(update: Update, context: CallbackContext):
 
     os.system("pm2 restart odin")
 
-
-@register(pattern='getstats', from_users=[SYS_ADMIN, OWNER_ID], no_args=True)
-async def getstats(event):
-    await event.reply(
-        f"**__BOT EVENT STATISTICS__**\n**Average messages:** {messages.average()}/s\n**Average Callback Queries:** {callback_queries.average()}/s\n**Average Inline Queries:** {inline_queries.average()}/s",
-        parse_mode='md'
-    )
 
 @kigcmd(command='pipinstall')
 @dev_plus
