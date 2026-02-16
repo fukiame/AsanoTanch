@@ -38,8 +38,8 @@ def fmt_help(update: Update, context: CallbackContext):
         text=help_text,
         parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Back", callback_data=f"help_module({__mod_name__.lower()})"),
-            InlineKeyboardButton(text='Support', url='https://t.me/asanotanchb_support')]]
+            [[InlineKeyboardButton(text="back", callback_data=f"help_module({__mod_name__.lower()})"),
+            InlineKeyboardButton(text='support', url='https://t.me/asanotanchb_support')]]
         ),
     )
     bot.answer_callback_query(query.id)
@@ -49,7 +49,7 @@ __mod_name__ = 'Formatting'
 def get_help(chat):
     return [gs(chat, "formt_help_bse".format(escape_markdown(dispatcher.bot.username))),
     [
-        InlineKeyboardButton(text="Markdown", callback_data="fmt_help_md"),
-        InlineKeyboardButton(text="Filling", callback_data="fmt_help_filling")
+        InlineKeyboardButton(text="markdown", callback_data="fmt_help_md"),
+        InlineKeyboardButton(text="filling", callback_data="fmt_help_filling")
     ]
 ]

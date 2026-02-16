@@ -47,14 +47,14 @@ def inlinequery(update: Update, _) -> None:
             "title": " “info” account info on Asano Tanch | 浅野てんき",
             "description": "look up a Telegram account in Asano Tanch database",
             "message_text": "click the button below to look up a person in using their Telegram ID",
-            "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
+            "thumb_urL": "https://raw.githubusercontent.com/fukiame/AsanoTanch/origin/assets/ic_not_login_avatar.png",
             "keyboard": "info ",
         },
         {
             "title": " “about” about",
             "description": "know about Asano Tanch | 浅野てんき",
             "message_text": "click the button below to get to know about this bot.",
-            "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
+            "thumb_urL": "https://raw.githubusercontent.com/fukiame/AsanoTanch/origin/assets/ic_not_login_avatar.png",
             "keyboard": "about ",
         },
     ]
@@ -171,7 +171,7 @@ def inlineinfo(query: str, update: Update, context: CallbackContext) -> None:
             title=f"User info of {html.escape(user.first_name)}",
             input_message_content=InputTextMessageContent(text, parse_mode=ParseMode.HTML,
                                                           disable_web_page_preview=True),
-            thumb_url="https://telegra.ph/file/c741074ba2291655a8546.jpg",
+            thumb_url="https://raw.githubusercontent.com/fukiame/AsanoTanch/origin/assets/ic_not_login_avatar.png",
             reply_markup=kb
         ),
     ]
@@ -222,7 +222,7 @@ def about(query: str, update: Update, context: CallbackContext) -> None:
             title=f"about Asano Tanch | 浅野てんき // (@{context.bot.username})",
             input_message_content=InputTextMessageContent(about_text, parse_mode=ParseMode.MARKDOWN,
                                                           disable_web_page_preview=True),
-            thumb_url="https://telegra.ph/file/c741074ba2291655a8546.jpg",
+            thumb_url="https://raw.githubusercontent.com/fukiame/AsanoTanch/origin/assets/ic_not_login_avatar.png",
             reply_markup=kb
         )
     )
