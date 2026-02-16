@@ -735,7 +735,7 @@ def fed_ban(update, context):  # sourcery no-metrics
                             mention_html(user.id, user.first_name),
                             user_target,
                             fban_user_id,
-			mess    age.chat.title,
+                            age.chat.title,
                             reason,
                         ),
                         parse_mode="HTML",
