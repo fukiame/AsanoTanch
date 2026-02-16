@@ -15,7 +15,8 @@ import zlib
 import base64
 from urllib.parse import urlparse, urljoin, urlunparse
 import base58
-from Crypto import Random, Hash, Protocol
+from Crypto import Random, Hash
+from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Cipher import AES
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
@@ -168,7 +169,7 @@ def delete(delmsg, timer):
 def upload_text(data: str) -> typing.Optional[str]:
     passphrase = Random.get_random_bytes(32)
     salt = Random.get_random_bytes(8)
-    key = Protocol.KDF.PBKDF2(passphrase, salt, 32, 100000, hmac_hash_module=Hash.SHA256)
+    key = PBKDF2(passphrase, salt, 32, 100000, hmac_hash_module=Hash.SHA256)
     compress = zlib.compressobj(wbits=-15)
     paste_blob = compress.compress(json.dumps({'paste': data}, separators=(',', ':')).encode()) + compress.flush()
     cipher = AES.new(key, AES.MODE_GCM)
