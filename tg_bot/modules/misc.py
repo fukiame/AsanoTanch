@@ -432,10 +432,13 @@ def uptimee(update: Update, _):
 @dev_plus
 def stats(update, context):
     db_size = SESSION.execute("SELECT pg_size_pretty(pg_database_size(current_database()))").scalar_one_or_none()
-    uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     botuptime = get_readable_time((time.time() - StartTime))
     status = "*╒═══「 System statistics: 」*\n\n"
-    status += "*• System Start time:* " + str(uptime) + "\n"
+    try:
+        uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+        status += "*• System Start time:* " + str(uptime) + "\n"
+    except PermissionError:
+        pass
     uname = platform.uname()
     status += "*• System:* " + str(uname.system) + "\n"
     status += "*• Node name:* " + escape_markdown(str(uname.node)) + "\n"
@@ -443,9 +446,12 @@ def stats(update, context):
     status += "*• Machine:* " + escape_markdown(str(uname.machine)) + "\n"
 
     mem = virtual_memory()
-    cpu = cpu_percent()
     disk = disk_usage("/")
-    status += "*• CPU:* " + str(cpu) + " %\n"
+    try:
+        cpu = cpu_percent()
+        status += "*• CPU:* " + str(cpu) + " %\n"
+    except PermissionError:
+        pass
     status += "*• RAM:* " + str(mem[2]) + " %\n"
     status += "*• Storage:* " + str(disk[3]) + " %\n\n"
     status += "*• Python version:* " + python_version() + "\n"
