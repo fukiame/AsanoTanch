@@ -4,13 +4,16 @@ from telegram.error import BadRequest
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update
 from telegram.ext import CallbackContext, CallbackQueryHandler
 from typing import List
-from tg_bot.modules.helper_funcs.anonymous import AdminPerms, user_admin
-from tg_bot.modules.helper_funcs.chat_status import bot_admin, is_user_admin_callback_query
-from tg_bot.modules.helper_funcs.decorators import rate_limit, kigcmd
-from tg_bot.modules.log_channel import loggable
+from tg_bot import dispatcher, spamcheck
+from .helper_funcs.decorators import kigcmd
+from .log_channel import loggable
 from pydantic import BaseModel
 from uuid import uuid4
-from tg_bot import dispatcher
+from .helper_funcs.admin_status import (
+    user_admin_check,
+    bot_admin_check,
+    AdminPerms,
+)
 
 class DeleteMessageCallback(BaseModel):
     purge_id: str
@@ -19,9 +22,9 @@ class DeleteMessageCallback(BaseModel):
 
 DEL_MSG_CB_MAP: List[DeleteMessageCallback] = []
 
-@is_user_admin_callback_query
-@bot_admin
-@rate_limit(40, 60)
+@bot_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
+@user_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
+@spamcheck
 @loggable
 def purge_confirm(update: Update, context: CallbackContext):
     query = update.callback_query
@@ -64,9 +67,9 @@ def purge_confirm(update: Update, context: CallbackContext):
 
 
 @kigcmd(command='purge')
-@bot_admin
-@user_admin(AdminPerms.CAN_DELETE_MESSAGES)
-@rate_limit(40, 60)
+@bot_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
+@user_admin_check(AdminPerms.CAN_DELETE_MESSAGES)
+@spamcheck
 @loggable
 def purge_messages_botapi(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
