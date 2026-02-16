@@ -102,7 +102,7 @@ def updates_log(update: Update, context: CallbackContext):
     updatestxt = open("updates.txt", "rt")
     with open(updatesname, "wt") as updatesout:
         for line in updatestxt:
-            updatesout.write(line.replace(str(DB_URI), '$DATABASE').replace(str(TOKEN), '$TOKEN').replace(str(APP_ID), '$APP_ID').replace(str(CASH_API_KEY), '$CASH_API_KEY').replace(str(TIME_API_KEY), '$TIME_API_KEY').replace(str(LASTFM_API_KEY), '$LASTFM_API_KEY').replace(str(CF_API_KEY), '$CF_API_KEY').replace(str(BACKUP_PASS), '$BACKUP_PASS'))
+            updatesout.write(line.replace(str(DB_URI), '$DATABASE').replace(str(TOKEN), '$TOKEN').replace(str(CASH_API_KEY), '$CASH_API_KEY').replace(str(TIME_API_KEY), '$TIME_API_KEY').replace(str(LASTFM_API_KEY), '$LASTFM_API_KEY').replace(str(CF_API_KEY), '$CF_API_KEY').replace(str(BACKUP_PASS), '$BACKUP_PASS'))
         updatestxt.close()
 
     with open(updatesname, "rb") as f:
