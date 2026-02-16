@@ -19,7 +19,6 @@ class DeleteMessageCallback(BaseModel):
 
 DEL_MSG_CB_MAP: List[DeleteMessageCallback] = []
 
-# @kigcallback(pattern=r"purge.*")
 @is_user_admin_callback_query
 @bot_admin
 @rate_limit(40, 60)
@@ -90,14 +89,6 @@ def purge_messages_botapi(update: Update, context: CallbackContext):
     messages_to_delete = []
     try:
         messages_to_delete.extend(iter(range(message_id_from, message_id_to + 1)))
-        # resp = context.bot._request.post(
-        # f"{context.bot.base_url}/deleteMessages",
-        # {
-        #     "chat_id": chat_id,
-        #     "message_ids": messages_to_delete
-        # },
-        # )
-        # logging.debug(resp)
         entry = DeleteMessageCallback(chat_id=chat_id, message_ids=messages_to_delete, purge_id=str(uuid4()))
         DEL_MSG_CB_MAP.append(entry)
         buttons = InlineKeyboardMarkup(
@@ -123,69 +114,6 @@ def purge_messages_botapi(update: Update, context: CallbackContext):
         logging.exception(e)
         update.effective_message.reply_text("An error occurred while purging")
 
-# async def purge_messages(event):
-#     start = time.perf_counter()
-#     if event.from_id is None:
-#         return
-
-#     if not await user_is_admin(
-#             user_id=event.sender_id, message=event) and event.from_id not in [
-#                 1087968824
-#             ]:
-#         await event.reply("Only Admins are allowed to use this command")
-#         return
-
-#     if not await can_delete_messages(message=event):
-#         await event.reply("Can't seem to purge the message")
-#         return
-
-#     reply_msg = await event.get_reply_message()
-#     if not reply_msg:
-#         await event.reply(
-#             "Reply to a message to select where to start purging from.")
-#         return
-#     messages = []
-#     message_id = reply_msg.id
-#     delete_to = event.message.id
-
-#     messages.append(event.reply_to_msg_id)
-#     for msg_id in range(message_id, delete_to + 1):
-#         messages.append(msg_id)
-#         if len(messages) == 100:
-#             await event.client.delete_messages(event.chat_id, messages)
-#             messages = []
-
-#     try:
-#         await event.client.delete_messages(event.chat_id, messages)
-#     except:
-#         pass
-#     time_ = time.perf_counter() - start
-#     text = f"Purged Successfully in {time_:0.2f} Second(s)"
-#     await event.respond(text, parse_mode='markdown')
-
-
-# async def delete_messages(event):
-#     if event.from_id is None:
-#         return
-
-#     if not await user_is_admin(
-#             user_id=event.sender_id, message=event) and event.from_id not in [
-#                 1087968824
-#             ]:
-#         await event.reply("Only Admins are allowed to use this command")
-#         return
-
-#     if not await can_delete_messages(message=event):
-#         await event.reply("Can't seem to delete this?")
-#         return
-
-#     message = await event.get_reply_message()
-#     if not message:
-#         await event.reply("Whadya want to delete?")
-#         return
-#     chat = await event.get_input_chat()
-#     del_message = [message, event.message]
-#     await event.client.delete_messages(chat, del_message)
 
 from tg_bot.modules.language import gs
 
@@ -196,14 +124,5 @@ CALLBACK_QUERY_HANDLER = CallbackQueryHandler(purge_confirm, pattern=r"purge.*")
 dispatcher.add_handler(CALLBACK_QUERY_HANDLER)
 
 
-
-# PURGE_HANDLER = purge_messages, events.NewMessage(pattern="^[!/]purge$")
-# DEL_HANDLER = delete_messages, events.NewMessage(pattern="^[!/]del$")
-
-# telethn.add_event_handler(*PURGE_HANDLER)
-# telethn.add_event_handler(*DEL_HANDLER)
-
 __mod_name__ = "Purges"
 __command_list__ = ["del", "purge"]
-# __handlers__ = [PURGE_HANDLER, DEL_HANDLER]
-
