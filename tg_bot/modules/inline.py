@@ -52,8 +52,8 @@ def inlinequery(update: Update, _) -> None:
         },
         {
             "title": " “about” about",
-            "description": "Know about Asano Tanch | 浅野てんき",
-            "message_text": "Click the button below to get to know about this bot.",
+            "description": "know about Asano Tanch | 浅野てんき",
+            "message_text": "click the button below to get to know about this bot.",
             "thumb_urL": "https://telegra.ph/file/c741074ba2291655a8546.jpg",
             "keyboard": "about ",
         },
