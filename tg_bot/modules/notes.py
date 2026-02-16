@@ -12,7 +12,6 @@ from .helper_funcs.parsing import Types, parse_filler, revertMd2HTML
 from .helper_funcs.chat_status import connection_status
 from .helper_funcs.misc import build_keyboard
 from .helper_funcs.parsing import get_data, ENUM_FUNC_MAP
-from .helper_funcs.handlers import MessageHandlerChecker
 from .helper_funcs.string_handling import escape_invalid_curly_brackets
 
 from .helper_funcs.admin_status import (
@@ -63,8 +62,6 @@ def get(update: Update, context: CallbackContext, notename: str, show_none: bool
     parseMode = ParseMode.HTML
 
     if note:
-        if MessageHandlerChecker.check_user(update.effective_user.id):
-            return
         # If we're replying to a message, reply to that message (unless it's an error)
         if message.reply_to_message:
             reply_id = message.reply_to_message.message_id
