@@ -530,16 +530,6 @@ nation_help: |
     Report abuse or ask us more on these at the Support chat.
     You can visit @TheBotsSupport to query more about these.
 
-nlp_help: |
-
-      *Chatroom Spam Prediction*
-       This feature uses @Intellivoid's Coffeehouse AI to
-       process chat messages and detect spam.
-       This comes under Coffehouse' NLP. Learn more about
-       it [here](https://docs.intellivoid.net/coffeehouse/v1/nlp/spam_prediction/chatroom)
-       *Command:*
-        • `/nlpstat <on/off/yes/no>`*:* toggle NLP in your chat.
-
 stickers_help: |
       • `/stickerid`*:* gets the id of the replied sticker.
       • `/getsticker`*:* get the replied sticker in an image format.
