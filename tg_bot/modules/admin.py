@@ -419,74 +419,20 @@ def admincache(update: Update, context: CallbackContext):
 _admincache = dict()
 
 
-@register(pattern="(admin|admins|staff|adminlist)", groups_only=True, no_args=True)
-async def adminList(event):
-    try:
-        _ = event.chat.title
-    except:
-        return
+@kigcmd(command=["admin", "admins"])
+@spamcheck
+def adminlist(update: Update, _):
+    administrators = update.effective_chat.get_administrators()
+    text = "Admins in *{}*:".format(update.effective_chat.title or "this chat")
+    for admin in administrators:
+        if not admin.is_anonymous:
+            user = admin.user
+            name = user.mention_markdown()
+            text += "\n -> {} • `{}` • `{}` • `{}`".format(name, user.id, admin.status,
+                                                           escape_markdown(
+                                                               admin.custom_title) if admin.custom_title else "")
 
-    temp = await event.reply("Fetching full admins list..")
-    text = "Admins in **{}**".format(event.chat.title)
-
-    admn = telethn.iter_participants(
-        event.chat_id, 50, filter=ChannelParticipantsAdmins)
-
-    creator = ""
-    admin = []
-    bots = []
-
-    async for user in admn:
-
-        if isinstance(user.participant, ChannelParticipantCreator):
-
-            if user.first_name == "":
-                name = "☠ Zombie"
-            else:
-                name = "[{}](tg://user?id={})".format(user.first_name.split()[0], user.id)
-            creator = "\nㅤㅤ• {}".format(name)
-        elif user.bot:
-            if user.first_name == "":
-                name = "☠ Zombie"
-            else:
-                name = "[{}](tg://user?id={})".format(user.first_name, user.id)  # .split()[0] bots names arent long ig?
-            bots.append("\nㅤㅤ• {}".format(name))
-
-        else:
-            try:
-                if user.participant.admin_rights.is_anonymous:
-                    continue
-            except:
-                pass
-
-            try:
-                if not user.first_name or user.deleted:
-                    continue
-                else:
-                    name = "[{}](tg://user?id={})".format(user.first_name, user.id)
-            except AttributeError:
-                pass
-            admin.append("\nㅤㅤ• {}".format(name))
-
-    text += "\nㅤ**Creator:**"
-
-    text += creator
-
-    text += f"\nㅤ**Admins:** {len(admin)}"
-
-    text += "".join(admin)
-
-    text += f"\nㅤ**Bots:** {len(bots)}"
-
-    text += "".join(bots)
-
-    members = await telethn.get_participants(event.chat_id)
-    mm = len(members)
-
-    text += "\n**Members:** {}".format(mm)
-    text += "\n**Note:** these values are up to date"
-
-    await temp.edit(text, parse_mode="markdown")
+    update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
 
 def get_help(chat):
