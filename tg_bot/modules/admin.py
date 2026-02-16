@@ -6,9 +6,6 @@ from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 
 from telegram.utils.helpers import mention_html
-from telethon.tl.types import ChannelParticipantsAdmins
-from telethon.tl.types import ChannelParticipantCreator
-from tg_bot import telethn
 
 from tg_bot import spamcheck
 from .helper_funcs.chat_status import connection_status

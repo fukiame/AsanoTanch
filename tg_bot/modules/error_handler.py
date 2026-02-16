@@ -4,7 +4,7 @@ import random
 from .helper_funcs.misc import upload_text
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CallbackContext
-from tg_bot import KInit, dispatcher, DEV_USERS, OWNER_ID, log, DB_URI, TOKEN, APP_ID, API_HASH, BACKUP_PASS
+from tg_bot import KInit, dispatcher, DEV_USERS, OWNER_ID, log, DB_URI, TOKEN, BACKUP_PASS
 from .helper_funcs.decorators import kigcmd
 
 class ErrorsDict(dict):
@@ -34,8 +34,6 @@ def error_callback(update: Update, context: CallbackContext):
     if e.find(KInit.TOKEN) != -1:
         e = e.replace(str(DB_URI), '$DATABASE')\
             .replace(str(TOKEN), '$TOKEN')\
-            .replace(str(APP_ID), '$APP_ID')\
-            .replace(str(API_HASH), '$API_HASH')\
             .replace(str(BACKUP_PASS), '$BACKUP_PASS')
 
     if update.effective_chat.type != "channel":

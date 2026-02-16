@@ -6,7 +6,6 @@ from typing import List, Optional
 from telegram import Update, ParseMode, TelegramError
 from telegram.ext import CommandHandler, run_async, CallbackContext, Filters
 from telegram.utils.helpers import mention_html
-from telethon import events
 from tg_bot import (
     MOD_USERS,
     dispatcher,

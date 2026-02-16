@@ -3,10 +3,9 @@ from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from tg_bot.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
 from telegram.ext import CallbackQueryHandler, InlineQueryHandler
 from telegram.ext.filters import BaseFilter, Filters
-from tg_bot import dispatcher as d, log, telethn, OWNER_ID
+from tg_bot import dispatcher as d, log, OWNER_ID
 from typing import Optional, Union, List
 from tg_bot.modules.helper_funcs.handlers import CustomCommandHandler as CommandHandler, CustomMessageHandler as MessageHandler, SpamChecker
-from telethon import events
 import traceback, html, requests
 class KigyoTelegramHandler:
     def __init__(self, d):
@@ -204,9 +203,6 @@ def register(**args):
                 )
                 # log.error(pretty_message)
 
-        if not disable_edited:
-            telethn.add_event_handler(wrapper, events.MessageEdited(**args))
-        telethn.add_event_handler(wrapper, events.NewMessage(**args))
         log.debug(f"[TLTHNCMD] Loaded handler {pattern} for function {func.__name__}")
 
         return wrapper

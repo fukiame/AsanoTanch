@@ -83,8 +83,6 @@ class KigyoINIT:
         self.SYS_ADMIN: int = self.parser.getint('SYS_ADMIN', '0')
         self.OWNER_ID: int = self.parser.getint('OWNER_ID', '0')
         self.OWNER_USERNAME: str = self.parser.get('OWNER_USERNAME', "0")
-        self.APP_ID: str = self.parser.getint("APP_ID")
-        self.API_HASH: str = self.parser.get("API_HASH")
         self.WEBHOOK: bool = self.parser.getboolean('WEBHOOK', False)
         self.URL: str = self.parser.get('URL', None)
         self.CERT_PATH: str = self.parser.get('CERT_PATH', None)
@@ -129,7 +127,6 @@ KInit = KigyoINIT(parser=kigconfig)
 OWNER_ID = KInit.OWNER_ID
 OWNER_USERNAME = KInit.OWNER_USERNAME
 APP_ID = KInit.APP_ID
-API_HASH = KInit.API_HASH
 WEBHOOK = KInit.WEBHOOK
 URL = KInit.URL
 CERT_PATH = KInit.CERT_PATH
