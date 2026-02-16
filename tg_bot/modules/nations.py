@@ -408,7 +408,7 @@ nations = """Some users have access levels we call as *"Super Users"*
 \n*Moderators* - They have some admin permissions, and cannot be banned, muted flood kicked but can be manually banned by admins.
 \n*Disclaimer*: The Super Users in the bot are there for troubleshooting, support, banning potential scammers.
 \nReport abuse or ask us more on these at the Support chat.
-\nYou can visit @TheBotsSupport to query more about these.
+\nYou can visit @asanotanchb_support to query more about these.
 """
 
 

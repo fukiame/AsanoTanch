@@ -50,7 +50,7 @@ def cannot_ban(banner_id, user_id, message) -> bool:
             message.reply_text("Let one of my Devs fight a Whitelist user.")
             return True
         elif user_id in MOD_USERS:
-            message.reply_text("Moderators cannot be banned, report abuse at @TheBotsSupport.")
+            message.reply_text("Moderators cannot be banned, report abuse at @asanotanchb_support.")
             return True
         return False
 
