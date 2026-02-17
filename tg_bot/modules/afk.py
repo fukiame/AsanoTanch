@@ -70,6 +70,8 @@ def no_longer_afk(update: Update, _: CallbackContext):
         (Filters.entity(MessageEntity.MENTION) | Filters.entity(MessageEntity.TEXT_MENTION) & Filters.chat_type.groups),
         friendly='afk', group=8)
 def reply_afk(update: Update, context: CallbackContext):
+    if update.effective_chat.type != "group" and update.effective_chat.type != "supergroup":
+        return
     bot = context.bot
     message = update.effective_message
     userc = update.effective_user
