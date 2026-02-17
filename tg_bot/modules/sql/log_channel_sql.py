@@ -2,6 +2,7 @@ import threading
 import typing
 
 from sqlalchemy import Column, String, func, distinct, BigInteger, Boolean, select
+from psycopg2.errors import UniqueViolation
 
 from tg_bot.modules.sql import BASE, SESSION
 
@@ -75,16 +76,19 @@ def get_chat_setting(chat_id: int) -> typing.Optional[LogChannelSettings]:
 
 
 def set_chat_setting(setting: LogChannelSettings):
-    with LOGS_INSERTION_LOCK:
-        res: LogChannelSettings = SESSION.query(LogChannelSettings).get(setting.chat_id)
-        if res:
-            res.log_warn = setting.log_warn
-            res.log_action = setting.log_action
-            res.log_report = setting.log_report
-            res.log_joins = setting.log_joins
-            res.log_leave = setting.log_leave
-        else:
-            SESSION.add(setting)
+    try:
+        with LOGS_INSERTION_LOCK:
+            res: LogChannelSettings = SESSION.query(LogChannelSettings).get(setting.chat_id)
+            if res:
+                res.log_warn = setting.log_warn
+                res.log_action = setting.log_action
+                res.log_report = setting.log_report
+                res.log_joins = setting.log_joins
+                res.log_leave = setting.log_leave
+            else:
+                SESSION.add(setting)
+    except UniqueViolation:
+        SESSION.rollback()
     SESSION.commit()
 
 
