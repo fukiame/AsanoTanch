@@ -7,7 +7,6 @@ authors: "@itsLuuke"
 curr_chat_lang: "Hey. Your current language is {}, select the one you want from the buttons below :)"
 set_chat_lang: "Great, {} it is from now on!"
 
-
 pm_start_text: |
   Hi {}, I'm [{}](https://raw.githubusercontent.com/fukiame/AsanoTanch/origin/assets/ic_product_origin_at_cropped.png),
   I am a modular group management bot with some fun extras ;)
@@ -17,15 +16,6 @@ pm_start_text: |
   All commands can be accessed by using: / ! or >
   *Click on help to learn more!*
 
-#    - Restrict users with *ban permissions*.
-#    - Greet users with media + text and buttons, with proper formatting.
-#    - Restrict users who flood your chat using my *anti-flood* module.
-#    - *Warn* users according to the options set and restrict em accordingly.
-#    - Save notes and filters with proper formatting and reply markup.
-
-#    Theres even more! this is just the tip of the iceberg. Do note I need
-#    to be promoted with proper admin permissions to function properly. 
-#    Else I won't be able to function as said.
 grp_start_text: "Hey, I'm {}."
 
 pm_help_text: |
@@ -39,7 +29,6 @@ pm_help_text: |
   - in PM: will send you your settings for all supported modules.
   - in a group: will redirect you to pm, with all that chat's settings.
   Click on the buttons below to get documentation about specific modules!
-#    • /language: Change bot language.
 
 add_bot_to_group_btn: "Add me!"
 reommended_fed_btn: "Recommended Federation"
@@ -408,15 +397,6 @@ misc_help: |
   • /afk <reason>: mark yourself as AFK(away from keyboard).
   • brb <reason>: same as the afk command - but not a command.
   When marked as AFK, any mentions will be replied to with a message to say you're not available!
-#      • /youtube : Gets media from youtube in video or audio format
-#      • /yt: Same as /youtube
-#      ───────────────────────────────
-#      *Last.FM*
-#      Share what you're what listening to with the help of this module!
-#      *Available commands:*
-#      • /setuser <username>: sets your last.fm username.
-#      • /clearuser: removes your last.fm username from the bot's database.
-#      • /lastfm: returns what you're scrobbling on last.fm.
 
 muting_help: |
   *Admins only:*
@@ -474,12 +454,6 @@ rules_help: |
   *Admins only:*
   • `/setrules <your rules here>`*:* set the rules for this chat.
   • `/clearrules`*:* clear the rules for this chat.
-
-#userinfo_help: |
-#      - /setbio <text>: while replying, will save another user's bio
-#      - /bio: will get your or another user's bio. This cannot be set by yourself.
-#      - /setme <text>: will set your info
-#      - /me: will get your or another user's info
 
 warns_help: |
   • `/warns <userhandle>`*:* get a user's number, and reason, of warns.
@@ -544,24 +518,6 @@ github_help: |
   • `/gitver`: returns the current API version
   • `/changelog <reponame>`: gets the changelog of a saved repo shortcut
 
-#        • `/listrepo`: lists all repo shortcuts in chat
-#       *Admin only:*
-#        • `/saverepo <name> <user>/<repo> <number (optional)>`: saves a repo value as shortcut
-#        • `/delrepo <name>`: deletes a repo shortcut
-
-
-# lockgroup_help: |
-#        *Available commands:*
-#        *Group owner only!*
-#        *Lockdown:* 
-#        • `/lockgroup (on/off)` : check and toggle the current lockgroup status
-
-#        Ever had your group raided by spammers or bots?
-#        By enabling *lockgroup* the bot will kick every user on joining the group.
-#        When the raid is done you can toggle back lockgroup and everything will be back to normal.
-
-
-
 pins_help: |
   *Admins only:*
   • `/pin`*:* silently pins the message replied to - add `'loud'` or `'notify'` to give notifs to users.
@@ -579,8 +535,6 @@ pins_help: |
   • /cleanlinked <on/off>: Automatically delete linked channel posts from chatroom
   • /antichannelpin <on/off>: Automatically unpins linked channel posts from chatroom
 
-
-
 welcome_mutes: |
   You can get the bot to mute new people who join your group and hence prevent spambots from flooding your group.
   The following options are possible:
@@ -589,8 +543,6 @@ welcome_mutes: |
   • <code>/welcomemute captcha</code><b>:</b>  mutes new members till they solve a button captcha thereby verifying they're human.
   • <code>/welcomemute off</code><b>:</b> turns off welcomemute.
   <b>Note:</b> Strong mode kicks a user from the chat if they dont verify in 120seconds. They can always rejoin thoug
-
-
 
 welcome_help: |
   Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages
@@ -625,7 +577,6 @@ sticker_blacklist_help: |
   • `/blstickermode <delete/ban/tban/mute/tmute>**`:** sets up a default action on what to do if users use blacklisted stickers
   Note:
   • `<sticker link>` can be `https://t.me/addstickers/<sticker>` or just `<sticker>` or reply to the sticker message
-
 
 raid_help: |
   Ever had your group raided by spammers or bots?
