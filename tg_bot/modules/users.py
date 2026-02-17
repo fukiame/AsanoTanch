@@ -30,12 +30,12 @@ def get_user_id(username):
         return None
 
     elif len(users) == 1:
-        return users[0]
+        return users[0].user_id
 
     else:
         for user_obj in users:
             try:
-                userdat = dispatcher.bot.get_chat(user_obj)
+                userdat = dispatcher.bot.get_chat(user_obj.user_id)
                 if userdat.username == username:
                     return userdat.id
 
