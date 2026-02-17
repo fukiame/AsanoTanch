@@ -367,6 +367,11 @@ def user_join_fed(update, context):
         info = sql.get_fed_info(fed_id)
         get_owner = ast.literal_eval(info["fusers"])["owner"]
         get_owner = context.bot.get_chat(get_owner).id
+        if user_id is None:
+            update.effective_message.reply_text(
+                "why is this none"
+            )
+            return
         if user_id == get_owner:
             update.effective_message.reply_text(
                 "You do know that the user is the federation owner, right? RIGHT?"
