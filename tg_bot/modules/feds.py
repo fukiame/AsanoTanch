@@ -544,9 +544,12 @@ def fed_admin(update, context):
     else:
         text += "\n🔱 Admin:\n"
         for x in members:
-            user = context.bot.get_chat(x)
-            name = user.first_name or 'Deleted'
-            text += " • {}\n".format(mention_html(user.id, user.first_name))
+            try:
+                user = context.bot.get_chat(x)
+                name = user.first_name or 'Deleted'
+                text += " • {}\n".format(mention_html(user.id, user.first_name))
+            except Exception:
+                text += " • {}\n".format(str(x))
 
     update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
 
