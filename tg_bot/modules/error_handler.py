@@ -40,7 +40,7 @@ def error_callback(update: Update, context: CallbackContext):
         try:
             if str(context.error).find(str(ConnectionResetError)) == "-1":
                 context.bot.send_message(update.effective_chat.id, 
-                f"<b>Sorry I ran into an error!</b>\n<b>Error</b>: <code>{e}</code>\n<i>This incident has been logged and reported.</i>",
+                f"<b>I ran into an error! (╥﹏╥)</b>\n<b>error</b>: <code>{e}</code>\n<i>this incident has been logged and reported.</i>",
                 parse_mode="html")
         except BaseException as e:
             log.exception(e)
@@ -51,12 +51,12 @@ def error_callback(update: Update, context: CallbackContext):
     )
     tb = "".join(tb_list)
     pretty_message = (
-        "An exception was raised while handling an update\n"
-        "User: {}\n"
-        "Chat: {} {}\n"
-        "Callback data: {}\n"
-        "Message: {}\n\n"
-        "Full Traceback: {}"
+        "exception raised while handling an update\n"
+        "user: {}\n"
+        "chat: {} {}\n"
+        "callback data: {}\n"
+        "msg: {}\n\n"
+        "traceback: {}"
     ).format(
             update.effective_user.id if update.effective_user else
             update.effective_message.sender_chat.id if update.effective_message and update.effective_message.sender_chat
@@ -76,13 +76,13 @@ def error_callback(update: Update, context: CallbackContext):
         context.bot.send_document(
             OWNER_ID,
             open("error.txt", "rb"),
-            caption=f"#{context.error.identifier}\n<b>Your sugar mommy got an error for you, you cute guy:</b>\n<code>{e}</code>",
+            caption=f"#{context.error.identifier}\n<b>I ran into an error (╥﹏╥):</b>\n<code>{e}</code>",
             parse_mode="html",
         )
         return
     context.bot.send_message(
         OWNER_ID,
-        text=f"#{context.error.identifier}\n<b>Your sugar mommy got an error for you, you cute guy:</b>\n<code>{e}</code>",
+        text=f"#{context.error.identifier}\n<b>I ran into an error (╥﹏╥):</b>\n<code>{e}</code>",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("PrivateBin", url=paste_url)]]),
         parse_mode="html",
     )
@@ -92,7 +92,7 @@ def list_errors(update: Update, context: CallbackContext):
     if update.effective_user.id not in DEV_USERS:
         return
     e = dict(sorted(errors.items(), key=lambda item: item[1], reverse=True))
-    msg = "<b>Errors List:</b>\n"
+    msg = "<b>errors list:</b>\n"
     for x, value in e.items():
         msg += f"• <code>{x}:</code> <b>{e[x]}</b> #{x.identifier}\n"
 
