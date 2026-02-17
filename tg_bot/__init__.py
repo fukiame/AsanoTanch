@@ -24,8 +24,8 @@ def get_user_list(key):
 # setup loggers
 
 
-file_formatter = logging.Formatter('%(asctime)s - %(levelname)s -- < - %(name)s - > -- %(message)s')
-stream_formatter = logging.Formatter('< - %(name)s - > -- %(message)s')
+file_formatter = logging.Formatter('[%(asctime)s %(levelname)s] %(name)s: %(message)s','%H:%M:%S')
+stream_formatter = logging.Formatter('%(name)s: %(message)s')
 
 file_handler = logging.FileHandler('logs.txt', 'w', encoding='utf-8')
 debug_handler = logging.FileHandler('debug.log', 'w', encoding='utf-8')
@@ -40,9 +40,9 @@ stream_handler.setLevel(logging.WARNING)
 debug_handler.setLevel(logging.DEBUG)
 
 logging.basicConfig(handlers = [file_handler, stream_handler, debug_handler], level = logging.DEBUG)
-log = logging.getLogger('[Enterprise]')
+log = logging.getLogger('AsanoTanch')
 
-log.info("LOGGER is starting. | Project maintained by: github.com/itsLuuke (t.me/itsLuuke)")
+log.info("logger started, probably. project maintained by t.me/fukiame")
 
 # if version < 3.10, stop bot.
 if sys.version_info[0] < 3 or sys.version_info[1] < 10:
@@ -106,8 +106,8 @@ class KigyoINIT:
         self.WEATHER_API: str = self.parser.get('WEATHER_API', None)
         self.CF_API_KEY: str =  self.parser.get("CF_API_KEY", None)
         self.bot_id = 0 #placeholder
-        self.bot_name = " Ōɖìղ" #placeholder
-        self.bot_username = "OdinRobot" #placeholder
+        self.bot_name = "Asano Tanch" #placeholder
+        self.bot_username = "asanotanchbot" #placeholder
         self.DEBUG: bool = self.parser.getboolean("IS_DEBUG", False)
         self.DROP_UPDATES: bool = self.parser.getboolean("DROP_UPDATES", True)
         self.BOT_API_URL: str = self.parser.get('BOT_API_URL', "https://api.telegram.org/bot")
@@ -166,7 +166,6 @@ BOT_ID = TOKEN.split(":")[0]
 if IS_DEBUG:
     log.debug("Debug mode is on")
     stream_handler.setLevel(logging.DEBUG)
-
 
 try:
     IS_DEBUG = IS_DEBUG
