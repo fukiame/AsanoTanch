@@ -426,10 +426,10 @@ def uptimee(update: Update, _):
     rspnc = ""
     try:
         uptime = datetime.datetime.fromtimestamp(boot_time()).strftime("%Y-%m-%d %H:%M:%S")
-        rspnc += "*- bot uptime:* " + str(botuptime) + "\n"
+        rspnc += "*- sys uptime:* " + str(uptime) + "\n"
     except PermissionError:
         pass
-    rspnc += "*- sys uptime:* " + str(uptime)
+    rspnc += "*- bot uptime:* " + str(botuptime)
     msg.reply_text(rspnc, parse_mode=ParseMode.MARKDOWN)
 
 @kigcmd(command='stats', can_disable=False)
