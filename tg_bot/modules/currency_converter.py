@@ -6,44 +6,59 @@ from .helper_funcs.decorators import kigcmd
 
 
 cash_help_str = \
-    "`/cash` : currency converter\
+    "`/cash`, `/cc` : currency converter\
         example syntax: `/cash` 1 USD INR"
 
-@kigcmd(command='cash')
+@kigcmd(command=['cash','cc'])
 @spamcheck
 def convert(update: Update, context: CallbackContext):
     args = update.effective_message.text.split(" ")
 
     if len(args) == 4:
+        orig_cur = args[2].lower()
+        new_cur = args[3].lower()
+
+        if orig_cur == new_cur:
+            update.effective_message.reply_text("old and new currency is the same")
+            return
+
+        incur = str(args[1]).strip().replace(',','.').lower()
+        m = 1
+        if len(incur) > 1:
+            match incur[-1]:
+                case 'k': m = 1000
+                case 'm': m = 1000000
+                case 'b': m = 1000000000
+            s = incur[:-1]
+        else: s = incur
+
         try:
-            orig_cur_amount = float(args[1])
+            orig_cur_amount = float(s) * m
 
         except ValueError:
             update.effective_message.reply_text("Invalid Amount Of Currency")
             return
 
-        orig_cur = args[2].upper()
-
-        new_cur = args[3].upper()
-
         request_url = (
-            f"https://www.alphavantage.co/query"
-            f"?function=CURRENCY_EXCHANGE_RATE"
-            f"&from_currency={orig_cur}"
-            f"&to_currency={new_cur}"
-            f"&apikey={CASH_API_KEY}"
+            f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{orig_cur}.json"
         )
-        response = requests.get(request_url).json()
+        try:
+            rs = requests.get(request_url)
+            response = rs.json()
+        except:
+            update.effective_message.reply_text(rs)
+            return
         try:
             current_rate = float(
-                response["Realtime Currency Exchange Rate"]["5. Exchange Rate"]
+                response[orig_cur][new_cur]
             )
         except KeyError:
             update.effective_message.reply_text("Currency Not Supported.")
             return
-        new_cur_amount = round(orig_cur_amount * current_rate, 5)
+        concur = orig_cur_amount * current_rate
+        new_cur_amount = round(concur, 2 if concur > 1 else 5)
         update.effective_message.reply_text(
-            f"{orig_cur_amount} {orig_cur} = {new_cur_amount} {new_cur}"
+            f"{orig_cur_amount} {orig_cur.upper()} = {new_cur_amount} {new_cur.upper()}"
         )
 
     elif len(args) == 1:
