@@ -38,4 +38,4 @@ gtts
 wikipedia
 
 geopy
-timezonefinder
+tzfpy

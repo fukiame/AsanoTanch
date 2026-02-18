@@ -8,6 +8,8 @@ from telegram import ParseMode, Update
 from telegram.ext import CallbackContext
 from .helper_funcs.decorators import kigcmd
 
+from geopy.geocoders import Nominatim
+from tzfpy import get_tz
 
 def is_valid_timezone(tz: str) -> bool:
     try:
@@ -18,16 +20,13 @@ def is_valid_timezone(tz: str) -> bool:
 
 
 def find_tz(to_find: str) -> str:
-    from geopy.geocoders import Nominatim
     nom = Nominatim(user_agent="tgbot_gettime")
     try:
         loc = nom.geocode(to_find)
     except:
         return None
 
-    from timezonefinder import TimezoneFinder
-    tzf = TimezoneFinder()
-    timezone = tzf.timezone_at(lng=loc.longitude, lat=loc.latitude)
+    timezone = get_tz(loc.longitude, loc.latitude)
 
     #return (loc.address, timezone)
     return timezone
