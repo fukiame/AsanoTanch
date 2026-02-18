@@ -410,7 +410,7 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
             )
         if welc_mutes == "captcha":
             btn = []
-            nums = [random.randint(100000, 999999) for _ in range(6)]
+            nums = [random.randint(1000, 9999) for _ in range(6)]
 
             captcha = ImageCaptcha()
             captcha.character_offset_dx = (1,3)
@@ -421,9 +421,9 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
             captcha.word_space_probability = 0.8
             captcha.word_offset_dx = 0.2
 
-            characters = str(nums[0])
+            characters = nums[0]
             # print(characters)
-            fileobj: BytesIO = captcha.generate(characters)
+            fileobj: BytesIO = captcha.generate(str(characters))
             fileobj.name = f'captcha_{new_mem.id}.png'
             fileobj.seek(0)
 
