@@ -576,12 +576,6 @@ def check_not_bot(member: User, chat_id: int, message_id: int, context: Callback
                 chat_id=chat_id,
                 message_id=message_id,
             )
-        except BadRequest:
-            bot.send_message(chat_id,
-                "{} was kicked as they failed to verify themselves".format(
-                    mention_html(member.id, member.first_name)),
-                    parse_mode=ParseMode.HTML,
-            )
         except TelegramError:
             bot.delete_message(chat_id=chat_id, message_id=message_id)
             bot.send_message(chat_id,
