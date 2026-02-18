@@ -1,5 +1,5 @@
 import requests
-from tg_bot import CASH_API_KEY, spamcheck
+from tg_bot import spamcheck
 from telegram import Update, ParseMode
 from telegram.ext import CallbackContext
 from .helper_funcs.decorators import kigcmd

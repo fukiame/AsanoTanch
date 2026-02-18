@@ -100,7 +100,6 @@ class KigyoINIT:
         self.BOT_LOGS: int = self.parser.getint('BOT_LOGS', None)
         self.NO_LOAD = self.parser.get("NO_LOAD", "").split()
         self.NO_LOAD: List[str] = list(map(str, self.NO_LOAD))
-        self.CASH_API_KEY: str = self.parser.get('CASH_API_KEY', None)
         self.LASTFM_API_KEY: str = self.parser.get('LASTFM_API_KEY', None)
         self.WEATHER_API: str = self.parser.get('WEATHER_API', None)
         self.CF_API_KEY: str =  self.parser.get("CF_API_KEY", None)
@@ -147,7 +146,6 @@ DEV_USERS = [OWNER_ID] + [SYS_ADMIN] + get_user_list("devs")
 SUPPORT_USERS = get_user_list("supports")
 WHITELIST_USERS = get_user_list("whitelists")
 SPAMMERS = get_user_list("spammers")
-CASH_API_KEY = KInit.CASH_API_KEY
 LASTFM_API_KEY = KInit.LASTFM_API_KEY
 WEATHER_API = KInit.WEATHER_API
 CF_API_KEY = KInit.CF_API_KEY
