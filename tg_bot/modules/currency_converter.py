@@ -29,6 +29,8 @@ def convert(update: Update, context: CallbackContext):
                 case 'k': m = 1000
                 case 'm': m = 1000000
                 case 'b': m = 1000000000
+
+        if m != 1:
             s = incur[:-1]
         else: s = incur
 
