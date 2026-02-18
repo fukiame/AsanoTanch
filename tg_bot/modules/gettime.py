@@ -3,7 +3,7 @@ from typing import List
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import requests
-from tg_bot import TIME_API_KEY, dispatcher, spamcheck
+from tg_bot import dispatcher, spamcheck
 from telegram import ParseMode, Update
 from telegram.ext import CallbackContext
 from .helper_funcs.decorators import kigcmd
