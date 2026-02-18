@@ -265,7 +265,10 @@ def ban(update: Update, context: CallbackContext) -> Optional[str]:  # sourcery 
         message.delete()
     elif delban and message.reply_to_message:
         message.reply_to_message.delete()
-    context.bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
+    try:
+        context.bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
+    except BadRequest:
+        pass
 
     return logmsg
 
