@@ -198,6 +198,7 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
 
     if should_welc:
 
+        '''
         # Give the owner a special welcome
         if new_mem.id == OWNER_ID:
             bot.send_message(chat.id,
@@ -244,9 +245,10 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
                 "Ah! A Moderator just joined!",
             )
             return
+        '''
 
         # Welcome yourself
-        elif new_mem.id == bot.id:
+        if new_mem.id == bot.id:
             bot.send_message(chat.id,
                 "Heyy, thanks for adding me!",
             )
