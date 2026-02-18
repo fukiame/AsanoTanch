@@ -375,7 +375,7 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
                 )
             new_join_mem = f"[{escape_markdown(new_mem.first_name)}](tg://user?id={user.id})"
             message = bot.send_message(chat.id,
-                f"{new_join_mem}, click the button below to prove you're human.\nYou have 120 seconds.",
+                f"{new_join_mem}, click the button below to prove you're human.\nYou have 90 seconds.",
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
@@ -405,7 +405,7 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
             )
             job_queue.run_once(
                 partial(check_not_bot, new_mem, chat.id, message.message_id),
-                120,
+                90,
                 name="welcomemute",
             )
         if welc_mutes == "captcha":
@@ -475,7 +475,7 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
 
             message = bot.send_photo(chat.id, fileobj,
                                       caption=f'Welcome [{escape_markdown(new_mem.first_name)}](tg://user?id={user.id}). Click the correct button to get unmuted!\n'
-                                              f'You got 120 seconds for this.',
+                                              f'You got 90 seconds for this.',
                                       reply_markup=InlineKeyboardMarkup(btn),
                                       parse_mode=ParseMode.MARKDOWN,
                                       allow_sending_without_reply=True,
@@ -496,7 +496,7 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
             )
             job_queue.run_once(
                 partial(check_not_bot, new_mem, chat.id, message.message_id),
-                120,
+                90,
                 name="welcomemute",
             )
 
@@ -940,7 +940,7 @@ def welcomemute(update: Update, context: CallbackContext) -> str:
         elif args[0].lower() in ["strong"]:
             sql.set_welcome_mutes(chat.id, "strong")
             msg.reply_text(
-                "I will now mute people when they join until they prove they're not a bot.\nThey will have 120seconds "
+                "I will now mute people when they join until they prove they're not a bot.\nThey will have 90 seconds "
                 "before they get kicked. "
             )
             return (
@@ -1250,7 +1250,7 @@ WELC_MUTE_HELP_TXT = (
     "• `/welcomemute strong`*:* mutes new members till they tap on a button thereby verifying they're human.\n"
     "• `/welcomemute captcha`*:*  mutes new members till they solve a button captcha thereby verifying they're human.\n"
     "• `/welcomemute off`*:* turns off welcomemute.\n"
-    "*Note:* Strong mode kicks a user from the chat if they dont verify in 120seconds. They can always rejoin though"
+    "*Note:* Strong mode kicks a user from the chat if they dont verify in 90 seconds. They can always rejoin though"
 )
 
 @kigcmd(command='welcomehelp')
