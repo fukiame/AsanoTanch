@@ -604,17 +604,11 @@ def left_member(update: Update, context: CallbackContext):  # sourcery no-metric
             if left_mem.id == bot.id:
                 return
 
+            '''
             # Give the owner a special goodbye
             if left_mem.id == OWNER_ID:
                 bot.send_message(chat.id,
                     "Sorry to see you leave :(",
-                )
-                return
-
-            # Give the other bot a special goodbye
-            if left_mem.id == 1826542418:
-                bot.send_message(chat.id,
-                    "<i>You can rest now...</i>", parse_mode=ParseMode.HTML
                 )
                 return
 
@@ -624,6 +618,15 @@ def left_member(update: Update, context: CallbackContext):  # sourcery no-metric
                     "See you later Dev!",
                 )
                 return
+            '''
+
+            # Give the other bot a special goodbye
+            if left_mem.id == 5094932263:
+                bot.send_message(chat.id,
+                    "<i>You can rest now...</i>", parse_mode=ParseMode.HTML
+                )
+                return
+
 
             # if media goodbye, use appropriate function for it
             if goodbye_type not in [sql.Types.TEXT, sql.Types.BUTTON_TEXT]:
