@@ -562,7 +562,10 @@ dispatcher.add_handler(MessageHandler(Filters.chat_type.groups, cleanServiceFilt
 
 def check_not_bot(member: User, chat_id: int, message_id: int, context: CallbackContext):
     bot = context.bot
-    member_dict = VERIFIED_USER_WAITLIST.pop((chat_id, member.id))
+    try:
+        member_dict = VERIFIED_USER_WAITLIST.pop((chat_id, member.id))
+    except KeyError:
+        return
     member_status = member_dict.get("status")
     if not member_status:
         try:
