@@ -74,7 +74,7 @@ VERIFIED_USER_WAITLIST = {}
 CAPTCHA_ANS_DICT = {}
 WELCOME_GROUP = 7
 
-from multicolorcaptcha import CaptchaGenerator
+from captcha.image import ImageCaptcha
 
 WHITELISTED = [OWNER_ID, SYS_ADMIN] + DEV_USERS + SUDO_USERS + SUPPORT_USERS + WHITELIST_USERS + MOD_USERS
 
@@ -410,21 +410,23 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
             )
         if welc_mutes == "captcha":
             btn = []
-            # Captcha image size number (2 -> 640x360)
-            CAPCTHA_SIZE_NUM = 2
-            # Create Captcha Generator object of specified size
-            generator = CaptchaGenerator(CAPCTHA_SIZE_NUM)
+            nums = [random.randint(100000, 999999) for _ in range(6)]
 
-            # Generate a captcha image
-            captcha = generator.gen_captcha_image(difficult_level=3)
-            # Get information
-            image = captcha["image"]
-            characters = captcha["characters"]
+            captcha = ImageCaptcha()
+            captcha.character_offset_dx = (1,3)
+            captcha.character_offset_dx = (2,4)
+            captcha.character_rotate = (-56,56)
+            captcha.character_warp_dx = (0.2,0.4)
+            captcha.character_warp_dy = (0.3,0.5)
+            captcha.word_space_probability = 0.8
+            captcha.word_offset_dx = 0.2
+
+            characters = str(nums[0])
             # print(characters)
-            fileobj = BytesIO()
+            fileobj: BytesIO = captcha.generate(characters)
             fileobj.name = f'captcha_{new_mem.id}.png'
-            image.save(fp=fileobj)
             fileobj.seek(0)
+
             CAPTCHA_ANS_DICT[(chat.id, new_mem.id)] = int(characters)
             welcome_bool = False
             if not media_wel:
@@ -459,8 +461,6 @@ def new_member(update: Update, context: CallbackContext):  # sourcery no-metrics
                     }
                 )
 
-            nums = [random.randint(1000, 9999) for _ in range(7)]
-            nums.append(characters)
             random.shuffle(nums)
             to_append = []
             # print(nums)
