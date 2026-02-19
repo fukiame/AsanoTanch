@@ -3,6 +3,7 @@ import typing
 
 from sqlalchemy import Column, String, func, distinct, BigInteger, Boolean, select
 from psycopg2.errors import UniqueViolation
+from sqlalchemy.exc import IntegrityError
 
 from tg_bot.modules.sql import BASE, SESSION
 
@@ -88,6 +89,8 @@ def set_chat_setting(setting: LogChannelSettings):
             else:
                 SESSION.add(setting)
     except UniqueViolation:
+        SESSION.rollback()
+    except IntegrityError:
         SESSION.rollback()
     SESSION.commit()
 
