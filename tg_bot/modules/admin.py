@@ -5,7 +5,7 @@ from telegram import ParseMode, Update
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext
 
-from telegram.utils.helpers import mention_html
+from telegram.utils.helpers import mention_html, escape_markdown
 
 from tg_bot import spamcheck
 from .helper_funcs.chat_status import connection_status
