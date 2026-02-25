@@ -68,7 +68,12 @@ def weebify(update: Update, context: CallbackContext):
     string = ""
 
     if message.reply_to_message:
-        string = message.reply_to_message.text.lower().replace(" ", "  ")
+        txt = message.reply_to_message.text
+        if txt is not None:
+            string = txt.lower().replace(" ", "  ")
+        else:
+            message.reply_text("Usage is `/weebify <text>`", parse_mode=ParseMode.MARKDOWN)
+            return
 
     if args:
         string = "  ".join(args).lower()
