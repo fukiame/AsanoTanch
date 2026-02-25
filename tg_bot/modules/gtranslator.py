@@ -41,6 +41,14 @@ def translate(update: Update, context: CallbackContext):
     except IndexError:
         source = trans.detect(to_translate)
         dest = "en"
+
+    if len(source) != 2:
+        message.reply_text("source lang must be in ISO 639-1 two-letter language codes.")
+        return
+    if len(dest) != 2:
+        message.reply_text("dest lang must be in ISO 639-1 two-letter language codes.")
+        return
+
     translation = trans(to_translate,
                         sourcelang=source, targetlang=dest)
     reply = f"<b>Translated from {source} to {dest}</b>:\n" \
