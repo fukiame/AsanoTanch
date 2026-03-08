@@ -41,6 +41,10 @@ def convert(update: Update, context: CallbackContext):
             update.effective_message.reply_text("Invalid Amount Of Currency")
             return
 
+        if orig_cur_amount == 0.0:
+            update.effective_message.reply_text("everything multiplied by zero is zero")
+            return
+
         request_url = (
             f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{orig_cur}.json"
         )
