@@ -771,7 +771,7 @@ def goodbye(update: Update, context: CallbackContext):
         pref, goodbye_m, goodbye_type = sql.get_gdbye_pref(chat.id)
         update.effective_message.reply_text(
             f"This chat has it's goodbye setting set to: `{pref}`.\n"
-            f"*The goodbye  message (not filling the {{}}) is:*",
+            f"*The goodbye message (not filling the {{}}) is:*",
             parse_mode=ParseMode.MARKDOWN,
         )
 
@@ -817,9 +817,7 @@ def goodbye(update: Update, context: CallbackContext):
 def set_welcome(update: Update, context: CallbackContext) -> str:
     chat = update.effective_chat
     user = update.effective_user
-    user = update.effective_user
     msg = update.effective_message
-
 
     text, data_type, content, buttons = get_welcome_type(msg)
 
