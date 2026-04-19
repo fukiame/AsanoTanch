@@ -64,7 +64,7 @@ def convert(update: Update, context: CallbackContext):
         concur = orig_cur_amount * current_rate
         new_cur_amount = round(concur, 2 if concur > 1 else 5)
         update.effective_message.reply_text(
-            f"{orig_cur_amount:,} {orig_cur.upper():,} = {new_cur_amount:,} {new_cur.upper():,}"
+            f"{orig_cur_amount:,} {orig_cur.upper()} = {new_cur_amount:,} {new_cur.upper()}"
         )
 
     elif len(args) == 1:
