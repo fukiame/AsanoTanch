@@ -26,6 +26,8 @@ def find_tz(to_find: str) -> str:
     except:
         return None
 
+    if loc == None:
+        return None
     timezone = get_tz(loc.longitude, loc.latitude)
 
     #return (loc.address, timezone)
