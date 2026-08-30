@@ -46,9 +46,6 @@ def no_longer_afk(update: Update, _: CallbackContext):
     if not user or user.id in (777000, 1087968824, 136817688):  # ignore channels
         return
 
-    afk_time = sql.get_afk_time(user.id)
-    afk_since = get_readable_time((time.time() - afk_time))
-
     if sql.rm_afk(user.id):
         if message.new_chat_members:  # dont say msg
             return
@@ -65,7 +62,6 @@ def no_longer_afk(update: Update, _: CallbackContext):
                 "Where is {}?\nIn the chat!",
             ]
             chosen_option = random.choice(options)
-            chosen_option += f"\nafk time: {afk_since}"
             update.effective_message.reply_text(
                 chosen_option.format(firstname), parse_mode=None
             )
