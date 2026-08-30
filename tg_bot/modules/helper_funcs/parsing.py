@@ -9,7 +9,7 @@ from telegram.utils.helpers import mention_html
 
 from tg_bot.modules.helper_funcs.admin_status import user_is_admin
 from tg_bot.modules.sql.notes_sql import Buttons
-from tg_bot import dispatcher, OWNER_ID
+from tg_bot import dispatcher
 
 
 BTN_LINK_REGEX = re.compile(
@@ -161,8 +161,6 @@ def get_data2(
 
     if buttons and not text:
         text = ""
-
-    print(f"text: {text}<br>data_type: {data_type}<br>content: {content}<br>buttons: {buttons}")
 
     return text, data_type, content, buttons
 
