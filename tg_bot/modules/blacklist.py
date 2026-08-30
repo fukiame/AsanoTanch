@@ -19,6 +19,7 @@ from .warns import warn
 from .helper_funcs.string_handling import extract_time
 from .helper_funcs.decorators import kigcmd, kigmsg, kigcallback
 from .helper_funcs.alternate import send_message, typing_action
+from .helper_funcs.parsing import Types, get_data2
 
 from .helper_funcs.admin_status import (
     user_admin_check,
@@ -350,8 +351,15 @@ def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metr
     user = message.sender_chat or update.effective_user
     bot = context.bot
     to_match = extract_text(message)
-    if not to_match:
+    text, data_type, content, buttons = get_data2(message, True)
+    if data_type == Types.TEXT:
+        to_match2 = None
+    else:
+        to_match2 = content
+    if (not to_match) and (not to_match2):
         return
+    if not to_match:
+        to_match = to_match2
     if is_approved(chat.id, user.id):
         return
     getmode, value = sql.get_blacklist_setting(chat.id)

@@ -116,6 +116,55 @@ def get_data(
     return note_name, text, data_type, content, buttons
 
 
+def get_data2(
+        msg: Message, welcome: bool = False
+             ) -> tuple[str, Types, Optional[str], Union[str, list[Optional[tuple[str, Optional[str], bool]]]]]:
+    data_type: Types = Types.TEXT
+    content: Optional[str] = None
+    text: str = ""
+    raw_text: str = msg.text_html or msg.caption_html
+
+    buttons: Union[str, list[Optional[tuple[str, Optional[str], bool]]]] = []
+    # determine what the contents of the filter are - text, image, sticker, etc
+    msgtext = msg.text_html or msg.caption_html
+    if msg.text_html:  # not caption, text
+        text, buttons = parser(msgtext, reply_markup=msg.reply_markup)
+        data_type = Types.BUTTON_TEXT if buttons else Types.TEXT
+    elif msg.sticker:
+        content = msg.sticker.file_id
+        data_type = Types.STICKER
+
+    elif msg.document:
+        content = msg.document.file_id
+        text, buttons = parser(msgtext)
+        data_type = Types.DOCUMENT
+
+    elif msg.photo:
+        content = msg.photo[-1].file_id  # last elem = best quality
+        text, buttons = parser(msgtext)
+        data_type = Types.PHOTO
+
+    elif msg.audio:
+        content = msg.audio.file_id
+        text, buttons = parser(msgtext)
+        data_type = Types.AUDIO
+
+    elif msg.voice:
+        content = msg.voice.file_id
+        text, buttons = parser(msgtext)
+        data_type = Types.VOICE
+
+    elif msg.video:
+        content = msg.video.file_id
+        text, buttons = parser(msgtext)
+        data_type = Types.VIDEO
+
+    if buttons and not text:
+        text = ""
+
+    return text, data_type, content, buttons
+
+
 def parser(
         txt: str, reply_markup: InlineKeyboardMarkup = None
 ) -> tuple[str, Union[str, list[Optional[tuple[str, Optional[str], bool]]]]]:
