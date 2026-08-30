@@ -359,7 +359,7 @@ def del_blacklist(update: Update, context: CallbackContext):  # sourcery no-metr
     if (not to_match) and (not to_match2):
         return
     if not to_match:
-        to_match = to_match2
+        to_match = str(to_match2)
     if is_approved(chat.id, user.id):
         return
     getmode, value = sql.get_blacklist_setting(chat.id)
