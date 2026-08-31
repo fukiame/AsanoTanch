@@ -48,7 +48,9 @@ def blacklist(update, context):
     chat = update.effective_chat
     args = context.args
 
-    filter_list = "<b>Blacklist settings for {}</b>:\n".format(html.escape(chat.title))
+    if not (e := chat.title):
+        e = " "
+    filter_list = "<b>Blacklist settings for {}</b>:\n".format(html.escape(e))
 
     getmode, getvalue = sql.get_blacklist_setting(chat.id)
     bl_type = "Do nothing"
@@ -81,7 +83,7 @@ def blacklist(update, context):
         if len(all_blacklisted) == 0:
             send_message(
                 update.effective_message,
-                "No blacklisted words in <b>{}</b>!".format(chat.title),
+                "No blacklisted words in <b>{}</b>!".format(e),
                 parse_mode=ParseMode.HTML,
             )
             return
